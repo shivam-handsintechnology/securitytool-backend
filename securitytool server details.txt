@@ -1,0 +1,6 @@
+
+CloudPanel
+https://server.strategytool.io/login
+server.strategytool.io
+username:shivam1306
+password:sadashiv@612

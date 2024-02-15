@@ -1,0 +1,17 @@
+exports.passwordkeys = [
+  "password",
+  "pass",
+  "pwd",
+  "user_password",
+  "login_password",
+  "authentication_password",
+  "passwd",
+  "userpass",
+  "loginpass",
+  "authpass",
+  "password1",
+  "newpassword",
+  "confirmpassword",
+  "oldpassword",
+  "hash",
+];

@@ -1,6 +1,12 @@
 const Joi = require("joi")
 
 module.exports = {
+    validateIPaddress: async (ipaddress) => {
+        if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {
+            return true;
+        }
+        return false;
+    },
     ValidateUserSignUp: (data) => {
         const Schema = Joi.object({
             email: Joi.string().email({ tlds: { allow: false } }).required().label("Email"),

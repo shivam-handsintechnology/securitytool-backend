@@ -3,6 +3,7 @@ const router = express.Router();
 const Sqllogs = require('../controllers/Sqllogs.controller')
 const middlwareController = require('../controllers/middlwaresController')
 const IpController = require('../controllers/IP.controller')
+const DomainController = require('../controllers/DomainController')
 const IndexRouter = require('./sys_ssl')
 const TestRouter = require('./test')
 // Logs
@@ -23,7 +24,11 @@ router.get('/ip/all', IpController.getAllIPs)
 router.delete('/ip', IpController.DeleteBlackListip)
 router.post('/ip/blacklist/add', IpController.AddBlackListIp);
 router.get('/ip/blacklist/all', IpController.BlackList)
-router.delete('/ip/blacklist',)
+router.delete('/ip/blacklist', IpController.DeleteBlackListip)
 // End Ips
+// Domains
+router.route('/domain').post(DomainController.addDomain).get(DomainController.getAllDomains).delete(DomainController.deleteDomain).put(DomainController.updateDomain);
+
+
 router.use("/test", TestRouter)
 module.exports = router

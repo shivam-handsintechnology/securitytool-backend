@@ -2,6 +2,7 @@ const Project_Security_Logs = require('.././models/Project_Security_Logs')
 // const axios = require('axios')
 const https = require('https');
 const { useCustomAxios } = require('../utilities/functions/fetchUrl');
+const { default: mongoose } = require('mongoose');
 // XLInjectionCheck
 function checkForXMLInjection(xml) {
   // Check for CDATA injection attacks
@@ -38,14 +39,14 @@ function checkForXMLInjection(xml) {
 
 const CreateuserDetails = async (req, res, message, type) => {
   try {
-    message="malacios"
+    message = "malacios"
     var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
- 
-     const response= await useCustomAxios(`http://ip-api.com/json/${ip}`)
-     const { country, city,  region }=response.data
+
+    const response = await useCustomAxios(`http://ip-api.com/json/${ip}`)
+    const { country, city, region } = response.data
     const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const d = new Date();
-  
+
     const useragent = req.headers['user-agent']
     // // const result = detector.detect(useragent);
     // // const { client, os, device } = result
@@ -78,7 +79,7 @@ const CreateuserDetails = async (req, res, message, type) => {
     if (finduser) {
       await Project_Security_Logs.findOneAndUpdate(filter, update)
       //  errorHandler(res, 406, message)
-    } else if(!finduser) {
+    } else if (!finduser) {
       await Project_Security_Logs.create(UserRawData)
       //  errorHandler(res, 406, message)
     }
@@ -86,32 +87,32 @@ const CreateuserDetails = async (req, res, message, type) => {
     console.error(error)
   }
 }
-const CreatStatusCodesDetails = async (ErrorStatuscode,message,url,hostname) => {
+const CreatStatusCodesDetails = async (ErrorStatuscode, message, url, hostname, id) => {
   try {
-    const StatusCodeModels=require('../models/ServerErrorResponseCodes')
-    const ResponseCodesLoginPageModels=require('../models/ResponseCodesLoginPageModels')
+    const StatusCodeModels = require('../models/ServerErrorResponseCodes')
+    const ResponseCodesLoginPageModels = require('../models/ResponseCodesLoginPageModels')
     const UserRawData = {
       ErrorStatuscode,
       message,
       hostname
     }
-    const filter = { ErrorStatuscode };
-    if(url.includes('/login')){
+    const filter = { user: id, ErrorStatuscode };
+    if (url.includes('/login')) {
       const finduser = await ResponseCodesLoginPageModels.findOne(filter)
       if (finduser) {
-       console.log("already exist")
+        console.log("already exist")
       } else {
-        await ResponseCodesLoginPageModels.create(UserRawData)
+        await ResponseCodesLoginPageModels.create({ user: id, UserRawData })
       }
-    }else{
+    } else {
       const finduser = await StatusCodeModels.findOne(filter)
       if (finduser) {
-       console.log("already exist")
+        console.log("already exist")
       } else {
-        await StatusCodeModels.create(UserRawData)
+        await StatusCodeModels.create({ user: id, UserRawData })
       }
     }
-   
+
   } catch (error) {
     console.error(error)
   }
@@ -126,14 +127,14 @@ async function hasRobotsTxt(originurl) {
     method: 'HEAD',
     hostname: hostname,
     port: 443,
-    path:'/robots.txt',
+    path: '/robots.txt',
   };
   return new Promise((resolve, reject) => {
     const req = https.request(options, res => {
-  
-      if(res.statusCode === 200){
+
+      if (res.statusCode === 200) {
         resolve('robot.txt file available');
-      }else if(res.statusCode === 404){
+      } else if (res.statusCode === 404) {
         reject('robot.txt file not available');
       }
     });
@@ -196,7 +197,7 @@ function hasCommandLineInjection(value) {
 // HTML Injection Function
 function hasHTMLnjection(value) {
   const HTML = new RegExp(/<(\"[^\"]*\"|'[^']*'|[^'\">])*>/, "g");
-   if (HTML.test(value)) {
+  if (HTML.test(value)) {
     return true;
   }
 
@@ -205,7 +206,7 @@ function hasHTMLnjection(value) {
 // HTML Injection Function
 function hasXSSnjection(value) {
   const XSS = /<script>/
-   if (XSS.test(value)) {
+  if (XSS.test(value)) {
     return true;
   }
 
@@ -213,58 +214,58 @@ function hasXSSnjection(value) {
 }
 // Sql Injection middleware
 async function isHashedPassword(password) {
-    const md5Regex = /^[a-f0-9]{32}$/i;
-    if (md5Regex.test(password)) {
-      return {message:true,algorithmname:"md5"};
-    }
-    const sha1Regex = /^[a-f0-9]{40}$/i;
-    if (sha1Regex.test(password)) {
-      return {message:true,algorithmname:"sha-1"};
-    }
-    const sha256Regex = /^[a-f0-9]{64}$/i;
-    if (sha256Regex.test(password)) {
-      return {message:true,algorithmname:"sha-256"};
-    }
-    const sha512Regex = /^[a-f0-9]{128}$/i;
-    if (sha512Regex.test(password)) {
-      return {message:true,algorithmname:"sha-512"};
-    }
-    const bcryptRegex = /^\$2[ayb]\$.{56}$/i;
-    if (bcryptRegex.test(password)) {
-      return {message:true,algorithmname:"bcrypt"};
-    }
-    const sha384Regex = /^[a-f0-9]{96}$/;
-    if (sha384Regex.test(password)) {
-      return {message:true,algorithmname:"sha-384"};
-    }
-    const sha3_224Regex = /^[a-f0-9]{56}$/;
-    if (sha3_224Regex.test(password)) {
-      return {message:true,algorithmname:"sha-3224"};
-    }
-    const DES=/^[a-zA-Z0-9./]{13}$/
-    if (DES.test(password)) {
-      return {message:true,algorithmname:"DES"};
-    }
-    const fnv164Regex = /^[0-9a-f]{16}$/i;
-    if (fnv164Regex.test(password)) {
-      return {message:true,algorithmname:"fnv164Regex"};
-    }
-   
-    
- 
-  return{ message:false}
+  const md5Regex = /^[a-f0-9]{32}$/i;
+  if (md5Regex.test(password)) {
+    return { message: true, algorithmname: "md5" };
+  }
+  const sha1Regex = /^[a-f0-9]{40}$/i;
+  if (sha1Regex.test(password)) {
+    return { message: true, algorithmname: "sha-1" };
+  }
+  const sha256Regex = /^[a-f0-9]{64}$/i;
+  if (sha256Regex.test(password)) {
+    return { message: true, algorithmname: "sha-256" };
+  }
+  const sha512Regex = /^[a-f0-9]{128}$/i;
+  if (sha512Regex.test(password)) {
+    return { message: true, algorithmname: "sha-512" };
+  }
+  const bcryptRegex = /^\$2[ayb]\$.{56}$/i;
+  if (bcryptRegex.test(password)) {
+    return { message: true, algorithmname: "bcrypt" };
+  }
+  const sha384Regex = /^[a-f0-9]{96}$/;
+  if (sha384Regex.test(password)) {
+    return { message: true, algorithmname: "sha-384" };
+  }
+  const sha3_224Regex = /^[a-f0-9]{56}$/;
+  if (sha3_224Regex.test(password)) {
+    return { message: true, algorithmname: "sha-3224" };
+  }
+  const DES = /^[a-zA-Z0-9./]{13}$/
+  if (DES.test(password)) {
+    return { message: true, algorithmname: "DES" };
+  }
+  const fnv164Regex = /^[0-9a-f]{16}$/i;
+  if (fnv164Regex.test(password)) {
+    return { message: true, algorithmname: "fnv164Regex" };
+  }
+
+
+
+  return { message: false }
 }
-async function InjectionChecker(req){
-  entries={
+async function InjectionChecker(req) {
+  entries = {
     ...req.body,
     ...req.query,
     ...req.params,
   }
-  let containsSql=false
-  , validateXss=false, validatehtml=false, containCommand=false;
-    value=  JSON.stringify(entries)
-    // console.log({value})
-   if (hasSqlInjection(value) === true) {
+  let containsSql = false
+    , validateXss = false, validatehtml = false, containCommand = false;
+  value = JSON.stringify(entries)
+  // console.log({value})
+  if (hasSqlInjection(value) === true) {
     containsSql = true;
   }
   if (hasXSSnjection(value) === true) {
@@ -276,7 +277,7 @@ async function InjectionChecker(req){
   if (hasCommandLineInjection(value) === true) {
     containCommand = true;
   }
-  return {containsSql, validateXss, validatehtml, containCommand}
+  return { containsSql, validateXss, validatehtml, containCommand }
 
 }
 async function checkForSensitiveInfoInBody(data, keysToMatch) {
@@ -305,61 +306,61 @@ async function checkForSensitiveInfoInBody(data, keysToMatch) {
   }
 }
 
-async function CheckJwttokenSecurity(req){
+async function CheckJwttokenSecurity(req) {
   try {
     const authHeader = req.headers.authorization;
-  let message;
-    var [authType, token] = authHeader ? authHeader.split(" "): "";
-   switch (authType) {
-    case !authHeader:
-   
-      break;
-     case "Bearer":
-       if (token) {
-         message = "Authorization Token Passed in Barer Authentication area";
-       }
-     
-       break;
- 
-     case "Basic":
-       if (token) {
-         message = "Authorization Token Passed in Basic Authentication area";
- 
-       }
-      
-       break;
- 
-     case "AWS":
-       if (token) {
-         message = "Authorization Token Passed in Aws Authentication area";
- 
-       }
-      
-       break;
- 
-     case "OAuth":
-       if (token) {
-         message = "Authorization Token Passed in OAuth Authentication area";
- 
-       }
-      
-       break;
-     default:
-       if (token) {
-         message = "unknown authorization type";
-       }
-      
-   }
-   if (message) {
-     const existingMessage = await TokenPassedArea.findOne();
-     if (existingMessage) {
-       await TokenPassedArea.findOneAndUpdate({}, { message });
-     } else {
-       await TokenPassedArea.create({ message });
-     }
-   }
+    let message;
+    var [authType, token] = authHeader ? authHeader.split(" ") : "";
+    switch (authType) {
+      case !authHeader:
+
+        break;
+      case "Bearer":
+        if (token) {
+          message = "Authorization Token Passed in Barer Authentication area";
+        }
+
+        break;
+
+      case "Basic":
+        if (token) {
+          message = "Authorization Token Passed in Basic Authentication area";
+
+        }
+
+        break;
+
+      case "AWS":
+        if (token) {
+          message = "Authorization Token Passed in Aws Authentication area";
+
+        }
+
+        break;
+
+      case "OAuth":
+        if (token) {
+          message = "Authorization Token Passed in OAuth Authentication area";
+
+        }
+
+        break;
+      default:
+        if (token) {
+          message = "unknown authorization type";
+        }
+
+    }
+    if (message) {
+      const existingMessage = await TokenPassedArea.findOne();
+      if (existingMessage) {
+        await TokenPassedArea.findOneAndUpdate({}, { message });
+      } else {
+        await TokenPassedArea.create({ message });
+      }
+    }
   } catch (error) {
-    
+
   }
 }
 async function CheckPasswordKeyText(data, keysToMatch) {

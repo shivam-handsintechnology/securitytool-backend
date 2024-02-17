@@ -4,24 +4,46 @@ const ServerCheckerController = require('../controllers/ServerChecker.controller
 const EmailHarvestingController = require('../controllers/EmailHarvestingController/EmailHarvesting.controller');
 const { sendResponse } = require('../utils/dataHandler');
 const crypto = require('crypto');
+const { ClientLoagsModel } = require('../models/ClientLoagsModel.js');
+const verifyToken = require('../middlewares/VerifyUser.js');
+const { default: mongoose } = require('mongoose');
 router.post("/", async (req, res) => {
-    return sendResponse(res, 200, "Sucessfull", req.body)
+  return sendResponse(res, 200, "Sucessfull", req.body)
 })
 router.get('/EmailHarvestingsData', EmailHarvestingController.EmailHarvestingData);
 router.get('/sensitiveinfoinurl', EmailHarvestingController.SensitiveinfoInUrl);
 router.get('/sensitiveinfoinbody', EmailHarvestingController.SensitiveInfoInBody);
-// router.get('/defaultwebpage', EmailHarvestingController.DefaultWebPage);
+router.get('/defaultwebpage', EmailHarvestingController.DefaultWebPage);
 router.get("/", (req, res) => {
   return sendResponse(res, 200, "Sucessfull", req.query)
 })
 router.get("/", (req, res) => {
   console.log(req.body)
-  (res, 200, "Sucessfull", req.body)
+    (res, 200, "Sucessfull", req.body)
 })
 router.get("/robottxt", ServerCheckerController.getRobotsTxt)
 router.get("/PasswordValidatorController", ServerCheckerController.PasswordValidatorController)
 router.get("/responsecodes", ServerCheckerController.ServerErrorResponseCodesController)
 router.get("/reponsecodeslogin", ServerCheckerController.ResponseCodesLoginController)
+router.get("/session-data", verifyToken, async (req, res) => {
+  try {
+
+
+    let data = await ClientLoagsModel.aggregate([
+      { $match: { user: mongoose.Types.ObjectId(req.user.id) } },
+      // { $project: { "sessionData": 1 } }
+    ]);
+    if (data.length === 0) {
+      return sendResponse(res, 404, "Records are not found");
+    }
+    return sendResponse(res, 200, "Fetch all domains", data);
+
+  } catch {
+    return sendResponse(res, 500, error.message);
+
+  }
+}
+)
 router.get('/set-session-cookie', (req, res) => {
   res.cookie('session-id', 'your-session-data', {
     session: true // Set cookie to expire when the browser is closed
@@ -59,13 +81,13 @@ router.get('/hash/:algorithm', (req, res) => {
   res.send(hash);
 });
 router.get('/allhashesh', (req, res) => {
- 
+
   let listOfSupportedHashes = crypto.getHashes();
-  
+
   if (!listOfSupportedHashes) {
     return res.status(400).send('Missing required parameter: message');
   }
-return sendResponse(res,200,"all hsh list",listOfSupportedHashes)
+  return sendResponse(res, 200, "all hsh list", listOfSupportedHashes)
 });
-  
+
 module.exports = router

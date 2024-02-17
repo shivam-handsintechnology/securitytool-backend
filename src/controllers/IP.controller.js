@@ -1,12 +1,7 @@
 const WhitelistModels = require('../models/WhitelistModel');
 const BlacklistModel = require('../models/BlacklistModel');
 const { sendResponse } = require('../utils/dataHandler');
-async function validateIPaddress(ipaddress) {
-    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {
-        return true;
-    }
-    return false;
-}
+const { validateIPaddress } = require('../../helpers/Validators');
 
 
 module.exports = {
@@ -62,7 +57,7 @@ module.exports = {
     },
     AddBlackListIp: async (req, res) => {
         const { ip } = req.body
-        const valid = await ValidateIPaddress(ip)
+        const valid = await validateIPaddress(ip)
         if (!valid) {
             return sendResponse(res, 406, "Please enter valid ip address")
         }

@@ -50,11 +50,22 @@
     "ssh2": "^1.13.0",
     "supertest": "^6.3.3",
     "systeminformation": "^5.18.3",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "which": "^4.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.21.5",
     "@babel/preset-env": "^7.21.5",
-    "eslint": "^8.40.0"
-  }
+    "eslint": "^8.56.0"
+  },
+  "env": {
+    "node": true,
+    "es6": true
+  },
+  "extends": "eslint:recommended",
+  "ignorePatterns": [
+    "node_modules/",
+    "package.json"
+  ],
+  "rules": {}
 }

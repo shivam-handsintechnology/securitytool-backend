@@ -377,7 +377,7 @@ router.post("/sessionvulnerability", async (req, res) => {
   ).lean();
   if (alloweddomains) {
     const session = await scanSessionvulnerability(content, fileName, middlewares);
-    console.log({ session })
+    console.log("fafafaf", session)
     res.json({ session });
   } else {
     res.status(403).json("you are not allowed");
@@ -397,30 +397,34 @@ router.post("/sqlvulnerability", async (req, res) => {
   }
 });
 router.post("/logsdata", async (req, res) => {
-  const { logs, sid, appid } = req.body;
-  const alloweddomains = await User.findOne(
-    { appid },
-    { password: 0, createdAt: 0, updatedAt: 0 }
-  ).lean();
-  if (alloweddomains) {
-    const finduser = await ClientLoagsModel.findOne({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: sid });
-    console.log({ ClientLoagsModel: finduser })
-    if (finduser) {
-      const updatedata = await ClientLoagsModel.findOneAndUpdate(
-        { user: mongoose.Types.ObjectId(alloweddomains._id), hostname: sid },
-        { LogsData: logs }
-      );
-      res.json(updatedata);
-    } else if (!finduser) {
-      const newdata = await ClientLoagsModel.create({
-        user: mongoose.Types.ObjectId(alloweddomains._id),
-        LogsData: logs,
-        hostname: sid,
-      });
-      res.json(newdata);
+  try {
+    const { logs, sid, appid } = req.body;
+    const alloweddomains = await User.findOne(
+      { appid },
+      { password: 0, createdAt: 0, updatedAt: 0 }
+    ).lean();
+    if (alloweddomains) {
+      const finduser = await ClientLoagsModel.findOne({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: sid });
+      console.log({ ClientLoagsModel: finduser })
+      if (finduser) {
+        const updatedata = await ClientLoagsModel.findOneAndUpdate(
+          { user: mongoose.Types.ObjectId(alloweddomains._id), hostname: sid },
+          { LogsData: logs }
+        );
+        res.json(updatedata);
+      } else if (!finduser) {
+        const newdata = await ClientLoagsModel.create({
+          user: mongoose.Types.ObjectId(alloweddomains._id),
+          LogsData: logs,
+          hostname: sid,
+        });
+        res.json(newdata);
+      }
+    } else {
+      res.status(403).json("you are not allowed");
     }
-  } else {
-    res.status(403).json("you are not allowed");
+  } catch (error) {
+    console.log
   }
 });
 router.get("/logsdata", async (req, res) => {

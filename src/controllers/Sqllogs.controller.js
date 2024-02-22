@@ -53,12 +53,58 @@ const getSingleSqllLogs = async (req, res) => {
 }
 const getSingleSqllLogsCount = async (req, res) => {
     try {
-        const data = await Project_Security_Logs.find().where({ type: "SQLI" }).count()
+        const alltypesinjection = require("../utils/Injectionstype.json").data
+        const typeTitles = alltypesinjection.map(entry => entry.slug);
+        // const data = await Project_Security_Logs.find().where({ type: req.query.type }).count()
+        const data = await Project_Security_Logs.aggregate([
+            {
+                $match: { type: { $in: typeTitles } }
+            },
+            {
+                $facet: {
+                    counts: [
+                        {
+                            $group: {
+                                _id: "$title",
+                                count: { $sum: 1 }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                $project: {
+                    combinedCounts: {
+                        $map: {
+                            input: typeTitles,
+                            as: "typeTitle",
+                            in: {
+                                title: "$$typeTitle",
+                                count: {
+                                    $ifNull: [
+                                        { $arrayElemAt: [{ $filter: { input: "$counts", as: "c", cond: { $eq: ["$$c._id", "$$typeTitle"] } } }, 0] },
+                                        { _id: "$$typeTitle", count: 0 }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $unwind: "$combinedCounts"
+            },
+            {
+                $replaceRoot: { newRoot: "$combinedCounts" }
+            }
+        ])
         if (data) {
             sendResponse(res, 200, "data fetch successfully", data)
         } else {
             errorHandler(res, 404, "data not found")
         }
+
+
 
     } catch (error) {
         errorHandler(res, error)

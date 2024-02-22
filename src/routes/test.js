@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const { ClientLoagsModel } = require('../models/ClientLoagsModel.js');
 const verifyToken = require('../middlewares/VerifyUser.js');
 const { default: mongoose } = require('mongoose');
+const { Session_time_out_is_high__not_implemented } = require('../utils/dashboarddataChecker.js');
 router.post("/", async (req, res) => {
   return sendResponse(res, 200, "Sucessfull", req.body)
 })
@@ -31,14 +32,81 @@ router.get("/session-data", verifyToken, async (req, res) => {
 
     let data = await ClientLoagsModel.aggregate([
       { $match: { user: mongoose.Types.ObjectId(req.user.id) } },
-      // { $project: { "sessionData": 1 } }
+      { $project: { "LogsData": 1 } }
     ]);
     if (data.length === 0) {
       return sendResponse(res, 404, "Records are not found");
     }
-    return sendResponse(res, 200, "Fetch all domains", data);
+    // Combine duplicate properties and merge their values into arrays
+    const originalLogsData = data[0].LogsData.reduce((accumulator, current) => {
+      Object.entries(current).forEach(([key, value]) => {
+        if (accumulator[key]) {
+          if (!Array.isArray(accumulator[key])) {
+            accumulator[key] = [accumulator[key]];
+          }
+          accumulator[key].push(value.toString());
+        } else {
+          accumulator[key] = value;
+        }
+      });
 
-  } catch {
+      return accumulator;
+    }, {});
+    const cleanedLogsData = Object.fromEntries(
+      Object.entries(originalLogsData).map(([key, value]) => {
+        // Use a Set to track unique values
+        const uniqueValues = new Set(Array.isArray(value) ? value : [value]);
+        const cleanedArray = Array.from(uniqueValues);
+        return [key, cleanedArray];
+      })
+    );
+    let sessionobj = {}
+    if (cleanedLogsData) {
+      if (cleanedLogsData.session) {
+        // Session token being passed in other areas apart from a cookie
+        sessionobj["Session token being passed in other areas apart from a cookie"] = "No"
+        if (cleanedLogsData.session.includes("Session token being passed in other areas apart from a cookie")) {
+          sessionobj["Session token being passed in other areas apart from a cookie"] = "Yes"
+        }
+        // An adversary can hijack user sessions by session fixation
+        sessionobj["An adversary can hijack user sessions by session fixation"] = ""
+        if (cleanedLogsData.session.includes("Regularly regenerating session IDs to prevent session fixation attack")) {
+          sessionobj["An adversary can hijack user sessions by session fixation"] = "No"
+        } else {
+          sessionobj["An adversary can hijack user sessions by session fixation"] = "Yes"
+
+        }
+        // Session does not expire on closing the browser
+        sessionobj["Session does not expire on closing the browser"] = "No"
+        if (cleanedLogsData.session.includes("Session does not expire on closing the browser")) {
+          sessionobj["Session does not expire on closing the browser"] = "Yes"
+        }
+        // Session time-out is high (or) not implemented
+        let stringvalue = ""
+        //  Session 
+        if (cleanedLogsData.session.includes("Session_time_out is Normal")) {
+          stringvalue += "Session Time Out is Normal" + ","
+        }
+        if (cleanedLogsData.session.includes("Session_time_out is Low")) {
+          stringvalue += "Session Time Out is Low" + ","
+        }
+        if (cleanedLogsData.session.includes("Session_time_out is High")) {
+          stringvalue += "Session Time Out is High" + ","
+        }
+        if (cleanedLogsData.session.includes("Session is Infinite")) {
+          stringvalue += "Session is Infinite" + ","
+        }
+        if (cleanedLogsData.session.includes("Not Implemented")) {
+          stringvalue += "Not Implemented" + ","
+        }
+        if (cleanedLogsData.session.includes("Session Found")) {
+          stringvalue += "Session Found" + ","
+        }
+        sessionobj["Session time-out is high (or) not implemented"] = stringvalue
+      }
+    }
+    return sendResponse(res, 200, "Fetch all domains", { LogsData: cleanedLogsData, sessionobj });
+  } catch (error) {
     return sendResponse(res, 500, error.message);
 
   }

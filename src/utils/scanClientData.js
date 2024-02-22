@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 const axios = require('axios');
-const API_KEY = 'd55435107bbfb1235bdeb3457aa0cc7ca48ce7cba06aeb2fd8b3e8cc82096187'; 
-const https=require('https')
+const API_KEY = 'd55435107bbfb1235bdeb3457aa0cc7ca48ce7cba06aeb2fd8b3e8cc82096187';
+const https = require('https')
 const {
   passwordkeys,
   sensitivedata,
@@ -35,7 +35,7 @@ async function ScanDangerousMethods(routes, hostname) {
   return new Promise((resolve, reject) => {
     try {
       routes.forEach((item) => {
-     
+
         const hasDangerousMethod = dangerousMethods.some((method) =>
           item.methods.includes(method)
         );
@@ -62,7 +62,7 @@ async function DefaultWebPage(routes, hostname) {
   return new Promise((resolve, reject) => {
     try {
       const results = [];
-    
+
       let defaultWebpage = routes.filter((val) => {
         return val.path === "/" && val.methods.includes("GET");
       });
@@ -193,21 +193,21 @@ async function scanXSSvulnerability(content, file) {
   // Check for potential XSS vulnerabilities
   // 4. Security Headers
   if (missingSecurityHeaders(content)) {
-    results.push( `Potential XSS vulnerability: Missing security headers at ${file}`
+    results.push(`Potential XSS vulnerability: Missing security headers at ${file}`
     );
   }
   if (InformationExposure(content)) {
-    results.push( `Disable X-Powered-By header for your Express app (consider using Helmet middleware),because it exposes information about the used framework to potential attackers.`);
+    results.push(`Disable X-Powered-By header for your Express app (consider using Helmet middleware),because it exposes information about the used framework to potential attackers.`);
   }
   // 5. Regular Expression Evaluation
-  
-    // 5. Server Side Evaluation
-    const serversideinjex = /(eval|setTimeout|setInterval)\s*\(/gi;
-    let serversideinjexmatch;
- if ((serversideinjexmatch = serversideinjex.exec(content)) !== null) {
-   const matchedKeyword = serversideinjexmatch[0];
-    results.push(`Potential Server Side Injection Code: ${matchedKeyword.replace("(","")}\n`);
- }
+
+  // 5. Server Side Evaluation
+  const serversideinjex = /(eval|setTimeout|setInterval)\s*\(/gi;
+  let serversideinjexmatch;
+  if ((serversideinjexmatch = serversideinjex.exec(content)) !== null) {
+    const matchedKeyword = serversideinjexmatch[0];
+    results.push(`Potential Server Side Injection Code: ${matchedKeyword.replace("(", "")}\n`);
+  }
   return results;
 }
 async function scanRedirectvulnerability(content, file) {
@@ -236,18 +236,18 @@ async function scanRedirectvulnerability(content, file) {
 
   return results;
 }
-async function scanSessionvulnerability(content, file,middlewares) {
-  const results=[]
+async function scanSessionvulnerability(content, file, middlewares) {
+  const results = []
   // 
   const jsonwebtoken = /jsonwebtoken/g; // Change this to the desired pattern
   if (jsonwebtoken.test(content)) {
     results.push(
-      "Session token being passed in other areas apart from a cookie:"+file
+      "Session token being passed in other areas apart from a cookie:" + file
     );
   }
- 
+
   // 
-  if(middlewares.includes("session")){
+  if (middlewares.includes("session")) {
     content = content.toLowerCase();
     //  session configuration
     results.push("Session Found")
@@ -265,7 +265,7 @@ async function scanSessionvulnerability(content, file,middlewares) {
       const cookieObject = eval(`(${cookieString})`);
       console.log(cookieObject);
       const isSecureTransmission = cookieObject.secure;
-      results.push( isSecureTransmission?"session IDs are securely transmitted over encrypted channels (HTTPS)": "session IDs are not  securely transmitted over encrypted channels (HTTPS)");
+      results.push(isSecureTransmission ? "session IDs are securely transmitted over encrypted channels (HTTPS)" : "session IDs are not  securely transmitted over encrypted channels (HTTPS)");
       if (cookieObject["maxage"] === false || cookieObject["expires"] === false) {
         // consoleColorText( "Session does not expire on closing the browser because is it means it will never expire",'red')
         results.push("Session does not expire on closing the browser");
@@ -280,21 +280,21 @@ async function scanSessionvulnerability(content, file,middlewares) {
         cookieObject["expires"] > sevenDays
       ) {
         // consoleColorText("session timeout is high",'red')
-        results.push("Session_time_out is High" );
+        results.push("Session_time_out is High");
       } else if (
         cookieObject["maxage"] < oneMinute ||
         cookieObject["expires"] < oneMinute
       ) {
         // consoleColorText("session timeout is Low",'red')
-        results.push("Session_time_out is Low" );
+        results.push("Session_time_out is Low");
       } else {
         // consoleColorText("session timeout is Normal","blue")
         results.push("Session_time_out is Normal");
       }
     }
-    
-  }else{
-    results.push("Session Not  Found")
+
+  } else {
+    results.push("Not Implemented")
   }
   return results;
 }
@@ -339,104 +339,104 @@ function getLineNumber(content, index) {
 }
 function scanDomain(domain) {
   try {
-      const timestamp = Math.floor(Date.now() / 1000);
-      const url = `https://www.virustotal.com/vtapi/v2/domain/report?apikey=${API_KEY}&domain=${domain}&date=${timestamp}`;
-      const options = {
-        method: 'GET'
-      };
-      // Make the request
-      const request = https.request(url, options, (response) => {
-        const chunks = [];
-    
-        // Collect the response data in chunks
-        response.on('data', (chunk) => {
-          chunks.push(chunk);
-        });
-    
-        // When the response is complete, concatenate the chunks into a single buffer
-        response.on('end', () => {
-          const buffer = Buffer.concat(chunks);
-          // Parse the JSON response
-          const result = JSON.parse(buffer.toString());
-          if (result.response_code !== 1) {
-            console.log(`The domain ${domain} could not be scanned.`);
-            return;
-          }
-    
-          if (result.detected_urls.length > 0) {
-            console.log(`The domain ${domain} contains a virus!`);
-            console.log(`The following URLs were detected as malicious:`);
-            for (const url of result.detected_urls) {
-              console.log(url.url);
-            }
-          } else {
-            console.log(`The domain ${domain} is clean.`);
-          }
-        });
+    const timestamp = Math.floor(Date.now() / 1000);
+    const url = `https://www.virustotal.com/vtapi/v2/domain/report?apikey=${API_KEY}&domain=${domain}&date=${timestamp}`;
+    const options = {
+      method: 'GET'
+    };
+    // Make the request
+    const request = https.request(url, options, (response) => {
+      const chunks = [];
+
+      // Collect the response data in chunks
+      response.on('data', (chunk) => {
+        chunks.push(chunk);
       });
-    
-      // Handle errors
-      request.on('error', (error) => {
-        console.error(error);
+
+      // When the response is complete, concatenate the chunks into a single buffer
+      response.on('end', () => {
+        const buffer = Buffer.concat(chunks);
+        // Parse the JSON response
+        const result = JSON.parse(buffer.toString());
+        if (result.response_code !== 1) {
+          console.log(`The domain ${domain} could not be scanned.`);
+          return;
+        }
+
+        if (result.detected_urls.length > 0) {
+          console.log(`The domain ${domain} contains a virus!`);
+          console.log(`The following URLs were detected as malicious:`);
+          for (const url of result.detected_urls) {
+            console.log(url.url);
+          }
+        } else {
+          console.log(`The domain ${domain} is clean.`);
+        }
       });
-    
-      request.end();
+    });
+
+    // Handle errors
+    request.on('error', (error) => {
+      console.error(error);
+    });
+
+    request.end();
   } catch (error) {
-      console.log(error)
+    console.log(error)
   }
-  }
-  async function checkDirectoryListing(url) {
-    try {
-      const response = await axios.get(url);
-      console.log(response.status);
-      if (response.status === 200 && response.data.includes('Index of')) {
-        console.log('Directory listing is enabled.');
-        return 'Directory listing is enabled.';
+}
+async function checkDirectoryListing(url) {
+  try {
+    const response = await axios.get(url);
+    console.log(response.status);
+    if (response.status === 200 && response.data.includes('Index of')) {
+      console.log('Directory listing is enabled.');
+      return 'Directory listing is enabled.';
+    } else {
+      console.log('Directory listing is disabled.');
+      return 'Directory listing is disabled.';
+    }
+  } catch (error) {
+
+    if (error?.response?.status >= 400) {
+      if (error?.response?.status === 404) {
+        console.log('Page not found.');
+        return 'Page not found.';
+      } else if (error?.response?.status === 403) {
+        console.log('Access forbidden.');
+        return 'Access forbidden.';
       } else {
         console.log('Directory listing is disabled.');
         return 'Directory listing is disabled.';
       }
-    } catch (error) {
-   
-      if (error?.response?.status >= 400) {
-        if (error?.response?.status === 404) {
-          console.log('Page not found.');
-          return 'Page not found.';
-        } else if (error?.response?.status === 403) {
-          console.log('Access forbidden.');
-          return 'Access forbidden.';
-        } else {
-          console.log('Directory listing is disabled.');
-          return 'Directory listing is disabled.';
-        }
-      }
     }
   }
-  async function scanWebsite(url) {
-    // Launch a headless browser
-    const puppeteer = require('puppeteer');
-    const browser = await puppeteer.launch();
-    try {
-      // Open a new page
-      const page = await browser.newPage();
-  
-      // Navigate to the specified URL
-      await page.goto(url);
-  
-      // Take a screenshot
-      await page.screenshot({ path: 'screenshot.png' });
-  
-      // Extract the page title
-      const title = await page.title();
-      console.log('Page title:', title);
-    } catch (error) {
-      console.error('An error occurred:', error);
-    } finally {
-      // Close the browser
-      await browser.close();
-    }
+}
+async function scanWebsite(url) {
+  // Launch a headless browser
+  const puppeteer = require('puppeteer');
+  const browser = await puppeteer.launch();
+  try {
+    // Open a new page
+    const page = await browser.newPage();
+
+    // Navigate to the specified URL
+    await page.goto(url);
+
+    // Take a screenshot
+    await page.screenshot({ path: 'screenshot.png' });
+
+    // Extract the page title
+    const title = await page.title();
+    console.log('Page title:', title);
+  } catch (error) {
+    console.error('An error occurred:', error);
+  } finally {
+    // Close the browser
+    await browser.close();
   }
-  const lighthouse = require('lighthouse');
+}
+const lighthouse = require('lighthouse');
 const { launch } = require('chrome-launcher');
 
 async function generateWebsiteReport(url) {
@@ -452,5 +452,7 @@ async function generateWebsiteReport(url) {
 
 // Usage example
 
-module.exports = {scanXSSvulnerability,generateWebsiteReport
-  ,checkDirectoryListing,scanDomain,scanWebsite, scanRedirectvulnerability, scanSessionvulnerability, scanSQLvulnerability, scanHardCodedData, scanHardPasswordHashing, scanDirectoryOptionMethod, ScanDangerousMethods, DefaultWebPage, };
+module.exports = {
+  scanXSSvulnerability, generateWebsiteReport
+  , checkDirectoryListing, scanDomain, scanWebsite, scanRedirectvulnerability, scanSessionvulnerability, scanSQLvulnerability, scanHardCodedData, scanHardPasswordHashing, scanDirectoryOptionMethod, ScanDangerousMethods, DefaultWebPage,
+};

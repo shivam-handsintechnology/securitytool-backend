@@ -16,7 +16,7 @@ router.get('/sqllogs/count', Sqllogs.getSingleSqllLogsCount);
 // middlewares
 router.get('/middlwares', middlwareController.getMiddlewareController);
 router.post('/middlwares/switch', middlwareController.findAndUpdateMiddlewareController);
-// End Middlewares
+// End Middlewaresnpm run dev
 router.use("/", IndexRouter)
 // Start Ips
 router.post('/ip/add', IpController.addIP);

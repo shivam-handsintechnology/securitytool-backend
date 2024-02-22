@@ -38,8 +38,7 @@ if (cluster.isPrimary) {
   cluster.on("exit", (worker, code, signal) => {
     console.log(code, signal);
     console.log(`worker ${worker.process.pid} died`);
-
-    // cluster.fork();
+    cluster.fork();
   });
 } else {
   server.listen(PortNumber, async function (req, res) {

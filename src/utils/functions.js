@@ -140,7 +140,7 @@ async function hasRobotsTxt(originurl) {
     });
     req.on('error', err => {
       console.log(err)
-      reject('robot.tex file not available');
+      reject('robot.txt file not available');
     });
 
     req.end();

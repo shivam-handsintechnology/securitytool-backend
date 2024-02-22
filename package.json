@@ -45,6 +45,7 @@
     "nodemailer": "^6.9.3",
     "nodemon": "^2.0.22",
     "puppeteer": "^20.7.0",
+    "snyk": "^1.1280.1",
     "ssh-exec": "^2.0.0",
     "ssh2": "^1.13.0",
     "supertest": "^6.3.3",

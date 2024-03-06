@@ -1,6 +1,7 @@
 // All Neccesary functions
+
+
 const apirouter = require('./src/routes')
-const authrouter = require('./src/routes/UserRoutes')
 const checkVerification = require('./src/middlewares/verifyClient')
 var express = require("express");
 const path = require('path')
@@ -9,7 +10,6 @@ const dotenv = require("dotenv")
 const { DBConnection, corsOptions } = require("./src/config/connection");
 const { AllowedDomainsModel } = require('./src/models/AllowedDomainsModel');
 const JsSnippetController = require('./src/controllers/JsSnippetController');
-const { Project_Security_Logs } = require('./src/models/Project_Security_Logs');
 var cluster = require("cluster"), os = require("os"), numCPUs = os.cpus().length, process = require("process");
 dotenv.config();
 var app = express();
@@ -26,14 +26,12 @@ app.disable('etag');
 // const AutoProtectCode = require('./auto')
 // AutoProtectCode(app, domain = 'autotest.handsintechnology.in', appid = "6f891635-cb99-4d8c-80bb-7a4261ec9997")
 app.use(apirouter)
-app.use('/api/auth', authrouter)
 const PortNumber = 20000;
 if (cluster.isPrimary) {
   console.log(`Primary ${process.pid} is running`);
   // Fork workers.
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
-
   }
   cluster.on("exit", (worker, code, signal) => {
     console.log(code, signal);
@@ -47,3 +45,11 @@ if (cluster.isPrimary) {
   });
   console.log(`Worker ${process.pid} started`);
 }
+
+
+
+
+
+
+
+

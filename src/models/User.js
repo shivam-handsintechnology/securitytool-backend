@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
+const CryptoJS = require("crypto-js")
+const { Project_Security_Logs } = require("./Project_Security_Logs");
+const { AllowedDomainsModel } = require("./AllowedDomainsModel");
+const secretkey = process.env.SECREY_KEY
 const UserSchema = new Schema({
-  // firstName:{type:String},
-  // lastName:{type:String},
-  // picture:{type:String,default:"https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg?w=740&t=st=1670312163~exp=1670312763~hmac=2ad40ed3c4aff26e836d5a9228da2480d2ae6592cd1755824a13fde78c40ec20"},
   domain: { type: Array, unique: true, trim: true, default: [] },
   email: { type: String, unique: true, trim: true },
   password: { type: String, trim: true },
@@ -15,6 +16,20 @@ const UserSchema = new Schema({
 
 }, {
   timestamps: true,
-  versionKey: false
+  versionKey: false,
+  toObject: { virtuals: true },
+  toJSON: { virtuals: true }
 })
+UserSchema.virtual('id').get(function () {
+  const idString = this._id.toString();
+  return CryptoJS.AES.encrypt(idString, secretkey).toString();
+});
+
+
+UserSchema.pre("save", async function (next) {
+  if (this.isNew) {
+    await Project_Security_Logs.create({ user: this._id, })
+    await AllowedDomainsModel.create({ user: this._id, domain: "" })
+  }
+});
 module.exports = mongoose.model("users", UserSchema);

@@ -2,25 +2,25 @@ const jwt = require("jsonwebtoken");
 
 const { sendResponse } = require("../utils/dataHandler");
 const verifyToken = (req, res, next) => {
-  var Authenticate=true;
+  var Authenticate = true;
   const authHeader = req.headers.authorization;
   console.log()
   // console.log({authHeader})
   if (!authHeader) {
-    Authenticate=false;
-  return sendResponse(res, 403, "missing authorization", {Authenticate})
+    Authenticate = false;
+    return sendResponse(res, 403, "missing authorization", { Authenticate })
   }
   const [authType, token] = authHeader.split(' ');
-  
-  switch(authType) {
+
+  switch (authType) {
     case 'Bearer':
       jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-        // console.log(err)
+
         if (err) {
-          Authenticate=false;
-          return sendResponse(res, 403, err.message, {Authenticate})
-        } 
-        req.user = user;
+          Authenticate = false;
+          return sendResponse(res, 403, err.message, { Authenticate })
+        }
+        req.user = { ...user, selectedhost: req.headers.SelectedHost ? req.headers.SelectedHost : null };
         next();
       });
       break;
@@ -56,8 +56,8 @@ const verifyToken = (req, res, next) => {
       break;
 
     default:
-      Authenticate=false;
-      return sendResponse(res, 403, "unknown authorization type", {Authenticate});
+      Authenticate = false;
+      return sendResponse(res, 403, "unknown authorization type", { Authenticate });
   }
 };
 

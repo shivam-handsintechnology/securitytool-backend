@@ -2,13 +2,12 @@ const User = require("../models/User")
 const jwt = require("jsonwebtoken");
 const { sendResponse } = require("../utils/dataHandler");
 const { errorHandler } = require("../utils/errorHandler");
-const crypto = require('crypto');
 const { checkDomainAvailability, validatePassword } = require("../utilities/functions/functions");
-var CryptoJS = require("crypto-js");
+const CryptoJS = require("crypto-js");
 const { middlewareModel } = require("../models/midlwaresModel");
 const { v4: uuidv4 } = require('uuid');
-const { ValidateUserSignUp, ValidateUserLogin } = require("../../helpers/Validators");
-const key = "12345678911012121234567891101212"
+const { ValidateUserSignUp, ValidateUserLogin } = require("../helpers/Validators");
+const key = process.env.SECREY_KEY
 const searchFilesRemotely = async (remotePath, searchTerm, ssh) => {
   try {
     const response = await ssh.execCommand(`find ${remotePath} -type f -exec grep -l "${searchTerm}" {} +`);
@@ -216,7 +215,7 @@ Login = async (req, res) => {
       var decrypted = bytes.toString(CryptoJS.enc.Utf8);
       if (decrypted == req.body.password) {
         const token = jwt.sign({ id: user._id, appid: user.appid }, process.env.JWT_SECRET, { expiresIn: "1d" })
-        return sendResponse(res, 200, "logibn successfully", { token, appid: user.appid });
+        return sendResponse(res, 200, "login successfully", { token, appid: user.appid });
       } else {
         return sendResponse(res, 406, "please enter valid credentials")
       }
@@ -393,14 +392,28 @@ FBCustomerLogin = async function (req, res, next) {
   }
 };
 //   
-
+const Profile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id)
+    if (user) {
+      return sendResponse(res, 200, "Fetch user", user);
+    } else {
+      return sendResponse(res, 404, "User not found");
+    }
+  }
+  catch (error) {
+    console.log(error)
+    return errorHandler(res)
+  }
+}
 const UserController = {
   Login,
   Logout,
   Register,
   GoogleRegister,
   FBCustomerLogin,
-  SetUp
+  SetUp,
+  Profile
 }
 
 module.exports = {

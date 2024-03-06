@@ -8,40 +8,14 @@ const {
 } = require("../sensitive/availableapikeys");
 // regular expression paterns
 // OPTIONS method
-async function checkDirectoryListing(url) {
-  try {
-    const response = await axios.get(url);
-    console.log(response.status);
-    if (response.status === 200 && response.data.includes('Index of')) {
-      console.log('Directory listing is enabled.');
-      return 'Directory listing is enabled.';
-    } else {
-      console.log('Directory listing is disabled.');
-      return 'Directory listing is disabled.';
-    }
-  } catch (error) {
 
-    if (error?.response?.status >= 400) {
-      if (error?.response?.status === 404) {
-        console.log('Page not found.');
-        return 'Page not found.';
-      } else if (error?.response?.status === 403) {
-        console.log('Access forbidden.');
-        return 'Access forbidden.';
-      } else {
-        console.log('Directory listing is disabled.');
-        return 'Directory listing is disabled.';
-      }
-    }
-  }
-}
 async function scanDirectoryOptionMethod(routes, hostname) {
   const results = [];
   return new Promise((resolve, reject) => {
     try {
       routes.forEach((item) => {
         if (item.methods.includes("OPTIONS")) {
-          results.push(`this location '${item.path}' uses the OPTIONS method`);
+          results.push(`The path '${item.path}' uses the OPTIONS method`);
         }
       });
       if (results.length > 0) {
@@ -70,7 +44,7 @@ async function ScanDangerousMethods(routes, hostname) {
             dangerousMethods.includes(method)
           );
           results.push(
-            `this location '${item.path}' uses the '${dangerousMethod}' method`
+            `The path '${item.path}' uses the '${dangerousMethod}' method`
           );
         }
       });
@@ -84,7 +58,29 @@ async function ScanDangerousMethods(routes, hostname) {
     }
   });
 }
+async function DefaultWebPage(routes, hostname) {
+  return new Promise((resolve, reject) => {
+    try {
+      const results = [];
 
+      let defaultWebpage = routes.filter((val) => {
+        return val.path === "/" && val.methods.includes("GET");
+      });
+      if (defaultWebpage.length > 0) {
+        // consoleColorText("Default web page present in the server", "blue");
+        results.push("Available");
+      } else {
+        // consoleColorText("Default web page not present in the server", "red");
+        results.push(
+          "Not Avaialble"
+        );
+      }
+      resolve(results);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
 function containsSequelizeCode(fileContent) {
   // Check if the file content contains Sequelize-related code
   // You can implement your own logic based on your project's coding patterns
@@ -141,7 +137,7 @@ function InformationExposure(content) {
   return expressPatterns.some((pattern) => content.match(pattern));
 }
 async function scanHardCodedData(content, file) {
-  const results = ["Hard Coded Data Not Found in the Project"];
+  const results = [];
   content = content.replace(/"/g, "'"); // Replace double quotes with single quotes
   const sensitiveFields = sensitivedata;
 
@@ -150,27 +146,25 @@ async function scanHardCodedData(content, file) {
     const regexIsObject = new RegExp(`${field}\\s*:\\s*['"]([^'"]*)['"]`, "g");
 
     let match;
-    if ((match = regexIsEqualTo.exec(content)) !== null) {
+    while ((match = regexIsEqualTo.exec(content)) !== null) {
       const hardcodedValue = match[1];
       const lineNumber = getLineNumber(content, match.index);
-      results.splice(0, 1);
       results.push(`find ${hardcodedValue}  in a ${field} at line ${lineNumber} in ${file}`);
     }
 
-    if ((match = regexIsObject.exec(content)) !== null) {
-      results.splice(0, 1);
+    while ((match = regexIsObject.exec(content)) !== null) {
       const hardcodedValue = match[1];
       const lineNumber = getLineNumber(content, match.index);
       results.push(`find ${hardcodedValue}  in a ${field} at line ${lineNumber} in ${file}`);
     }
   }
-  return results;
 
+  return results;
 }
 
 async function scanHardPasswordHashing(content, file) {
   const listOfSupportedHashes = crypto.getHashes();
-  const results = ["Password Hashing Not Found in the Project"];
+  const results = [];
   content = content.toLowerCase();
   const crypto_createHashRegex = /createhash\('([^']*)'/g;
   const CryptoJsRegx = /(md5|sha256)\(/g;
@@ -178,7 +172,6 @@ async function scanHardPasswordHashing(content, file) {
   let CryptoJsRegxmatch;
   if ((CryptoJsRegxmatch = CryptoJsRegx.exec(content)) !== null) {
     const keyword = CryptoJsRegxmatch[1];
-    results.splice(0, 1);
     results.push(`found a file where ${keyword} password hashing is used in ${file}`);
   }
   // crypto module
@@ -190,23 +183,20 @@ async function scanHardPasswordHashing(content, file) {
     const keyword = crypto_createHashRegexmatch[1];
     if (listOfSupportedHashes.includes(keyword)) {
       console.log({ keyword });
-      results.splice(0, 1);
       results.push(`found a file where ${keyword} password hashing is used in ${file}`);
     }
   }
   return results;
 }
 async function scanXSSvulnerability(content, file) {
-  const results = ["XSS Vulnerability Not Found in the Project"];
+  const results = [];
   // Check for potential XSS vulnerabilities
   // 4. Security Headers
   if (missingSecurityHeaders(content)) {
-    results.splice(0, 1);
     results.push(`Potential XSS vulnerability: Missing security headers at ${file}`
     );
   }
   if (InformationExposure(content)) {
-    results.splice(0, 1);
     results.push(`Disable X-Powered-By header for your Express app (consider using Helmet middleware),because it exposes information about the used framework to potential attackers.`);
   }
   // 5. Regular Expression Evaluation
@@ -216,13 +206,12 @@ async function scanXSSvulnerability(content, file) {
   let serversideinjexmatch;
   if ((serversideinjexmatch = serversideinjex.exec(content)) !== null) {
     const matchedKeyword = serversideinjexmatch[0];
-    results.splice(0, 1);
     results.push(`Potential Server Side Injection Code: ${matchedKeyword.replace("(", "")}\n`);
   }
   return results;
 }
 async function scanRedirectvulnerability(content, file) {
-  const results = ["Redirect Vulnerability Not Found in the file"];
+  const results = [];
   content = content.toLowerCase();
   //  redirect vunurability
   const redirectmatches = content.match(/\.redirect\s*\(([^)]+)\)/g);
@@ -236,7 +225,6 @@ async function scanRedirectvulnerability(content, file) {
         if (thirdPartyURLs && thirdPartyURLs.length > 0) {
           for (const url of thirdPartyURLs) {
             if (url.includes("http") || url.includes("https")) {
-              results.splice(0, 1);
               results.push(`Found a third-party URL: ${url} at file ${file}`);
               // Perform further actions or checks as needed
             }
@@ -257,6 +245,7 @@ async function scanSessionvulnerability(content, file, middlewares) {
       "Session token being passed in other areas apart from a cookie:" + file
     );
   }
+
   // 
   if (middlewares.includes("session")) {
     content = content.toLowerCase();
@@ -396,7 +385,33 @@ function scanDomain(domain) {
     console.log(error)
   }
 }
+async function checkDirectoryListing(url) {
+  try {
+    const response = await axios.get(url);
+    console.log(response.status);
+    if (response.status === 200 && response.data.includes('Index of')) {
+      console.log('Directory listing is enabled.');
+      return 'Directory listing is enabled.';
+    } else {
+      console.log('Directory listing is disabled.');
+      return 'Directory listing is disabled.';
+    }
+  } catch (error) {
 
+    if (error?.response?.status >= 400) {
+      if (error?.response?.status === 404) {
+        console.log('Page not found.');
+        return 'Page not found.';
+      } else if (error?.response?.status === 403) {
+        console.log('Access forbidden.');
+        return 'Access forbidden.';
+      } else {
+        console.log('Directory listing is disabled.');
+        return 'Directory listing is disabled.';
+      }
+    }
+  }
+}
 async function scanWebsite(url) {
   // Launch a headless browser
   const puppeteer = require('puppeteer');
@@ -434,42 +449,10 @@ async function generateWebsiteReport(url) {
   await chrome.kill();
   return report
 }
-async function DefaultWebPage(routes, hostname) {
-  return new Promise((resolve, reject) => {
-    try {
-      let results = "Not Available";
 
-      let defaultWebpage = routes.filter((val) => {
-        return val.path === "/" && val.methods.includes("GET");
-      });
-      if (defaultWebpage.length > 0) {
-        // consoleColorText("Default web page present in the server", "blue");
-        results = "Available"
-      } else {
-        // consoleColorText("Default web page not present in the server", "red");
-        results = "Not Avaialble"
-      }
-      resolve(results);
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
 // Usage example
-const ScanAllContentAndroutes = async (content, file, routes, hostname, middlewares) => {
-  const results = {};
-  results["optionmethodvulnerability"] = await scanDirectoryOptionMethod(routes, hostname);
-  results["dangerousemethodvulnerability"] = await ScanDangerousMethods(routes, hostname);
-  results["hardcodedata"] = await scanHardCodedData(content, file);
-  results["passwordhashing"] = await scanHardPasswordHashing(content, file);
-  results["xssvulnerability"] = await scanXSSvulnerability(content, file);
-  results["redirectvulnerability"] = await scanRedirectvulnerability(content, file);
-  results["sessionvulnerability"] = await scanSessionvulnerability(content, file, middlewares);
-  results["sqlvulnerability"] = await scanSQLvulnerability(content, file);
-  results["defaultwebpagevulnerability"] = await DefaultWebPage(routes, hostname);
-  return results;
-}
+
 module.exports = {
-  ScanAllContentAndroutes,
-  checkDirectoryListing
+  scanXSSvulnerability, generateWebsiteReport
+  , checkDirectoryListing, scanDomain, scanWebsite, scanRedirectvulnerability, scanSessionvulnerability, scanSQLvulnerability, scanHardCodedData, scanHardPasswordHashing, scanDirectoryOptionMethod, ScanDangerousMethods, DefaultWebPage,
 };

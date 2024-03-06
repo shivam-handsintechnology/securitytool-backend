@@ -3,6 +3,7 @@ const Project_Security_Logs = require('.././models/Project_Security_Logs')
 const https = require('https');
 const { useCustomAxios } = require('../utilities/functions/fetchUrl');
 const { default: mongoose } = require('mongoose');
+const { sendResponse } = require('./dataHandler');
 // XLInjectionCheck
 function checkForXMLInjection(xml) {
   // Check for CDATA injection attacks
@@ -118,32 +119,36 @@ const CreatStatusCodesDetails = async (ErrorStatuscode, message, url, hostname, 
   }
 }
 async function hasRobotsTxt(originurl) {
-  const originHeader = originurl;
-  const { hostname } = new URL(originHeader);
-  if (hostname === 'localhost') {
+
+  if (originurl === 'localhost') {
     return Promise.reject(new Error('localhost not allowed'));
   }
   const options = {
     method: 'HEAD',
-    hostname: hostname,
+    hostname: originurl,
     port: 443,
     path: '/robots.txt',
   };
   return new Promise((resolve, reject) => {
-    const req = https.request(options, res => {
+    try {
+      const req = https.request(options, res => {
 
-      if (res.statusCode === 200) {
-        resolve('robot.txt file available');
-      } else if (res.statusCode === 404) {
-        reject('robot.txt file not available');
-      }
-    });
-    req.on('error', err => {
-      console.log(err)
-      reject('robot.txt file not available');
-    });
+        if (res.statusCode === 200) {
+          resolve('robot.txt file available');
+        } else if (res.statusCode === 404) {
+          resolve('robot.txt file not available');
+        }
+      });
+      req.on('error', err => {
+        console.log(err)
+        reject(JSON.stringify(err));
+      });
 
-    req.end();
+      req.end();
+    } catch (error) {
+      console.log(error)
+      reject(error)
+    }
   });
 }
 // Sql Injection Function

@@ -19,12 +19,8 @@ router.post('/middlwares/switch', middlwareController.findAndUpdateMiddlewareCon
 // End Middlewaresnpm run dev
 router.use("/", IndexRouter)
 // Start Ips
-router.post('/ip/add', IpController.addIP);
-router.get('/ip/all', IpController.getAllIPs)
-router.delete('/ip', IpController.DeleteBlackListip)
-router.post('/ip/blacklist/add', IpController.AddBlackListIp);
-router.get('/ip/blacklist/all', IpController.BlackList)
-router.delete('/ip/blacklist', IpController.DeleteBlackListip)
+router.route('/ip').post(IpController.addIP).get(IpController.getAllIPs).delete(IpController.deleteIP);
+router.route("/blacklist").post(IpController.AddBlackListIp).get(IpController.BlackList).delete(IpController.DeleteBlackListip);
 // End Ips
 // Domains
 router.route('/domain').post(DomainController.addDomain).get(DomainController.getAllDomains).delete(DomainController.deleteDomain).put(DomainController.updateDomain);

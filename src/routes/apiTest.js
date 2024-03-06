@@ -11,7 +11,6 @@ router.get("/", (req, res) => {
 router.get("/", (req, res) => {
   (res, 200, "Sucessfull", req.query)
 })
-router.get("/robottxt", ServerCheckerController.getRobotsTxt)
 
 
 

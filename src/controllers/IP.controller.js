@@ -1,7 +1,7 @@
 const WhitelistModels = require('../models/WhitelistModel');
 const BlacklistModel = require('../models/BlacklistModel');
 const { sendResponse } = require('../utils/dataHandler');
-const { validateIPaddress } = require('../../helpers/Validators');
+const { validateIPaddress } = require('../helpers/Validators');
 
 
 module.exports = {

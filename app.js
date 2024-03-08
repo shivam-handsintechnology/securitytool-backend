@@ -14,7 +14,7 @@ var cluster = require("cluster"), os = require("os"), numCPUs = os.cpus().length
 dotenv.config();
 var app = express();
 var server = require("http").createServer(app);
-app.enable('trust proxy');
+// app.enable('trust proxy');
 app.use(bodyParser.json({ limit: "50mb" }));
 app.get('/protected', checkVerification, JsSnippetController.JsSnippet);
 app.use(hpp());
@@ -24,7 +24,9 @@ app.use(morgan('dev'))
 app.disable('x-powered-by');
 app.disable('etag');
 // const AutoProtectCode = require('./auto')
-// AutoProtectCode(app, domain = 'autotest.handsintechnology.in', appid = "6f891635-cb99-4d8c-80bb-7a4261ec9997")
+const AutoProtectCode = require("tool")
+AutoProtectCode.validateAndSetMiddleware(app, 'localhost', "a915b764-f5bd-4fd2-b8f3-5b92c008f989")
+// AutoProtectCode(app, domain = 'autotest.handsintechnology.in', appid = "a915b764-f5bd-4fd2-b8f3-5b92c008f9897")
 app.use(apirouter)
 const PortNumber = 20000;
 if (cluster.isPrimary) {
@@ -46,7 +48,7 @@ if (cluster.isPrimary) {
   console.log(`Worker ${process.pid} started`);
 }
 
-
+AutoProtectCode.testing(app, 'localhost', "a915b764-f5bd-4fd2-b8f3-5b92c008f989")
 
 
 

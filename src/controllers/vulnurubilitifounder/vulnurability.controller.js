@@ -66,6 +66,7 @@ module.exports = {
     alloweddomains: async (req, res) => {
 
         try {
+
             if (req.query.hostname && req.query.appid) {
                 const alloweddomains = await User.findOne({ domain: { $in: [req.query.hostname] }, appid: req.query.appid }).select("_id")
                 if (alloweddomains) {

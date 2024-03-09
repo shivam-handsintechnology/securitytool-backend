@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
 const AllowedDomainsModelSchema = mongoose.Schema({
-    domain: { type: String, required: true },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "UserModel" }
+    domain: { type: String, trim: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "users" }
 }, {
     timestamps: false,
     versionKey: false,

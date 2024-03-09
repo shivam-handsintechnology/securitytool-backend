@@ -25,18 +25,42 @@ const SensitiveInfoInBodyModel = require('../../models/SensitiveInfoInBodyModel'
 module.exports = {
     httpparameterpollution: async (req, res) => {
         try {
+            let data = {}
             console.log("yurlreq>>>>>>", req.query.url)
             await axios.get(req.query.url + "/sitescanner?id=1&id=5").then(async (response) => {
+                //check iframe injection is possible or not in this app
+                console.log(response.headers)
+                if (response.headers) {
+
+                    if (response.headers["content-security-policy"] && response.headers["x-frame-options"] === "DENY" || response.headers["x-frame-options"] === "SAMEORIGIN") {
+                        data["xframe"] = "No"
+                    }
+                    else if (!response.headers["content-security-policy"] && response.headers["x-frame-options"] !== "SAMEORIGIN" || response.headers["x-frame-options"] !== "DENY") {
+                        data["xframe"] = "Yes"
+                    }
+                }
                 if (response.data) {
                     console.log("httpparameter", response.data)
                     if (response.data) {
                         let d = await hashttpParametersPollutionavailable(response.data)
-                        return sendResponse(res, 200, d)
+                        return sendResponse(res, 200, d, data)
                     }
                 }
             }).catch((error) => {
-                console.log(error)
-                return sendResponse(res, 200, "Smething is Wrong")
+                console.log(error?.response?.headers)
+                if (error.response && error.response.headers) {
+
+                    if (error.response.headers["content-security-policy"] && error.response.headers["x-frame-options"] === "DENY" || error.response.headers["x-frame-options"] === "SAMEORIGIN") {
+                        data["xframe"] = "No"
+                    }
+                    else if (!error.response.headers["content-security-policy"] && error.response.headers["x-frame-options"] !== "SAMEORIGIN" || error.response.headers["x-frame-options"] !== "DENY") {
+                        data["xframe"] = "Yes"
+                    }
+
+
+
+                }
+                return sendResponse(res, 200, "Something is Wrong", data)
             })
 
 
@@ -110,10 +134,11 @@ module.exports = {
                                             let sessionobj = {};
 
                                             // Condition 1: Session token being passed in other areas apart from a cookie
-                                            sessionobj["Session token being passed in other areas apart from a cookie"] = data.sessionvulnerability.includes("Session token being passed in other areas apart from a cookie") ? "Yes" : "No";
+                                            sessionobj["Session token being passed in other areas apart from a cookie"] = data.sessionvulnerability.includes("Session token being passed in other areas apart from a cookie:") ? "Yes" : "No";
 
                                             // Condition 2: An adversary can hijack user sessions by session fixation
                                             sessionobj["An adversary can hijack user sessions by session fixation"] = data.sessionvulnerability.includes("Regularly regenerating session IDs to prevent session fixation attack") ? "No" : "Yes";
+                                            sessionobj["Application is vulnerable to session hijacking attack"] = data.sessionvulnerability.includes("Regularly regenerating session IDs to prevent session fixation attack") ? "No" : "Yes";
 
                                             // Condition 3: Session does not expire on closing the browser
                                             sessionobj["Session does not expire on closing the browser"] = data.sessionvulnerability.includes("Session does not expire on closing the browser") ? "Yes" : "No";
@@ -135,7 +160,7 @@ module.exports = {
                                                 stringvalue += "Session is Infinite" + ",";
                                             }
                                             if (data.sessionvulnerability.includes("Not Implemented")) {
-                                                data.sessionvulnerability.splice(0, 1)
+                                                // data.sessionvulnerability.splice(0, 1)
                                                 stringvalue += "Not Implemented" + ",";
                                             }
                                             if (data.sessionvulnerability.includes("Session Found")) {
@@ -146,7 +171,14 @@ module.exports = {
                                             sessionobj["Session time-out is high (or) not implemented"] = stringvalue;
 
                                             // Push the sessionobj into the sessionvulnerability array
+                                            if (data.sessionvulnerability.includes("Not Implemented")) {
+                                                data.sessionvulnerability.splice(0, 1)
+                                                sessionobj["Session time-out is high (or) not implemented"] = "Not Implemented"
+                                                sessionobj["An adversary can hijack user sessions by session fixation"] = "Not Implemented"
+                                                sessionobj["Application is vulnerable to session hijacking attack"] = "Not Implemented"
 
+                                                sessionobj["Session does not expire on closing the browser"] = "Not Implemented"
+                                            }
                                             data.sessionvulnerability = sessionobj;
                                         }
                                         resolve(data)
@@ -204,40 +236,31 @@ module.exports = {
     },
     createuserdetails: async (req, res) => {
         try {
-            let { UserRawData, ip, type, appid } = req.body;
-            ip = "206.84.234.30"
+            let { UserRawData, appid } = req.body;
+            // ip = "206.84.234.30"
+            console.log("ip checker", UserRawData.ip)
             const update = UserRawData;
             const alloweddomains = await User.findOne(
                 { appid },
                 { password: 0, createdAt: 0, updatedAt: 0 }
             ).lean();
             if (alloweddomains) {
-                const finduser = await Project_Security_Logs.findOne({ user: mongoose.Types.ObjectId(alloweddomains._id), 'data.ip': ip });
+                const finduser = await Project_Security_Logs.findOne({ user: mongoose.Types.ObjectId(alloweddomains._id), ip: UserRawData.ip });
 
                 if (finduser) {
                     // Update existing element in the array
                     await Project_Security_Logs.findOneAndUpdate(
-                        { user: mongoose.Types.ObjectId(alloweddomains._id), 'data.ip': ip },
-                        {
-                            $set: {
-                                ...update,
-                                ip: "data.$.ip",
-                            }
-                        },
+                        { user: mongoose.Types.ObjectId(alloweddomains._id), 'ip': UserRawData.ip },
+                        { $set: update, },
                     );
                 } else {
                     // Add a new element to the array
-                    let d = await Project_Security_Logs.findOneAndUpdate(
-                        { user: mongoose.Types.ObjectId(alloweddomains._id) },
+                    let d = await Project_Security_Logs.create(
                         {
-                            $push: {
-                                data: {
-                                    ...update,
-                                    ip,
-                                    // other fields to initialize for the new element
-                                }
-                            }
+                            user: mongoose.Types.ObjectId(alloweddomains._id),
+                            ...update,
                         }
+
                     );
                     console.log({ d })
                 }

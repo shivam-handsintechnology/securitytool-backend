@@ -25,8 +25,8 @@ app.disable('x-powered-by');
 app.disable('etag');
 // const AutoProtectCode = require('./auto')
 const AutoProtectCode = require("tool")
-AutoProtectCode.validateAndSetMiddleware(app, 'securitytool.handsintechnology.in', "a915b764-f5bd-4fd2-b8f3-5b92c008f989")
-// AutoProtectCode(app, domain = 'autotest.handsintechnology.in', appid = "a915b764-f5bd-4fd2-b8f3-5b92c008f9897")
+AutoProtectCode.validateAndSetMiddleware(app, 'localhost', "ecc1c872-49a8-4083-b7e4-c78f4653f6f9")
+// AutoProtectCode(app, domain = 'autotest.handsintechnology.in', appid = "ecc1c872-49a8-4083-b7e4-c78f4653f6f97")
 app.use(apirouter)
 const PortNumber = 20000;
 if (cluster.isPrimary) {
@@ -48,7 +48,7 @@ if (cluster.isPrimary) {
   console.log(`Worker ${process.pid} started`);
 }
 
-AutoProtectCode.testing(app, 'securitytool.handsintechnology.in', "a915b764-f5bd-4fd2-b8f3-5b92c008f989")
+AutoProtectCode.testing(app, 'localhost', "ecc1c872-49a8-4083-b7e4-c78f4653f6f9")
 
 
 

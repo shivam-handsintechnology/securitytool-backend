@@ -55,59 +55,28 @@ const getSingleSqllLogsCount = async (req, res) => {
     try {
         const alltypesinjection = require("../utils/Injectionstype.json").data
         const typeTitles = alltypesinjection.map(entry => entry.slug);
-        // const data = await Project_Security_Logs.find().where({ type: req.query.type }).count()
-        // const data = await Project_Security_Logs.aggregate([
 
-        //     {
-        //         $match: { user: mongoose.Types.ObjectId(req.user.id) }
-        //     },
-        //     { $unwind: "$data" },
-        //     {
-        //         $match: { "$data.type": { $in: typeTitles } }
-        //     },
-        //     {
-        //         $facet: {
-        //             counts: [
-        //                 {
-        //                     $group: {
-        //                         _id: "$title",
-        //                         count: { $sum: 1 }
-        //                     }
-        //                 }
-        //             ]
-        //         }
-        //     },
-        //     {
-        //         $project: {
-        //             combinedCounts: {
-        //                 $map: {
-        //                     input: typeTitles,
-        //                     as: "typeTitle",
-        //                     in: {
-        //                         title: "$$typeTitle",
-        //                         count: {
-        //                             $ifNull: [
-        //                                 { $arrayElemAt: [{ $filter: { input: "$counts", as: "c", cond: { $eq: ["$$c._id", "$$typeTitle"] } } }, 0] },
-        //                                 { _id: "$$typeTitle", count: 0 }
-        //                             ]
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     },
-        //     {
-        //         $unwind: "$combinedCounts"
-        //     },
-        //     {
-        //         $replaceRoot: { newRoot: "$combinedCounts" }
-        //     }
-        // ])
-        // if (data) {
-        //     sendResponse(res, 200, "data fetch successfully", data)
-        // } else {
-        //     errorHandler(res, 404, "data not found")
-        // }
+        const data = await Project_Security_Logs.aggregate([
+            {
+                $group: {
+                    _id: "$type",
+                    count: { $sum: 1 }
+                }
+            }
+        ])
+        let result = {}
+        data.forEach(entry => {
+            result[entry._id] = entry.count
+        })
+        let finalResult = {}
+        typeTitles.forEach(title => {
+            finalResult[title] = result[title] || 0
+
+        })
+        delete finalResult["xss-injection"]
+        delete finalResult["Remote-FiLe-Inclusion"]
+        delete finalResult["VPN"]
+        sendResponse(res, 200, "data fetch successfully", finalResult)
 
         res.json({
             message: 'okay'

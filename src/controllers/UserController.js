@@ -165,7 +165,7 @@ Register = async (req, res) => {
     }
     const user = await User.findOne({ email: req.body.email })
     if (user) {
-      return sendResponse(res, 409, "Domain is already registered", {});
+      return sendResponse(res, 409, "email is already registered", {});
     }
     else if (!user) {
       const appid = uuidv4(); // ⇨ '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
@@ -173,7 +173,8 @@ Register = async (req, res) => {
       const user = await User.create({
         email: req.body.email,
         password: encrypted,
-        appid
+        appid,
+
       });
       await middlewareModel.create({
         user: user._id,

@@ -249,22 +249,29 @@ async function scanRedirectvulnerability(content, file) {
   return results;
 }
 async function scanSessionvulnerability(content, file, middlewares) {
-  const results = []
+  const results = {
+    jsonwebtoken: false,
+    session: false,
+    session_hijacking: false,
+    session_timeout: "Normal",
+    secure_transmission: false,
+    session_close_on_browser_close: false,
+
+  }
   // 
   const jsonwebtoken = /jsonwebtoken/g; // Change this to the desired pattern
   if (jsonwebtoken.test(content)) {
-    results.push(
-      "Session token being passed in other areas apart from a cookie:" + file
-    );
+    results.jsonwebtoken = true;
   }
   // 
   if (middlewares.includes("session")) {
     content = content.toLowerCase();
     //  session configuration
-    results.push("Session Found")
+    results["session"] = true;
     const sessionIdRegeneration = content.includes(".session.regenerate(");
     if (sessionIdRegeneration) {
-      results.push(`Regularly regenerating session IDs to prevent session fixation attack is not possible because session regeneration is used in this file: ${file}\nApplication is not vulnerable to session hijacking attack`)
+      results["session_hijacking"] = true;
+
     }
     const cookieRegex = /cookie:\s*{\s*[\s\S]*?\s*}/;
     const cookieRegexmatch = content.match(cookieRegex);
@@ -276,36 +283,42 @@ async function scanSessionvulnerability(content, file, middlewares) {
       const cookieObject = eval(`(${cookieString})`);
       console.log(cookieObject);
       const isSecureTransmission = cookieObject.secure;
-      results.push(isSecureTransmission ? "session IDs are securely transmitted over encrypted channels (HTTPS)" : "session IDs are not  securely transmitted over encrypted channels (HTTPS)");
+      results["secure_transmission"] = isSecureTransmission ? "session IDs are securely transmitted over encrypted channels (HTTPS)" : "session IDs are not  securely transmitted over encrypted channels (HTTPS)"
       if (cookieObject["maxage"] === false || cookieObject["expires"] === false) {
         // consoleColorText( "Session does not expire on closing the browser because is it means it will never expire",'red')
-        results.push("Session does not expire on closing the browser");
+        results["session_close_on_browser_close"] = true;
       } else if (
         cookieObject["maxage"] === null ||
         cookieObject["expires"] === null
       ) {
         // consoleColorText("session is infinite","red")
-        results.push("Session is Infinite");
+        results["session_timeout"] = "Infinite";
       } else if (
         cookieObject["maxage"] > sevenDays ||
         cookieObject["expires"] > sevenDays
       ) {
         // consoleColorText("session timeout is high",'red')
-        results.push("Session_time_out is High");
+        results["session_timeout"] = "High";
       } else if (
         cookieObject["maxage"] < oneMinute ||
         cookieObject["expires"] < oneMinute
       ) {
         // consoleColorText("session timeout is Low",'red')
-        results.push("Session_time_out is Low");
+        results["session_timeout"] = "Low";
       } else {
         // consoleColorText("session timeout is Normal","blue")
-        results.push("Session_time_out is Normal");
+        results["session_timeout"] = "Normal";
       }
     }
 
-  } else {
-    results.push("Not Implemented")
+  }
+  if (!middlewares.includes("session")) {
+    results["session"] = false;
+    results["session_hijacking"] = false;
+    results["secure_transmission"] = false;
+    results["session_timeout"] = "Not Implememted";
+    results["session_close_on_browser_close"] = false;
+
   }
   return results;
 }
@@ -421,13 +434,13 @@ async function scanWebsite(url) {
     await browser.close();
   }
 }
-const lighthouse = require('lighthouse');
+// const lighthouse = require('lighthouse');
 const { launch } = require('chrome-launcher');
 
 async function generateWebsiteReport(url) {
   const chrome = await launch();
   const options = { port: chrome.port };
-  const runnerResult = await lighthouse(url, options);
+  // const runnerResult = await lighthouse(url, options);
 
   // Access the generated report
   const report = runnerResult.report;

@@ -134,51 +134,17 @@ module.exports = {
                                             let sessionobj = {};
 
                                             // Condition 1: Session token being passed in other areas apart from a cookie
-                                            sessionobj["Session token being passed in other areas apart from a cookie"] = data.sessionvulnerability.includes("Session token being passed in other areas apart from a cookie:") ? "Yes" : "No";
+                                            sessionobj["Session token being passed in other areas apart from a cookie"] = data.sessionvulnerability.jsonwebtoken ? "Yes" : "No";
 
                                             // Condition 2: An adversary can hijack user sessions by session fixation
-                                            sessionobj["An adversary can hijack user sessions by session fixation"] = data.sessionvulnerability.includes("Regularly regenerating session IDs to prevent session fixation attack") ? "No" : "Yes";
-                                            sessionobj["Application is vulnerable to session hijacking attack"] = data.sessionvulnerability.includes("Regularly regenerating session IDs to prevent session fixation attack") ? "No" : "Yes";
+                                            sessionobj["An adversary can hijack user sessions by session fixation"] = data.sessionvulnerability.session_hijacking ? "Yes" : "No";
+                                            sessionobj["Application is vulnerable to session hijacking attack"] = data.sessionvulnerability.session_hijacking ? "Yes" : "No";
 
                                             // Condition 3: Session does not expire on closing the browser
-                                            sessionobj["Session does not expire on closing the browser"] = data.sessionvulnerability.includes("Session does not expire on closing the browser") ? "Yes" : "No";
+                                            sessionobj["Session does not expire on closing the browser"] = data.sessionvulnerability.session_close_on_browser_close ? "Yes" : "No";
 
                                             // Condition 4: Session time-out is high (or) not implemented
-                                            let stringvalue = "";
-
-                                            // Check each session time-out condition and append to stringvalue
-                                            if (data.sessionvulnerability.includes("Session_time_out is Normal")) {
-                                                stringvalue += "Session Time Out is Normal" + ",";
-                                            }
-                                            if (data.sessionvulnerability.includes("Session_time_out is Low")) {
-                                                stringvalue += "Session Time Out is Low" + ",";
-                                            }
-                                            if (data.sessionvulnerability.includes("Session_time_out is High")) {
-                                                stringvalue += "Session Time Out is High" + ",";
-                                            }
-                                            if (data.sessionvulnerability.includes("Session is Infinite")) {
-                                                stringvalue += "Session is Infinite" + ",";
-                                            }
-                                            if (data.sessionvulnerability.includes("Not Implemented")) {
-                                                // data.sessionvulnerability.splice(0, 1)
-                                                stringvalue += "Not Implemented" + ",";
-                                            }
-                                            if (data.sessionvulnerability.includes("Session Found")) {
-                                                stringvalue += "Session Found" + ",";
-                                            }
-
-                                            // Set the final value for "Session time-out is high (or) not implemented"
-                                            sessionobj["Session time-out is high (or) not implemented"] = stringvalue;
-
-                                            // Push the sessionobj into the sessionvulnerability array
-                                            if (data.sessionvulnerability.includes("Not Implemented")) {
-                                                data.sessionvulnerability.splice(0, 1)
-                                                sessionobj["Session time-out is high (or) not implemented"] = "Not Implemented"
-                                                sessionobj["An adversary can hijack user sessions by session fixation"] = "Not Implemented"
-                                                sessionobj["Application is vulnerable to session hijacking attack"] = "Not Implemented"
-
-                                                sessionobj["Session does not expire on closing the browser"] = "Not Implemented"
-                                            }
+                                            sessionobj["Session time-out is high (or) not implemented"] = data.sessionvulnerability.session_timeout;
                                             data.sessionvulnerability = sessionobj;
                                         }
                                         resolve(data)

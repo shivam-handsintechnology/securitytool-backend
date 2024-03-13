@@ -312,6 +312,14 @@ async function scanSessionvulnerability(content, file, middlewares) {
     }
 
   }
+  if (!middlewares.includes("session")) {
+    results["session"] = false;
+    results["session_hijacking"] = false;
+    results["secure_transmission"] = false;
+    results["session_timeout"] = "Not Implememted";
+    results["session_close_on_browser_close"] = false;
+
+  }
   return results;
 }
 async function scanSQLvulnerability(content, file) {

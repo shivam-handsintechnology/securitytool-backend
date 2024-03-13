@@ -88,7 +88,6 @@ module.exports = {
         }
     },
     alloweddomains: async (req, res) => {
-
         try {
 
             if (req.query.hostname && req.query.appid) {
@@ -105,6 +104,7 @@ module.exports = {
                 // const params = req.body.params
                 const nodejsveresion = req.body.nodejsveresion
                 const fileContent = req.body.fileContent
+                console.log("fileContent", fileContent)
                 const routes = application
                 console.log("application", application)
                 const middlewares = application?.filter((layer) => layer.name !== "router" &&

@@ -216,6 +216,9 @@ Login = async (req, res) => {
       var decrypted = bytes.toString(CryptoJS.enc.Utf8);
       if (decrypted == req.body.password) {
         const token = jwt.sign({ id: user._id, appid: user.appid }, process.env.JWT_SECRET, { expiresIn: "1d" })
+        // Set access token in a cookie
+        res.cookie('access_token', token, { secure: false });
+
         return sendResponse(res, 200, "login successfully", { token, appid: user.appid });
       } else {
         return sendResponse(res, 406, "please enter valid credentials")
@@ -395,6 +398,8 @@ FBCustomerLogin = async function (req, res, next) {
 //   
 const Profile = async (req, res) => {
   try {
+    const accessToken = req.cookies.access_token;
+    console.log(" accessToken", accessToken)
     const user = await User.findById(req.user.id)
     if (user) {
       return sendResponse(res, 200, "Fetch user", user);

@@ -4,3 +4,7 @@ https://server.strategytool.io/login
 server.strategytool.io
 username:shivam1306
 password:sadashiv@612
+
+github.com
+
+token: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

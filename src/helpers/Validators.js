@@ -31,4 +31,10 @@ module.exports = {
         }
         return message
     },
+    refreshTokenBodyValidation: (body) => {
+        const schema = Joi.object({
+            refreshToken: Joi.string().required().label("Refresh Token"),
+        });
+        return schema.validate(body);
+    },
 }

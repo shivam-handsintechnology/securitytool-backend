@@ -1,0 +1,56 @@
+{
+    "http_error": [
+        {
+            "code": 100,
+            "description": "Continue"
+        },
+        {
+            "code": 101,
+            "description": "Switching Protocols"
+        },
+        {
+            "code": 200,
+            "description": "OK"
+        },
+        {
+            "code": 201,
+            "description": "Created"
+        },
+        {
+            "code": 204,
+            "description": "No Content"
+        },
+        {
+            "code": 301,
+            "description": "Moved Permanently"
+        },
+        {
+            "code": 302,
+            "description": "Found"
+        },
+        {
+            "code": 304,
+            "description": "Not Modified"
+        },
+        {
+            "code": 400,
+            "description": "Bad Request"
+        },
+        {
+            "code": 401,
+            "description": "Unauthorized"
+        },
+        {
+            "code": 404,
+            "description": "Not Found"
+        },
+        {
+            "code": 500,
+            "description": "Internal Server Error"
+        },
+        {
+            "code": 503,
+            "description": "Service Unavailable"
+        }
+    ]
+}

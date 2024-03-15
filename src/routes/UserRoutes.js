@@ -8,6 +8,6 @@ router.post('/Oauth', UserController.GoogleRegister)
 router.get('/profile', verifyToken, UserController.Profile)
 router.post('/facebook', UserController.FBCustomerLogin)
 router.post('/logout', UserController.Logout)
-router.get('/setup', UserController.SetUp)
+
 
 module.exports = router

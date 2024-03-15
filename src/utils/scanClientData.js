@@ -253,26 +253,27 @@ async function scanSessionvulnerability(content, file, middlewares) {
     jsonwebtoken: false,
     session: false,
     session_hijacking: false,
-    session_timeout: "Normal",
+    session_timeout: "",
     secure_transmission: false,
     session_close_on_browser_close: false,
+    file: file
+  };
 
-  }
-  // 
   const jsonwebtoken = /jsonwebtoken/g; // Change this to the desired pattern
   if (jsonwebtoken.test(content)) {
     results.jsonwebtoken = true;
   }
-  // 
+
   if (middlewares.includes("session")) {
     content = content.toLowerCase();
-    //  session configuration
-    results["session"] = true;
+
+    results.session = true;
+
     const sessionIdRegeneration = content.includes(".session.regenerate(");
     if (sessionIdRegeneration) {
-      results["session_hijacking"] = true;
-
+      results.session_hijacking = true;
     }
+
     const cookieRegex = /cookie:\s*{\s*[\s\S]*?\s*}/;
     const cookieRegexmatch = content.match(cookieRegex);
     if (cookieRegexmatch) {
@@ -281,47 +282,36 @@ async function scanSessionvulnerability(content, file, middlewares) {
       const sessionConfig = cookieRegexmatch[0].trim();
       const cookieString = sessionConfig.replace("cookie:", "");
       const cookieObject = eval(`(${cookieString})`);
-      console.log(cookieObject);
+
       const isSecureTransmission = cookieObject.secure;
-      results["secure_transmission"] = isSecureTransmission ? "session IDs are securely transmitted over encrypted channels (HTTPS)" : "session IDs are not  securely transmitted over encrypted channels (HTTPS)"
+      results.secure_transmission = isSecureTransmission ? "session IDs are securely transmitted over encrypted channels (HTTPS)" : "session IDs are not securely transmitted over encrypted channels (HTTPS)";
+
       if (cookieObject["maxage"] === false || cookieObject["expires"] === false) {
-        // consoleColorText( "Session does not expire on closing the browser because is it means it will never expire",'red')
-        results["session_close_on_browser_close"] = true;
+        results.session_close_on_browser_close = true;
       } else if (
         cookieObject["maxage"] === null ||
         cookieObject["expires"] === null
       ) {
-        // consoleColorText("session is infinite","red")
-        results["session_timeout"] = "Infinite";
+        results.session_timeout = "Infinite";
       } else if (
         cookieObject["maxage"] > sevenDays ||
         cookieObject["expires"] > sevenDays
       ) {
-        // consoleColorText("session timeout is high",'red')
-        results["session_timeout"] = "High";
+        results.session_timeout = "High";
       } else if (
         cookieObject["maxage"] < oneMinute ||
         cookieObject["expires"] < oneMinute
       ) {
-        // consoleColorText("session timeout is Low",'red')
-        results["session_timeout"] = "Low";
+        results.session_timeout = "Low";
       } else {
-        // consoleColorText("session timeout is Normal","blue")
-        results["session_timeout"] = "Normal";
+        results.session_timeout = "Normal";
       }
     }
-
   }
-  if (!middlewares.includes("session")) {
-    results["session"] = false;
-    results["session_hijacking"] = false;
-    results["secure_transmission"] = false;
-    results["session_timeout"] = "Not Implememted";
-    results["session_close_on_browser_close"] = false;
 
-  }
-  return results;
+  return results; // Returning an array to match the structure of other vulnerability scanning functions
 }
+
 async function scanSQLvulnerability(content, file) {
   const results = [];
   content = content.toLowerCase();
@@ -361,92 +351,8 @@ function getLineNumber(content, index) {
   const lines = content.substr(0, index).split("\n");
   return lines.length;
 }
-function scanDomain(domain) {
-  try {
-    const timestamp = Math.floor(Date.now() / 1000);
-    const url = `https://www.virustotal.com/vtapi/v2/domain/report?apikey=${API_KEY}&domain=${domain}&date=${timestamp}`;
-    const options = {
-      method: 'GET'
-    };
-    // Make the request
-    const request = https.request(url, options, (response) => {
-      const chunks = [];
 
-      // Collect the response data in chunks
-      response.on('data', (chunk) => {
-        chunks.push(chunk);
-      });
 
-      // When the response is complete, concatenate the chunks into a single buffer
-      response.on('end', () => {
-        const buffer = Buffer.concat(chunks);
-        // Parse the JSON response
-        const result = JSON.parse(buffer.toString());
-        if (result.response_code !== 1) {
-          console.log(`The domain ${domain} could not be scanned.`);
-          return;
-        }
-
-        if (result.detected_urls.length > 0) {
-          console.log(`The domain ${domain} contains a virus!`);
-          console.log(`The following URLs were detected as malicious:`);
-          for (const url of result.detected_urls) {
-            console.log(url.url);
-          }
-        } else {
-          console.log(`The domain ${domain} is clean.`);
-        }
-      });
-    });
-
-    // Handle errors
-    request.on('error', (error) => {
-      console.error(error);
-    });
-
-    request.end();
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-async function scanWebsite(url) {
-  // Launch a headless browser
-  const puppeteer = require('puppeteer');
-  const browser = await puppeteer.launch();
-  try {
-    // Open a new page
-    const page = await browser.newPage();
-
-    // Navigate to the specified URL
-    await page.goto(url);
-
-    // Take a screenshot
-    await page.screenshot({ path: 'screenshot.png' });
-
-    // Extract the page title
-    const title = await page.title();
-    console.log('Page title:', title);
-  } catch (error) {
-    console.error('An error occurred:', error);
-  } finally {
-    // Close the browser
-    await browser.close();
-  }
-}
-// const lighthouse = require('lighthouse');
-const { launch } = require('chrome-launcher');
-
-async function generateWebsiteReport(url) {
-  const chrome = await launch();
-  const options = { port: chrome.port };
-  // const runnerResult = await lighthouse(url, options);
-
-  // Access the generated report
-  const report = runnerResult.report;
-  await chrome.kill();
-  return report
-}
 async function DefaultWebPage(routes, hostname) {
   return new Promise((resolve, reject) => {
     try {

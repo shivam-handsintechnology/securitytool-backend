@@ -97,6 +97,7 @@ const CreatStatusCodesDetails = async (ErrorStatuscode, message, url, hostname, 
       message,
       hostname
     }
+    console.log("UserRawData", UserRawData)
     const filter = { user: id, ErrorStatuscode };
     if (url.includes('/login')) {
       const finduser = await ResponseCodesLoginPageModels.findOne(filter)

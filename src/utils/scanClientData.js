@@ -1,7 +1,5 @@
 const crypto = require("crypto");
 const axios = require('axios');
-const API_KEY = 'd55435107bbfb1235bdeb3457aa0cc7ca48ce7cba06aeb2fd8b3e8cc82096187';
-const https = require('https')
 const {
   passwordkeys,
   sensitivedata,
@@ -374,6 +372,11 @@ async function DefaultWebPage(routes, hostname) {
     }
   });
 }
+
+
+// Scan package.json file
+
+
 // Usage example
 const ScanAllContentAndroutes = async (content, file, routes, hostname, middlewares) => {
   const results = {};

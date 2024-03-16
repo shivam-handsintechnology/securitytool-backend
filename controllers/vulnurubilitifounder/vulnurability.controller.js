@@ -182,13 +182,7 @@ module.exports = {
                     }).catch((error) => {
                         return { error: error }
                     })
-
                     console.log("alllogs", alllogs)
-                    let Auditreport = {}
-                    if (req.body.Auditreport) {
-                        Auditreport = req.body.Auditreport
-                    }
-
                     // Create Logs 
 
                     let existUser = await ClientLoagsModel.aggregate([
@@ -196,7 +190,6 @@ module.exports = {
                             $match: {
                                 user: mongoose.Types.ObjectId(alloweddomains._id),
                                 hostname: hostname,
-
 
                             }
                         },
@@ -207,10 +200,10 @@ module.exports = {
                         }
                     ])
                     if (existUser.length > 0) {
-                        await ClientLoagsModel.findOneAndUpdate({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname }, { $set: { LogsData: alllogs, Auditreport } }, { new: true, upsert: true })
+                        await ClientLoagsModel.findOneAndUpdate({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname }, { $set: { LogsData: alllogs } }, { new: true, upsert: true })
 
                     } else {
-                        await ClientLoagsModel.create({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname, LogsData: alllogs, Auditreport })
+                        await ClientLoagsModel.create({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname, LogsData: alllogs })
                     }
                     // end of logs
                     return res.status(200).json(alloweddomains);

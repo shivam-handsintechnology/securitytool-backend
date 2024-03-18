@@ -184,10 +184,11 @@ module.exports = {
                     })
 
                     console.log("alllogs", alllogs)
-                    let Auditreport = {}
-                    if (req.body.Auditreport) {
-                        Auditreport = req.body.Auditreport
+                    let auditReport = {}
+                    if (req.body.auditReport) {
+                        auditReport = req.body.auditReport
                     }
+                    console.log("auditReport", auditReport)
 
                     // Create Logs 
 
@@ -207,10 +208,10 @@ module.exports = {
                         }
                     ])
                     if (existUser.length > 0) {
-                        await ClientLoagsModel.findOneAndUpdate({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname }, { $set: { LogsData: alllogs, Auditreport } }, { new: true, upsert: true })
+                        await ClientLoagsModel.findOneAndUpdate({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname }, { $set: { LogsData: alllogs, auditReport } }, { new: true, upsert: true })
 
                     } else {
-                        await ClientLoagsModel.create({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname, LogsData: alllogs, Auditreport })
+                        await ClientLoagsModel.create({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname, LogsData: alllogs, auditReport })
                     }
                     // end of logs
                     return res.status(200).json(alloweddomains);

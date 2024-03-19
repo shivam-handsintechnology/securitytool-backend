@@ -16,6 +16,8 @@ async function DBConnection(mongouri) {
         useUnifiedTopology: true,
       }).then(async () => {
         await IndectionsTypeModel.insertMany(Injectionstype.data, { ordered: false })
+        // insert csv file data to mongodb
+
         console.log("mongodb connected")
       }).catch((e) => console.log(e.message))
   } catch (error) {

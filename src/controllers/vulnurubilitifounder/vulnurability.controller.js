@@ -19,6 +19,7 @@ const User = require("../../models/User");
 const { NodeVersionModel } = require("../../models/NodeVersionModel");
 const { PasswordValidateModel } = require('../../models/PasswordVaildateModel');
 const SensitiveInfoInBodyModel = require('../../models/SensitiveInfoInBodyModel');
+const { sessionvunurability } = require('../../utils/sessionvalidationclient');
 
 module.exports = {
     httpparameterpollution: async (req, res) => {
@@ -722,11 +723,15 @@ module.exports = {
                 if (!valid) {
                     return res.json("please enter valid url")
                 } else if (valid) {
+
                     const checkMyHeaders = require('../../utils/ScanHeaders')
                     const data = await checkMyHeaders(req.query.url)
                         .then((messages) => messages)
                     const rawHeaders = data.headers
-                    return res.json({ headersinfo: data.messages, rawHeaders })
+                    const session = await sessionvunurability(req.query.url)
+                        .then((data) => data)
+                        .catch((error) => error)
+                    return res.json({ headersinfo: data.messages, sessionvunurability: session, rawHeaders })
 
                 }
 

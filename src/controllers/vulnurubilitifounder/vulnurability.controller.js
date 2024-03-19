@@ -19,6 +19,7 @@ const User = require("../../models/User");
 const { NodeVersionModel } = require("../../models/NodeVersionModel");
 const { PasswordValidateModel } = require('../../models/PasswordVaildateModel');
 const SensitiveInfoInBodyModel = require('../../models/SensitiveInfoInBodyModel');
+const { sessionvunurability } = require('../../utils/sessionvalidationclient');
 
 module.exports = {
     httpparameterpollution: async (req, res) => {
@@ -184,10 +185,11 @@ module.exports = {
                     })
 
                     console.log("alllogs", alllogs)
-                    let Auditreport = {}
-                    if (req.body.Auditreport) {
-                        Auditreport = req.body.Auditreport
+                    let auditReport = {}
+                    if (req.body.auditReport) {
+                        auditReport = req.body.auditReport
                     }
+                    console.log("auditReport", auditReport)
 
                     // Create Logs 
 
@@ -207,10 +209,10 @@ module.exports = {
                         }
                     ])
                     if (existUser.length > 0) {
-                        await ClientLoagsModel.findOneAndUpdate({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname }, { $set: { LogsData: alllogs, Auditreport } }, { new: true, upsert: true })
+                        await ClientLoagsModel.findOneAndUpdate({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname }, { $set: { LogsData: alllogs, auditReport } }, { new: true, upsert: true })
 
                     } else {
-                        await ClientLoagsModel.create({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname, LogsData: alllogs, Auditreport })
+                        await ClientLoagsModel.create({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname, LogsData: alllogs, auditReport })
                     }
                     // end of logs
                     return res.status(200).json(alloweddomains);
@@ -721,11 +723,15 @@ module.exports = {
                 if (!valid) {
                     return res.json("please enter valid url")
                 } else if (valid) {
+
                     const checkMyHeaders = require('../../utils/ScanHeaders')
                     const data = await checkMyHeaders(req.query.url)
                         .then((messages) => messages)
                     const rawHeaders = data.headers
-                    return res.json({ headersinfo: data.messages, rawHeaders })
+                    const session = await sessionvunurability(req.query.url)
+                        .then((data) => data)
+                        .catch((error) => error)
+                    return res.json({ headersinfo: data.messages, sessionvunurability: session, rawHeaders })
 
                 }
 

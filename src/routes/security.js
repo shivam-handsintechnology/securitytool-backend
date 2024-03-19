@@ -6,6 +6,7 @@ const IpController = require('../controllers/IP.controller')
 const DomainController = require('../controllers/DomainController')
 const IndexRouter = require('./sys_ssl')
 const TestRouter = require('./test')
+const WhitelistWords = require('./whitelistwords.route');
 // Logs
 router.get('/sqllogs/', Sqllogs.getAllSqllLogs);
 router.post('/sqllogs/single', Sqllogs.getSingleSqllLogs);
@@ -24,7 +25,8 @@ router.route("/blacklist").post(IpController.AddBlackListIp).get(IpController.Bl
 // End Ips
 // Domains
 router.route('/domain').post(DomainController.addDomain).get(DomainController.getAllDomains).delete(DomainController.deleteDomain).put(DomainController.updateDomain);
-
+// Whitelist words
+router.use("/whitelistwords", WhitelistWords)
 
 router.use("/test", TestRouter)
 module.exports = router

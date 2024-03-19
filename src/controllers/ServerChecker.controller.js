@@ -7,7 +7,7 @@ const ServerErrorResponseCodes = require('../models/ServerErrorResponseCodes');
 const { PasswordValidateModel } = require('../models/PasswordVaildateModel');
 const { hasRobotsTxt } = require('../utils/functions');
 const { ClientLoagsModel } = require('../models/ClientLoagsModel');
-const ErrorMessagesData = require("../data/ErrorMessagesData.json")
+const ErrorMessagesData = require("../data/json/ErrorMessagesData.json")
 module.exports = {
   getRobotsTxt: async (req, res) => {
     try {

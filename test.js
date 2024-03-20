@@ -156,8 +156,75 @@ async function scanSessionVulnerability(cookies) {
 
     return results;
 }
-(async () => {
-    let data = await scanSessionVulnerability(cookies)
-    console.log(data)
-})()
+// (async () => {
+//     let data = await scanSessionVulnerability(cookies)
+//     console.log(data)
+// })()
+const axios = require('axios');
+const cheerio = require('cheerio');
+const { sensitivedata } = require('./src/sensitive/availableapikeys');
+
+async function findFrameworks(url) {
+    try {
+        const response = await axios.get(url);
+        const html = response.data;
+        const $ = cheerio.load(html);
+
+        // Framework detection logic
+        const frameworks = [];
+
+        // Check for presence of React
+        if ($('[data-reactroot]').length > 0 || $('[id="root"]').length > 0) {
+            frameworks.push('React');
+        }
+
+        // Check for presence of Vue
+        if ($('[data-v-]').length > 0) {
+            frameworks.push('Vue');
+        }
+
+        // Check for presence of Angular
+        if ($('[ng-app]').length > 0 || $('[ng-version]').length > 0) {
+            frameworks.push('Angular');
+        }
+
+        // Check for presence of Next.js
+        if ($('meta[name="next-head-count"]').length > 0 || $('[data-next-root]').length > 0) {
+            frameworks.push('Next.js');
+        }
+
+        // Add checks for other frameworks
+
+        if (frameworks.length === 0) {
+            console.log('No frameworks detected.');
+        } else {
+            console.log('Frameworks used:', frameworks);
+            //   get js file where bundle is located
+            let scripts = $('script').map((i, el) => $(el).attr('src')).get()
+            for (let i = 0; i < scripts.length; i++) {
+                if (scripts[i].includes('bundle') || scripts[i].includes('main') || scripts[i].includes('index')) {
+                    fetch(url + scripts[i])
+                        .then(response => response.text())
+                        .then(data => {
+                            sensitivedata.forEach((sensitive) => {
+                                // find when in query sensitive field available
+
+                                if (data.includes(sensitive)) {
+                                    console.log('Sensitive data exposed:', sensitive);
+                                }
+                            })
+                        })
+                }
+            }
+        }
+
+    } catch (error) {
+        console.error('Error fetching or parsing the web app:', error);
+    }
+}
+
+// Example usage
+findFrameworks('https://lmpfrontend.handsintechnology.in');
+
+
 

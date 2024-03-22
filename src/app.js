@@ -1,22 +1,16 @@
 // All Neccesary functions
 
-const logger = require('./src/logger/logger');
-const apirouter = require('./src/routes')
-const checkVerification = require('./src/middlewares/verifyClient')
-const { DBConnection } = require("./src/config/connection");
-const JsSnippetController = require('./src/controllers/JsSnippetController');
-var express = require("express");
-const fileUpload = require('express-fileupload');
-var session = require('express-session')
-const cookieParser = require('cookie-parser');
-var cors = require("cors"), hpp = require('hpp'), morgan = require('morgan'), helmet = require('helmet'), bodyParser = require('body-parser')
-const dotenv = require("dotenv")
-var cluster = require("cluster"), os = require("os"), numCPUs = os.cpus().length, process = require("process");
-dotenv.config();
+const logger = require('./logger/logger');
+const apirouter = require('./routes')
+const checkVerification = require('./middlewares/verifyClient')
+const { DBConnection } = require("./config/connection");
+const JsSnippetController = require('./controllers/JsSnippetController');
+const cors = require("cors"), path = require('path'), history = require('./helpers/connect-history-api-fallback'), fileUpload = require('express-fileupload'), express = require("express"); hpp = require('hpp'), morgan = require('morgan'), helmet = require('helmet'), bodyParser = require('body-parser'), dotenv = require('dotenv'), cluster = require("cluster"), os = require("os"), numCPUs = os.cpus().length, process = require("process");
 // Connected to mongodb
+dotenv.config();
 DBConnection(process.env.MONGO_URI)
-var app = express();
-
+// Create Express APP
+const app = express();
 app.use(bodyParser.json({ limit: "50mb", extended: true }));
 // File Upload Functionality
 app.use(fileUpload({
@@ -26,14 +20,7 @@ app.use(fileUpload({
 
 app.get('/protected', JsSnippetController.JsSnippet);
 app.post('/protected', JsSnippetController.getALlDataFromSnippet);
-app.use(cookieParser());
 app.set('trust proxy', 1) // trust first proxy
-app.use(session({
-  secret: 'keyboard cat',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: true, maxAge: 60000 * 60 * 24 * 7 } // 1 week
-}))
 app.use(hpp());
 app.use(cors())
 app.use(helmet())
@@ -50,6 +37,21 @@ app.use((err, req, res, next) => {
   logger.error(err.stack);
   res.status(500).send('Something broke!');
 });
+
+// Serve up production assets
+// app.use(express.static(path.join(__dirname, 'build')));
+
+// // Let the React app handle any unknown routes
+// // Serve up the index.html if Express doesn't recognize the route
+// app.get('*', (req, res) => {
+//   try {
+//     res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send('Internal Server Error');
+//   }
+// });
+
 const PortNumber = 20000;
 if (cluster.isPrimary) {
   console.log(`Primary ${process.pid} is running`);

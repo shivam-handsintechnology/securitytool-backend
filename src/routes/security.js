@@ -7,6 +7,7 @@ const DomainController = require('../controllers/DomainController')
 const IndexRouter = require('./sys_ssl')
 const TestRouter = require('./test')
 const WhitelistWords = require('./whitelistwords.route');
+const Use_cases_webApp = require("./Use_cases_web_app.route")
 // Logs
 router.get('/sqllogs/', Sqllogs.getAllSqllLogs);
 router.post('/sqllogs/single', Sqllogs.getSingleSqllLogs);
@@ -29,4 +30,6 @@ router.route('/domain').post(DomainController.addDomain).get(DomainController.ge
 router.use("/whitelistwords", WhitelistWords)
 
 router.use("/test", TestRouter)
+router.use(Use_cases_webApp)
+
 module.exports = router

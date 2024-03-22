@@ -324,9 +324,8 @@ FBCustomerLogin = async function (req, res, next) {
 //   
 const Profile = async (req, res) => {
   try {
-    const accessToken = req.cookies.access_token;
-    console.log(" accessToken", accessToken)
-    const user = await User.findById(req.user.id)
+
+    const user = await User.findById(req.user.id).select("userType email id")
     if (user) {
       return sendResponse(res, 200, "Fetch user", user);
     } else {

@@ -90,9 +90,17 @@ module.exports = {
         try {
 
             if (req.query.hostname && req.query.appid) {
-                const alloweddomains = await User.findOne({ domain: { $in: [req.query.hostname] }, appid: req.query.appid }).select("_id")
+                const alloweddomains = await User.findOne({ appid: req.query.appid }).select("_id")
                 if (alloweddomains) {
-                    return sendResponse(res, 200, "fetch", { allowed: true })
+                    const includedomain = await User.findOne({ domain: { $in: [req.query.hostname] }, appid: req.query.appid }).select("_id")
+                    if (includedomain) {
+                        return sendResponse(res, 200, "fetch", { allowed: true })
+                    } else if (!includedomain) {
+                        await User.findOneAndUpdate({ app: req.query.appid }, { $push: { domain: req.query.hostname } })
+                        return sendResponse(res, 200, "fetch", { allowed: true })
+                    }
+
+
                 } else {
                     return errorHandler(res, 404, "please enter valid details", { allowed: false })
                 }
@@ -117,105 +125,206 @@ module.exports = {
                 // Person is verified, proceed to serve the file
 
                 const alloweddomains = await User.findOne(
-                    { domain: { $in: [hostname] }, appid },
+                    { appid },
                     { password: 0, createdAt: 0, updatedAt: 0 }
                 ).lean();
                 if (alloweddomains) {
-                    const logs = async () => {
-                        return new Promise((resolve, reject) => {
-                            try {
-                                let resultarray = []
+                    const includedomain = await User.findOne({ domain: { $in: [req.query.hostname] }, appid: req.query.appid }).select("_id")
+                    if (includedomain) {
+                        const logs = async () => {
+                            return new Promise((resolve, reject) => {
+                                try {
+                                    let resultarray = []
 
-                                fileContent.map(async (file) => {
-                                    // scan  hard coded data 
-                                    await ScanAllContentAndroutes(file.content, file.name, routes, middlewares, appid).then((data) => {
+                                    fileContent.map(async (file) => {
+                                        // scan  hard coded data 
+                                        await ScanAllContentAndroutes(file.content, file.name, routes, middlewares, appid).then((data) => {
 
-                                        if (data.sessionvulnerability) {
-                                            resultarray.push(data.sessionvulnerability)
-                                        }
-                                        resolve({ ...data, sessionvulnerability: resultarray })
-                                    }).catch((error) => {
-                                        console.log("error", error)
-                                        reject(error)
+                                            if (data.sessionvulnerability) {
+                                                resultarray.push(data.sessionvulnerability)
+                                            }
+                                            resolve({ ...data, sessionvulnerability: resultarray })
+                                        }).catch((error) => {
+                                            console.log("error", error)
+                                            reject(error)
+                                        })
+
                                     })
+                                } catch (error) {
+                                    reject(error)
+                                }
+                            })
+                        }
+                        const alllogs = await logs().then((data) => {
+                            let sessionvulnerability = {
+                                jsonwebtoken: false,
+                                session: false,
+                                session_hijacking: false,
+                                session_timeout: "",
+                                secure_transmission: false,
+                                session_close_on_browser_close: false,
 
-                                })
-                            } catch (error) {
-                                reject(error)
+                            };
+                            if (data.sessionvulnerability) {
+                                let jsonwebtoken = data.sessionvulnerability.find((v) => v.jsonwebtoken == true)
+                                let session = data.sessionvulnerability.find((v) => v.session == true)
+                                let session_hijacking = data.sessionvulnerability.find((v) => v.session_hijacking == true)
+                                let secure_transmission = data.sessionvulnerability.find((v) => v.secure_transmission == true)
+                                let session_close_on_browser_close = data.sessionvulnerability.find((v) => v.session_close_on_browser_close == true)
+                                let session_timeout = data.sessionvulnerability.find((v) => v.session_timeout !== "")
+                                sessionvulnerability["Session does not expire on closing the browser"] = session_close_on_browser_close ? "Yes" : "No"
+                                sessionvulnerability["Session time-out is high (or) not implemented."] = session_timeout ? session_timeout : "No"
+                                sessionvulnerability["Session token being passed in other areas apart from cookies"] = jsonwebtoken ? "Yes" : "No"
+                                sessionvulnerability["An adversary can hijack user sessions by session fixation"] = session_hijacking ? "Yes" : "No"
+                                sessionvulnerability["Session is not secure (or) not implemented."] = secure_transmission ? "Yes" : "No"
+                                sessionvulnerability["Application is vulnerable to session hijacking attack"] = session_hijacking ? "Yes" : "No"
+                                sessionvulnerability["Can session puzzling be used to bypass authentication or authorization?"] = session_hijacking ? "Yes" : "No"
+                                delete sessionvulnerability.jsonwebtoken
+                                delete sessionvulnerability.session
+                                delete sessionvulnerability.session_hijacking
+                                delete sessionvulnerability.secure_transmission
+                                delete sessionvulnerability.session_close_on_browser_close
+                                delete sessionvulnerability.session_timeout
+                                data.sessionvulnerability = sessionvulnerability
+
+
                             }
+                            return data
+                        }).catch((error) => {
+                            return { error: error }
                         })
-                    }
-                    const alllogs = await logs().then((data) => {
-                        let sessionvulnerability = {
-                            jsonwebtoken: false,
-                            session: false,
-                            session_hijacking: false,
-                            session_timeout: "",
-                            secure_transmission: false,
-                            session_close_on_browser_close: false,
 
-                        };
-                        if (data.sessionvulnerability) {
-                            let jsonwebtoken = data.sessionvulnerability.find((v) => v.jsonwebtoken == true)
-                            let session = data.sessionvulnerability.find((v) => v.session == true)
-                            let session_hijacking = data.sessionvulnerability.find((v) => v.session_hijacking == true)
-                            let secure_transmission = data.sessionvulnerability.find((v) => v.secure_transmission == true)
-                            let session_close_on_browser_close = data.sessionvulnerability.find((v) => v.session_close_on_browser_close == true)
-                            let session_timeout = data.sessionvulnerability.find((v) => v.session_timeout !== "")
-                            sessionvulnerability["Session does not expire on closing the browser"] = session_close_on_browser_close ? "Yes" : "No"
-                            sessionvulnerability["Session time-out is high (or) not implemented."] = session_timeout ? session_timeout : "No"
-                            sessionvulnerability["Session token being passed in other areas apart from cookies"] = jsonwebtoken ? "Yes" : "No"
-                            sessionvulnerability["An adversary can hijack user sessions by session fixation"] = session_hijacking ? "Yes" : "No"
-                            sessionvulnerability["Session is not secure (or) not implemented."] = secure_transmission ? "Yes" : "No"
-                            sessionvulnerability["Application is vulnerable to session hijacking attack"] = session_hijacking ? "Yes" : "No"
-                            sessionvulnerability["Can session puzzling be used to bypass authentication or authorization?"] = session_hijacking ? "Yes" : "No"
-                            delete sessionvulnerability.jsonwebtoken
-                            delete sessionvulnerability.session
-                            delete sessionvulnerability.session_hijacking
-                            delete sessionvulnerability.secure_transmission
-                            delete sessionvulnerability.session_close_on_browser_close
-                            delete sessionvulnerability.session_timeout
-                            data.sessionvulnerability = sessionvulnerability
-
-
+                        console.log("alllogs", alllogs)
+                        let auditReport = {}
+                        if (req.body.auditReport) {
+                            auditReport = req.body.auditReport
                         }
-                        return data
-                    }).catch((error) => {
-                        return { error: error }
-                    })
+                        console.log("auditReport", auditReport)
 
-                    console.log("alllogs", alllogs)
-                    let auditReport = {}
-                    if (req.body.auditReport) {
-                        auditReport = req.body.auditReport
-                    }
-                    console.log("auditReport", auditReport)
+                        // Create Logs 
 
-                    // Create Logs 
+                        let existUser = await ClientLoagsModel.aggregate([
+                            {
+                                $match: {
+                                    user: mongoose.Types.ObjectId(alloweddomains._id),
+                                    hostname: hostname,
 
-                    let existUser = await ClientLoagsModel.aggregate([
-                        {
-                            $match: {
-                                user: mongoose.Types.ObjectId(alloweddomains._id),
-                                hostname: hostname,
+
+                                }
+                            },
+                            {
+                                $project: {
+                                    "_id": 1
+                                }
+                            }
+                        ])
+                        if (existUser.length > 0) {
+                            await ClientLoagsModel.findOneAndUpdate({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname }, { $set: { LogsData: alllogs, auditReport } }, { new: true, upsert: true })
+
+                        } else {
+                            await ClientLoagsModel.create({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname, LogsData: alllogs, auditReport })
+                        }
+                        // end of logs
+                        return res.status(200).json(alloweddomains);
+                    } else if (!includedomain) {
+                        await User.findOneAndUpdate({ app: req.query.appid }, { $push: { domain: req.query.hostname } })
+                        const logs = async () => {
+                            return new Promise((resolve, reject) => {
+                                try {
+                                    let resultarray = []
+
+                                    fileContent.map(async (file) => {
+                                        // scan  hard coded data 
+                                        await ScanAllContentAndroutes(file.content, file.name, routes, middlewares, appid).then((data) => {
+
+                                            if (data.sessionvulnerability) {
+                                                resultarray.push(data.sessionvulnerability)
+                                            }
+                                            resolve({ ...data, sessionvulnerability: resultarray })
+                                        }).catch((error) => {
+                                            console.log("error", error)
+                                            reject(error)
+                                        })
+
+                                    })
+                                } catch (error) {
+                                    reject(error)
+                                }
+                            })
+                        }
+                        const alllogs = await logs().then((data) => {
+                            let sessionvulnerability = {
+                                jsonwebtoken: false,
+                                session: false,
+                                session_hijacking: false,
+                                session_timeout: "",
+                                secure_transmission: false,
+                                session_close_on_browser_close: false,
+
+                            };
+                            if (data.sessionvulnerability) {
+                                let jsonwebtoken = data.sessionvulnerability.find((v) => v.jsonwebtoken == true)
+                                let session = data.sessionvulnerability.find((v) => v.session == true)
+                                let session_hijacking = data.sessionvulnerability.find((v) => v.session_hijacking == true)
+                                let secure_transmission = data.sessionvulnerability.find((v) => v.secure_transmission == true)
+                                let session_close_on_browser_close = data.sessionvulnerability.find((v) => v.session_close_on_browser_close == true)
+                                let session_timeout = data.sessionvulnerability.find((v) => v.session_timeout !== "")
+                                sessionvulnerability["Session does not expire on closing the browser"] = session_close_on_browser_close ? "Yes" : "No"
+                                sessionvulnerability["Session time-out is high (or) not implemented."] = session_timeout ? session_timeout : "No"
+                                sessionvulnerability["Session token being passed in other areas apart from cookies"] = jsonwebtoken ? "Yes" : "No"
+                                sessionvulnerability["An adversary can hijack user sessions by session fixation"] = session_hijacking ? "Yes" : "No"
+                                sessionvulnerability["Session is not secure (or) not implemented."] = secure_transmission ? "Yes" : "No"
+                                sessionvulnerability["Application is vulnerable to session hijacking attack"] = session_hijacking ? "Yes" : "No"
+                                sessionvulnerability["Can session puzzling be used to bypass authentication or authorization?"] = session_hijacking ? "Yes" : "No"
+                                delete sessionvulnerability.jsonwebtoken
+                                delete sessionvulnerability.session
+                                delete sessionvulnerability.session_hijacking
+                                delete sessionvulnerability.secure_transmission
+                                delete sessionvulnerability.session_close_on_browser_close
+                                delete sessionvulnerability.session_timeout
+                                data.sessionvulnerability = sessionvulnerability
 
 
                             }
-                        },
-                        {
-                            $project: {
-                                "_id": 1
-                            }
-                        }
-                    ])
-                    if (existUser.length > 0) {
-                        await ClientLoagsModel.findOneAndUpdate({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname }, { $set: { LogsData: alllogs, auditReport } }, { new: true, upsert: true })
+                            return data
+                        }).catch((error) => {
+                            return { error: error }
+                        })
 
-                    } else {
-                        await ClientLoagsModel.create({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname, LogsData: alllogs, auditReport })
+                        console.log("alllogs", alllogs)
+                        let auditReport = {}
+                        if (req.body.auditReport) {
+                            auditReport = req.body.auditReport
+                        }
+                        console.log("auditReport", auditReport)
+
+                        // Create Logs 
+
+                        let existUser = await ClientLoagsModel.aggregate([
+                            {
+                                $match: {
+                                    user: mongoose.Types.ObjectId(alloweddomains._id),
+                                    hostname: hostname,
+
+
+                                }
+                            },
+                            {
+                                $project: {
+                                    "_id": 1
+                                }
+                            }
+                        ])
+                        if (existUser.length > 0) {
+                            await ClientLoagsModel.findOneAndUpdate({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname }, { $set: { LogsData: alllogs, auditReport } }, { new: true, upsert: true })
+
+                        } else {
+                            await ClientLoagsModel.create({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname, LogsData: alllogs, auditReport })
+                        }
+                        // end of logs
+                        return res.status(200).json(alloweddomains);
                     }
-                    // end of logs
-                    return res.status(200).json(alloweddomains);
+
                 } else {
                     return res.status(404).json("please enter valid details");
                 }
@@ -226,6 +335,146 @@ module.exports = {
             return res.status(500).json("Internal server error");
         }
     },
+    // alloweddomains: async (req, res) => {
+    //     try {
+
+    //         if (req.query.hostname && req.query.appid) {
+    //             const alloweddomains = await User.findOne({ domain: { $in: [req.query.hostname] }, appid: req.query.appid }).select("_id")
+    //             if (alloweddomains) {
+    //                 return sendResponse(res, 200, "fetch", { allowed: true })
+    //             } else {
+    //                 return errorHandler(res, 404, "please enter valid details", { allowed: false })
+    //             }
+    //         } else {
+    //             const appid = req.body.appid;
+    //             const application = req.body.application
+    //             const hostname = req.body.hostname
+    //             // const params = req.body.params
+    //             const nodejsveresion = req.body.nodejsveresion
+    //             const fileContent = req.body.fileContent
+    //             console.log("fileContent", fileContent)
+    //             const routes = application
+    //             console.log("application", application)
+    //             const middlewares = application?.filter((layer) => layer.name !== "router" &&
+    //                 layer.name !== "bound dispatch" &&
+    //                 layer.name !== "jsonParser" &&
+    //                 layer.name !== "<anonymous>" &&
+    //                 layer.name !== "urlencodedParser" &&
+    //                 layer.name !== "expressInit" &&
+    //                 layer.name !== "query" &&
+    //                 layer.name !== "Middleware")?.map((layer) => layer.name) || [];
+    //             // Person is verified, proceed to serve the file
+
+    //             const alloweddomains = await User.findOne(
+    //                 { domain: { $in: [hostname] }, appid },
+    //                 { password: 0, createdAt: 0, updatedAt: 0 }
+    //             ).lean();
+    //             if (alloweddomains) {
+    //                 const logs = async () => {
+    //                     return new Promise((resolve, reject) => {
+    //                         try {
+    //                             let resultarray = []
+
+    //                             fileContent.map(async (file) => {
+    //                                 // scan  hard coded data 
+    //                                 await ScanAllContentAndroutes(file.content, file.name, routes, middlewares, appid).then((data) => {
+
+    //                                     if (data.sessionvulnerability) {
+    //                                         resultarray.push(data.sessionvulnerability)
+    //                                     }
+    //                                     resolve({ ...data, sessionvulnerability: resultarray })
+    //                                 }).catch((error) => {
+    //                                     console.log("error", error)
+    //                                     reject(error)
+    //                                 })
+
+    //                             })
+    //                         } catch (error) {
+    //                             reject(error)
+    //                         }
+    //                     })
+    //                 }
+    //                 const alllogs = await logs().then((data) => {
+    //                     let sessionvulnerability = {
+    //                         jsonwebtoken: false,
+    //                         session: false,
+    //                         session_hijacking: false,
+    //                         session_timeout: "",
+    //                         secure_transmission: false,
+    //                         session_close_on_browser_close: false,
+
+    //                     };
+    //                     if (data.sessionvulnerability) {
+    //                         let jsonwebtoken = data.sessionvulnerability.find((v) => v.jsonwebtoken == true)
+    //                         let session = data.sessionvulnerability.find((v) => v.session == true)
+    //                         let session_hijacking = data.sessionvulnerability.find((v) => v.session_hijacking == true)
+    //                         let secure_transmission = data.sessionvulnerability.find((v) => v.secure_transmission == true)
+    //                         let session_close_on_browser_close = data.sessionvulnerability.find((v) => v.session_close_on_browser_close == true)
+    //                         let session_timeout = data.sessionvulnerability.find((v) => v.session_timeout !== "")
+    //                         sessionvulnerability["Session does not expire on closing the browser"] = session_close_on_browser_close ? "Yes" : "No"
+    //                         sessionvulnerability["Session time-out is high (or) not implemented."] = session_timeout ? session_timeout : "No"
+    //                         sessionvulnerability["Session token being passed in other areas apart from cookies"] = jsonwebtoken ? "Yes" : "No"
+    //                         sessionvulnerability["An adversary can hijack user sessions by session fixation"] = session_hijacking ? "Yes" : "No"
+    //                         sessionvulnerability["Session is not secure (or) not implemented."] = secure_transmission ? "Yes" : "No"
+    //                         sessionvulnerability["Application is vulnerable to session hijacking attack"] = session_hijacking ? "Yes" : "No"
+    //                         sessionvulnerability["Can session puzzling be used to bypass authentication or authorization?"] = session_hijacking ? "Yes" : "No"
+    //                         delete sessionvulnerability.jsonwebtoken
+    //                         delete sessionvulnerability.session
+    //                         delete sessionvulnerability.session_hijacking
+    //                         delete sessionvulnerability.secure_transmission
+    //                         delete sessionvulnerability.session_close_on_browser_close
+    //                         delete sessionvulnerability.session_timeout
+    //                         data.sessionvulnerability = sessionvulnerability
+
+
+    //                     }
+    //                     return data
+    //                 }).catch((error) => {
+    //                     return { error: error }
+    //                 })
+
+    //                 console.log("alllogs", alllogs)
+    //                 let auditReport = {}
+    //                 if (req.body.auditReport) {
+    //                     auditReport = req.body.auditReport
+    //                 }
+    //                 console.log("auditReport", auditReport)
+
+    //                 // Create Logs 
+
+    //                 let existUser = await ClientLoagsModel.aggregate([
+    //                     {
+    //                         $match: {
+    //                             user: mongoose.Types.ObjectId(alloweddomains._id),
+    //                             hostname: hostname,
+
+
+    //                         }
+    //                     },
+    //                     {
+    //                         $project: {
+    //                             "_id": 1
+    //                         }
+    //                     }
+    //                 ])
+    //                 if (existUser.length > 0) {
+    //                     await ClientLoagsModel.findOneAndUpdate({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname }, { $set: { LogsData: alllogs, auditReport } }, { new: true, upsert: true })
+
+    //                 } else {
+    //                     await ClientLoagsModel.create({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: hostname, LogsData: alllogs, auditReport })
+    //                 }
+    //                 // end of logs
+    //                 return res.status(200).json(alloweddomains);
+    //             } else {
+    //                 return res.status(404).json("please enter valid details");
+    //             }
+    //         }
+
+    //     } catch (error) {
+    //         console.error("Error retrieving allowed domains:", error);
+    //         return res.status(500).json("Internal server error");
+    //     }
+    // },
     createuserdetails: async (req, res) => {
         try {
             let { UserRawData, appid } = req.body;

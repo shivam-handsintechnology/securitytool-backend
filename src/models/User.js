@@ -29,7 +29,7 @@ UserSchema.virtual('id').get(function () {
 UserSchema.pre("save", async function (next) {
   if (this.isNew) {
     await Project_Security_Logs.create({ user: this._id, })
-    await AllowedDomainsModel.create({ user: this._id, domain: "" })
+    next()
   }
 });
 module.exports = mongoose.model("users", UserSchema);

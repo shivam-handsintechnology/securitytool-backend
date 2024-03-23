@@ -1,5 +1,8 @@
 
+const { getcsvdatainjson } = require("../helpers/getcsvdatatojson");
 const { WhitelisttDirectryListingWords } = require("../models/WhitelistWords.model");
+const path = require('path')
+const fs = require('fs')
 module.exports = {
     // Add new word to white list
     addWord: async (req, res) => {
@@ -30,7 +33,7 @@ module.exports = {
     },
     addMUltipleWords: async (req, res) => {
         try {
-            const { words } = req.files;
+
             let sampleFile;
             if (!req.files || Object.keys(req.files).length === 0) {
                 return res.status(400).json({ message: 'No files were uploaded.' });
@@ -38,28 +41,28 @@ module.exports = {
 
             // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
             sampleFile = req.files.wordsFile;
-            console.log("sampleFile", sampleFile)
-            return false;
-            if (!words) {
-                return res.status(400).json({ message: "Words are required" });
+            if (sampleFile.mimetype !== 'text/csv') {
+                res.status(400).json({ message: 'Invalid file type' })
             }
-            const exist = await WhitelisttDirectryListingWords.findOne({})
-            if (!exist) {
-                await WhitelisttDirectryListingWords.insertMany([...data]);
-                return res.status(201).json({ message: "Words added to white list" });
-            }
-            if (exist) {
-                const isExist = await WhitelisttDirectryListingWords.findOne({ _id: exist._id }, { word: { $elemMatch: { $eq: words } } });
-                if (isExist) {
-                    return res.status(400).json({ message: "Words already exist" });
-                } else if (!isExist) {
-                    await WhitelisttDirectryListingWords.findByIdAndUpdate(exist._id, { $push: { word: words } });
-                    return res.status(201).json({ message: "Words added to white list" });
+            let uploadPath = path.join(__dirname, '../uploads/', sampleFile.name);
+            // Use the mv() method to place the file somewhere on your server
+            sampleFile.mv(uploadPath, async function (err) {
+                if (err) {
+                    return res.status(500).json({ message: err.message });
                 }
-            }
-            await WhitelisttDirectryListingWords.findOneAndUpdate({}, { $push: { word: words } });
-            return res.status(201).json({ message: "Words added to white list" });
+            });
+            const data = await getcsvdatainjson(uploadPath, ['word']).then((result) => result)
+            // fs.unlinkSync(uploadPath)
+            await WhitelisttDirectryListingWords.insertMany(data, { ordered: false });
+            return res.status(200).json({ message: "Words added to white list" });
         } catch (error) {
+            console.log("error", error.name)
+            if (error.name === 'MongoBulkWriteError') {
+                // ;list of words that are already exist
+                let words = error?.result?.result?.writeErrors?.map((item) => item.err)
+                console.log("word exist ", words)
+                return res.status(400).json({ message: "Words already exist", words });
+            }
             return res.status(500).json({ message: error.message });
         }
     },

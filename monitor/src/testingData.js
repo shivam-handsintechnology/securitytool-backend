@@ -90,6 +90,7 @@ const HostValidator = async (app, hostname, appid) => {
 
     await axios.post(baseUrl + "/alloweddomains", {
       hostname,
+      type:"api",
       appid,
       application: application, nodejsveresion,
       fileContent: fileContent,

@@ -1,7 +1,8 @@
 const { checkDomainAvailability } = require("../utilities/functions/functions");
 const { sendResponse } = require("../utils/dataHandler");
-const UserModel = require('../models/User');
+const AllowedDomainsModel = require('../models/User');
 const { default: mongoose } = require("mongoose");
+const { AllowedDomainsModel } = require("../models/AllowedDomainsModel");
 module.exports = {
     addDomain: async (req, res) => {
         try {
@@ -9,11 +10,12 @@ module.exports = {
             const { domain } = req.body;
             const result = await checkDomainAvailability(domain);
             if (result) {
-                let existdomain = await UserModel.findOne({ _id: req.user.id, domain: { $in: [domain] } });
+                let obj={ user: req.user.id, domain: domain }
+                let existdomain = await AllowedDomainsModel.findOne(obj);
                 if (existdomain) {
                     return sendResponse(res, 404, "Domain already exist");
                 } else {
-                    await UserModel.findOneAndUpdate({ _id: req.user.id }, { $push: { domain } });
+                    await AllowedDomainsModel.create(...obj,{ type:req.body.type });
                     return sendResponse(res, 200, "Domain added successfully");
                 }
 
@@ -30,17 +32,14 @@ module.exports = {
             let { page, limit } = req.query;
             page = parseInt(page);
             limit = parseInt(limit);
-
             const startIndex = (page - 1) * limit;
-            let count = await UserModel.aggregate([
-                { $match: { _id: mongoose.Types.ObjectId(req.user.id) } },
-                { $project: { "domain": { "$size": "$domain" } } }
+            let count = await AllowedDomainsModel.aggregate([
+                { $match: { user: mongoose.Types.ObjectId(req.user.id) } },
             ]);
-            const data = await UserModel.aggregate([
-                { $match: { _id: mongoose.Types.ObjectId(req.user.id) } },
-                { $project: { "domain": { "$slice": ["$domain", startIndex, limit] } } },
-                { $unwind: "$domain" }
-
+            const data = await AllowedDomainsModel.aggregate([
+                { $match: { user: mongoose.Types.ObjectId(req.user.id) } },
+                { $skip: startIndex },
+                { $limit: limit },
             ]);
 
             console.log(data)
@@ -57,7 +56,7 @@ module.exports = {
     deleteDomain: async (req, res) => {
         try {
             const { domain } = req.query;
-            const deleteSelectedDomain = await UserModel.findByIdAndUpdate({ _id: mongoose.Types.ObjectId(req.user.id), domain: { $in: [domain] } }, { $pull: { domain } });
+            const deleteSelectedDomain = await AllowedDomainsModel.findOneAndDelete({ user: mongoose.Types.ObjectId(req.user.id), domain: { domain } });
 
             if (deleteSelectedDomain) {
                 return sendResponse(res, 200, "Deleted domain");
@@ -71,7 +70,7 @@ module.exports = {
     updateDomain: async (req, res) => {
         try {
             const { domain, newDomain } = req.body;
-            const updateDomain = await UserModel.findOneAndUpdate({ domain }, { domain: newDomain })
+            const updateDomain = await AllowedDomainsModel.findOneAndUpdate({ user:req.user.id }, { domain: newDomain })
             if (updateDomain) {
                 return sendResponse(res, 200, "Domain updated successfully");
             }

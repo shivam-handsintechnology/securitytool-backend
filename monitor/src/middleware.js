@@ -189,7 +189,7 @@ const HostValidator = (app, sid, appid) => {
 };
 const Ialloweddomain = async (hostname, appid) => {
     try {
-        const response = await axios.post(`${baseUrl}/alloweddomains?hostname=${hostname}&appid=${appid}`)
+        const response = await axios.post(`${baseUrl}/alloweddomains?hostname=${hostname}&appid=${appid}&type=api`)
         console.log(response.status, "response", response.data)
         if (response.status == 200) {
             return { allowed: true };

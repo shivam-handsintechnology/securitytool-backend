@@ -5,7 +5,7 @@ const { Project_Security_Logs } = require("./Project_Security_Logs");
 const { AllowedDomainsModel } = require("./AllowedDomainsModel");
 const secretkey = process.env.SECREY_KEY
 const UserSchema = new Schema({
-  domain: { type: Array, unique: true, trim: true, default: [] },
+  // domain: { type: Array, unique: true, trim: true, default: [] },
   email: { type: String, unique: true, trim: true },
   password: { type: String, trim: true },
   appid: { type: String, unique: true },

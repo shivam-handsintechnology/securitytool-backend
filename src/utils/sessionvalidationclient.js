@@ -16,12 +16,15 @@ async function getCookies(url) {
             // Get all cookies from the browser session
             const cookies = await page.cookies();
 
-            // Print the cookies
-            console.log(cookies);
 
             await browser.close();
             if (cookies.length === 0) {
-                reject({ error: true, message: "Session Not Found In Cookies" })
+                resolve({session_does_not_expire_on_close: false,
+                         session_timeout: "",
+                         session_fixation: false,
+                         session_hijacking: false,
+                         session_enabled: false,
+                        })
             }
             else if (cookies.length > 0) {
                 resolve({ cookies: cookies, error: false, message: "Cookies fetched successfully" })
@@ -83,8 +86,8 @@ const sessionvunurability = async (url) => {
             const data = await getCookies(url);
             if (data.error) {
                 reject(data)
-            } else if (!data.error && data.cookies.length === 0) {
-                reject(data)
+            } else if (!data.error && Object(data).hasOwnProperty("session_enabled")){
+               resolve(data)
             } else if (!data.error && data.cookies.length > 0) {
                 let sessionvulnurability = await scanSessionVulnerability(data.cookies)
                 resolve(sessionvulnurability)

@@ -43,7 +43,7 @@ module.exports = {
             page = parseInt(page) || 1;
             limit = parseInt(limit)|| 10;
             const startIndex = (page - 1) * limit;
-            let count = await AllowedDomainsModel.countDocuments({ user: mongoose.Types.ObjectId(req.user.id) });
+            let totalCount = await AllowedDomainsModel.countDocuments({ user: mongoose.Types.ObjectId(req.user.id) });
             const data = await AllowedDomainsModel.aggregate([
                 { $match: { user: mongoose.Types.ObjectId(req.user.id) } },
                 { $skip: startIndex },
@@ -53,9 +53,9 @@ module.exports = {
             console.log(data)
             if (data.length === 0) {
 
-                return sendResponse(res, 404, "Records are not found");
+                return sendResponse(res, 404, "Records are not found", { data, totalPages:0 });
             }
-            return sendResponse(res, 200, "Fetch all domains", { data, totalPages: count });
+            return sendResponse(res, 200, "Fetch all domains", { data, totalPages: Math.ceil(totalCount / limit) });
         } catch (error) {
             console.error(error);
             return sendResponse(res, 500, error.message);
@@ -64,12 +64,13 @@ module.exports = {
     deleteDomain: async (req, res) => {
         try {
             const { domain } = req.query;
-            const deleteSelectedDomain = await AllowedDomainsModel.findOneAndDelete({ user: mongoose.Types.ObjectId(req.user.id), domain: { domain } });
+            console.log("domain",domain)
+            const deleteSelectedDomain = await AllowedDomainsModel.findOneAndDelete({ user: mongoose.Types.ObjectId(req.user.id), domain: domain });
 
             if (deleteSelectedDomain) {
-                return sendResponse(res, 200, "Deleted domain");
+                return sendResponse(res, 200, "Deleted domain",{domain:deleteSelectedDomain.domain});
             }
-            return sendResponse(res, 404, "Domain not found");
+            return sendResponse(res, 404, "Domain not found", { domain });
         } catch (error) {
             console.error(error);
             return sendResponse(res, 500, error.message);

@@ -7,7 +7,9 @@ const ServerErrorResponseCodes = require('../models/ServerErrorResponseCodes');
 const { PasswordValidateModel } = require('../models/PasswordVaildateModel');
 const { hasRobotsTxt } = require('../utils/functions');
 const { ClientLoagsModel } = require('../models/ClientLoagsModel');
-const ErrorMessagesData = require("../data/json/ErrorMessagesData.json")
+const ErrorMessagesData = require("../data/json/ErrorMessagesData.json");
+const { error } = require('console');
+const { sessionvunurability } = require('../utils/sessionvalidationclient');
 module.exports = {
   getRobotsTxt: async (req, res) => {
     try {
@@ -81,15 +83,34 @@ module.exports = {
   sessionData: async (req, res) => {
     try {
       console.log("user_id", req.user.id)
-      let data = await ClientLoagsModel.aggregate([
-        { $match: { user: mongoose.Types.ObjectId(req.user.id) } },
-        { $project: { "LogsData": 1 } }
-      ]);
-      if (data.length === 0) {
-        return sendResponse(res, 404, "Records are not found");
+      let { hostname,type } = req.query;
+      let data={}
+      if (!hostname) {
+        throw new Error("hostname is required")
+      }
+      if (!type) {
+        throw new Error("type is required")
+      }
+      if(type === "web"){
+        data = await ClientLoagsModel.findOne(
+          { user: mongoose.Types.ObjectId(req.user.id),hostname:hostname } )
+          console.log("data",data)
+          //convert hostname to url
+          let url = `http://${hostname}`
+         let sessionvunulrability = await sessionvunurability(url)
+         .then((data) =>({data:data,error:false}))
+         .catch((error) => ({error:true,message:error.message}))
+         console.log("sessionvunulrability",sessionvunulrability)
+      }else{
+        data = await ClientLoagsModel.findOne(
+          { user: mongoose.Types.ObjectId(req.user.id),hostname:hostname } )
+      }
+       
+      if (!data) {
+        return sendResponse(res, 200, "Records are not found");
       }
 
-      return sendResponse(res, 200, "Fetch all domains", data.length > 0 ? data[0]["LogsData"] : {});
+      return sendResponse(res, 200, "Fetch all domains",data.LogsData );
     } catch (error) {
       return sendResponse(res, 500, error.message);
 

@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 
 const AllowedDomainsModelSchema = mongoose.Schema({
-    domain: { type: String, trim: true },
+    domain: { type: String, trim: true,unique:true },
+    type: { type: String,enum:["nodejs","web","android","ios"] ,trim: true },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "users" }
 }, {
     timestamps: false,

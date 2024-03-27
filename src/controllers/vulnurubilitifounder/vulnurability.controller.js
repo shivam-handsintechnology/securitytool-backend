@@ -20,6 +20,7 @@ const { NodeVersionModel } = require("../../models/NodeVersionModel");
 const { PasswordValidateModel } = require('../../models/PasswordVaildateModel');
 const SensitiveInfoInBodyModel = require('../../models/SensitiveInfoInBodyModel');
 const { sessionvunurability } = require('../../utils/sessionvalidationclient');
+const { AllowedDomainsModel } = require('../../models/AllowedDomainsModel');
 
 module.exports = {
     httpparameterpollution: async (req, res) => {
@@ -92,11 +93,16 @@ module.exports = {
             if (req.query.hostname && req.query.appid) {
                 const alloweddomains = await User.findOne({ appid: req.query.appid }).select("_id")
                 if (alloweddomains) {
-                    const includedomain = await User.findOne({ domain: { $in: [req.query.hostname] }, appid: req.query.appid }).select("_id")
+                    const validDomain = await checkDomainAvailability(req.query.hostname)
+                    if(!validDomain){
+                        return errorHandler(res, 404, "please enter valid domain", { allowed: false })
+                    }
+                    let obj={ domain:req.query.hostname,user:alloweddomains._id,type:req.query.type}
+                    const includedomain = await AllowedDomainsModel.findOne({ domain:req.query.hostname,user:alloweddomains._id}).select("_id")
                     if (includedomain) {
                         return sendResponse(res, 200, "fetch", { allowed: true })
                     } else if (!includedomain) {
-                        await User.findOneAndUpdate({ app: req.query.appid }, { $push: { domain: req.query.hostname } })
+                        await AllowedDomainsModel.create(obj)
                         return sendResponse(res, 200, "fetch", { allowed: true })
                     }
 
@@ -129,8 +135,13 @@ module.exports = {
                     { password: 0, createdAt: 0, updatedAt: 0 }
                 ).lean();
                 if (alloweddomains) {
-                    const includedomain = await User.findOne({ domain: { $in: [req.query.hostname] }, appid: req.query.appid }).select("_id")
-                    if (includedomain) {
+                    const validDomain = await checkDomainAvailability(hostname)
+                    if(!validDomain){
+                        return errorHandler(res, 404, "please enter valid domain", { allowed: false })
+                    }
+                    let obj={ domain:hostname,user:alloweddomains._id,type:req.body.type}
+                    const includedomain = await AllowedDomainsModel.findOne({ domain:hostname,user:alloweddomains._id}).select("_id")
+                     if (includedomain) {
                         const logs = async () => {
                             return new Promise((resolve, reject) => {
                                 try {
@@ -227,7 +238,7 @@ module.exports = {
                         // end of logs
                         return res.status(200).json(alloweddomains);
                     } else if (!includedomain) {
-                        await User.findOneAndUpdate({ app: req.query.appid }, { $push: { domain: req.query.hostname } })
+                        await AllowedDomainsModel.create(obj)
                         const logs = async () => {
                             return new Promise((resolve, reject) => {
                                 try {
@@ -338,7 +349,7 @@ module.exports = {
     // alloweddomains: async (req, res) => {
     //     try {
 
-    //         if (req.query.hostname && req.query.appid) {
+    //         if (hostname && req.query.appid) {
     //             const alloweddomains = await User.findOne({ domain: { $in: [req.query.hostname] }, appid: req.query.appid }).select("_id")
     //             if (alloweddomains) {
     //                 return sendResponse(res, 200, "fetch", { allowed: true })

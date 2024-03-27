@@ -116,8 +116,8 @@ Register = async (req, res) => {
         ldapInjectionDetectorMiddlware: false,
         BlockUserMiddlware: true
       })
-      const token = jwt.sign({ id: user._id, appid: user.appid }, process.env.JWT_SECRET, { expiresIn: "1d" })
-      return sendResponse(res, 200, "logibn successfully", { token, appid: user.appid });
+
+      return sendResponse(res, 200, "register successfully", { appid: user.appid });
     }
   } catch (error) {
     console.log(error)
@@ -141,7 +141,7 @@ Login = async (req, res) => {
       var bytes = CryptoJS.AES.decrypt(user.password, key);
       var decrypted = bytes.toString(CryptoJS.enc.Utf8);
       if (decrypted == req.body.password) {
-        const token = jwt.sign({ id: user._id, appid: user.appid }, process.env.JWT_SECRET, { expiresIn: "1d" })
+        const token = jwt.sign({ id: user._id, appid: user.appid }, process.env.JWT_SECRET, { expiresIn: "365d" })
         // Set access token in a cookie
         res.cookie('access_token', token, { secure: false });
 

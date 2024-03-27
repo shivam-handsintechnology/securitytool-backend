@@ -27,10 +27,7 @@ app.use(helmet())
 app.use(morgan('dev'))
 app.disable('x-powered-by');
 app.disable('etag');
-// const AutoProtectCode = require('./auto')
-// const AutoProtectCode = require("tool")
-// AutoProtectCode.validateAndSetMiddleware(app, 'localhost', "ecc1c872-49a8-4083-b7e4-c78f4653f6f9")
-// AutoProtectCode(app, domain = 'autotest.handsintechnology.in', appid = "ecc1c872-49a8-4083-b7e4-c78f4653f6f97")
+const AutoProtectCode = require("../monitor")
 app.use(apirouter)
 // Error handling middleware
 app.use((err, req, res, next) => {

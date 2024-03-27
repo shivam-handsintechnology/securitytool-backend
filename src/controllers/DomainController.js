@@ -1,21 +1,31 @@
 const { checkDomainAvailability } = require("../utilities/functions/functions");
 const { sendResponse } = require("../utils/dataHandler");
-const AllowedDomainsModel = require('../models/User');
 const { default: mongoose } = require("mongoose");
 const { AllowedDomainsModel } = require("../models/AllowedDomainsModel");
 module.exports = {
     addDomain: async (req, res) => {
         try {
             console.log(req.user)
-            const { domain } = req.body;
+            const { domain,type } = req.body;
+           
+            if(!domain){
+                return sendResponse(res, 400, "domain is required");
+            }
+            else if(domain.includes("localhost")){
+                return sendResponse(res, 400, "Domain should not be localhost");
+            }
+            else if(!type){
+                return sendResponse(res, 400, "Type is required");
+            }
             const result = await checkDomainAvailability(domain);
             if (result) {
                 let obj={ user: req.user.id, domain: domain }
                 let existdomain = await AllowedDomainsModel.findOne(obj);
                 if (existdomain) {
-                    return sendResponse(res, 404, "Domain already exist");
+                    return sendResponse(res, 400, "Domain already exist");
                 } else {
-                    await AllowedDomainsModel.create(...obj,{ type:req.body.type });
+                    obj["type"]=type
+                    await AllowedDomainsModel.create(obj);
                     return sendResponse(res, 200, "Domain added successfully");
                 }
 
@@ -30,12 +40,10 @@ module.exports = {
         try {
             console.log(req.user)
             let { page, limit } = req.query;
-            page = parseInt(page);
-            limit = parseInt(limit);
+            page = parseInt(page) || 1;
+            limit = parseInt(limit)|| 10;
             const startIndex = (page - 1) * limit;
-            let count = await AllowedDomainsModel.aggregate([
-                { $match: { user: mongoose.Types.ObjectId(req.user.id) } },
-            ]);
+            let count = await AllowedDomainsModel.countDocuments({ user: mongoose.Types.ObjectId(req.user.id) });
             const data = await AllowedDomainsModel.aggregate([
                 { $match: { user: mongoose.Types.ObjectId(req.user.id) } },
                 { $skip: startIndex },
@@ -47,7 +55,7 @@ module.exports = {
 
                 return sendResponse(res, 404, "Records are not found");
             }
-            return sendResponse(res, 200, "Fetch all domains", { data, totalPages: count[0]?.domain });
+            return sendResponse(res, 200, "Fetch all domains", { data, totalPages: count });
         } catch (error) {
             console.error(error);
             return sendResponse(res, 500, error.message);

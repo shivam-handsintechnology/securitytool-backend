@@ -73,7 +73,7 @@ if (cluster.isPrimary) {
 
 
 
-AutoProtectCode.testing(app, 'localhost', "ecc1c872-49a8-4083-b7e4-c78f4653f6f9")
+// AutoProtectCode.testing(app, 'localhost', "ecc1c872-49a8-4083-b7e4-c78f4653f6f9")
 
 
 

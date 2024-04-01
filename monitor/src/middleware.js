@@ -5,7 +5,8 @@ const rateLimit = require("express-rate-limit");
 const url = require("url");
 const http = require("http");
 const axios = require("axios");
-const { errorHandler, consoleColorText, InjectionChecker } = require('./helpers/functions');
+const path=require("path")
+const { errorHandler, consoleColorText, InjectionChecker, CreateuserDetails } = require('./helpers/functions');
 const xmlparser = require("./express-xml-bodyparser");
 const { baseUrl } = require('./config');
 const emailRegex = /^\S+@\S+\.\S+$/; // Regular expression to match email addresses
@@ -59,7 +60,25 @@ const limiter = rateLimit({
         }
     },
 });
+// Function to check if directory listing is enabled
 
+function checkDirectoryListingMiddleware(req, res, next) {
+    // Get the requested URL
+    const requestedUrl = url.parse(req.url);
+    const requestedPath = path.join(__dirname, requestedUrl.pathname);
+  
+    // Check if directory listing is enabled by attempting to read the directory
+    try {
+      const directoryContents = fs.readdirSync(requestedPath);
+      req.isDirectoryListingEnabled = true; // Directory listing is enabled if readdirSync does not throw an error
+    } catch (error) {
+      req.isDirectoryListingEnabled = false; // Directory listing is disabled if readdirSync throws an error
+      console.log("isDirectoryListingEnabled",req.isDirectoryListingEnabled)
+    }
+  
+    // Call the next middleware or route handler
+    next();
+  }
 // Responde Code Checker
 function responseCodeChecker(req, res) {
     const hostname = req.domain;
@@ -87,7 +106,9 @@ function responseCodeChecker(req, res) {
             // Assign the modified locals object to responseData
             responseData = locals;
         };
-    } catch (error) { }
+    } catch (error) { 
+        console.log(error)
+    }
     res.on("finish", async function () {
         const existingCode = http.STATUS_CODES[res.statusCode];
         const parsedUrl = url.parse(req.url);
@@ -96,12 +117,12 @@ function responseCodeChecker(req, res) {
             responseData
                 ? await axios
                     .post(`${baseUrl}/sensitivekeysandPasswordValidate`, {
-                        currentData,
+                        responseData,
                         hostname: req.domain,
                         appid: req.appid,
                     })
                     .then((res) => res.data)
-                    .catch((err) => err?.response?.data)
+                    .catch((err) => err?.message)
                 : null;
             req.query ? await axios
                 .post(`${baseUrl}/sensitivekeysinurl`, {
@@ -111,7 +132,7 @@ function responseCodeChecker(req, res) {
                     appid: req.appid,
                 })
                 .then((res) => res.data)
-                .catch((err) => err?.response?.data) : null;
+                .catch((err) => err?.message) : null;
             // response codes
             const resoponsecodedata = existingCode
                 ? {
@@ -124,17 +145,15 @@ function responseCodeChecker(req, res) {
                 hostname,
                 resoponsecodedata,
             };
-            await axios.post(`${baseUrl}/responsecodeavailableornot`, { data, hostname, url: requestUrl, appid: req.appid }).then((res) => res.data).catch((err) => err?.response?.data);
+            await axios.post(`${baseUrl}/responsecodeavailableornot`, { data, hostname, url: requestUrl, appid: req.appid }).then((res) => res.data).catch((err) => err.message);
 
         } catch (error) {
-            // console.log(JSON.stringify(error.message));
+            console.log(JSON.stringify(error.message));
         }
     });
 }
 const Middleware = async (req, res, next) => {
     try {
-
-        if (req.alloweddomain.allowed) {
             try {
                 responseCodeChecker(req, res);
                 const reqPath = req.url.toLowerCase();
@@ -163,13 +182,12 @@ const Middleware = async (req, res, next) => {
                 }
                 next();
             } catch (error) {
+                console.log(error)
                 return errorHandler(res);
             }
-        } else {
-            consoleColorText("Your domain is not allowed to fetch live status of injections", "red");
-            next();
-        }
+      
     } catch (error) {
+        console.log(error)
         return errorHandler(res, 500, "Internal server error");
     }
 };
@@ -213,25 +231,19 @@ function isExpressApplication(app) {
     );
 }
 
-// Validate and set middleware
-const validateAndSetMiddleware = (app, sid, appid) => {
+// Combined middleware function
+const validateAndSetMiddleware = async (req, res, next) => {
     try {
-        if (!isExpressApplication(app)) {
-            consoleColorText("Please provide a valid Express application", "red");
-        } else if (!sid) {
-            consoleColorText("Please provide a valid hostname", "red");
-        } else {
-
-            app.use(cors(), express.json(), express.urlencoded({ extended: true }));
-            app.use(HostValidator(app, sid, appid));
-            app.use(xmlparser);
-            app.use(limiter);
-            app.use(Middleware);
-        }
+        req.app.use(checkDirectoryListingMiddleware);
+        req.app.use(cors(), express.json(), express.urlencoded({ extended: true }));
+        req.app.use(xmlparser);
+        req.app.use(Middleware);
+        req.app.use(limiter);
+        next()
+        // Add other middleware logic here
     } catch (error) {
-        console.log(error.message)
+        console.log(error)
     }
-
 };
 
 module.exports = validateAndSetMiddleware

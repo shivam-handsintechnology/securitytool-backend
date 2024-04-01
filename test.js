@@ -1,230 +1,66 @@
-const http = require('http');
 
-// Function to test directory listing for a specific path
-function testDirectoryListing(domain, path) {
-    const url = `http://${domain}${path}`;
-
-    http.get(url, (res) => {
-        if (res.statusCode === 200) {
-            console.log(`Directory listing enabled for ${url}`);
-        } else if (res.statusCode === 403) {
-            console.log(`Directory listing disabled for ${url}`);
-        } else {
-            console.log(`Unexpected status code ${res.statusCode} for ${url}`);
-        }
-    }).on('error', (err) => {
-        console.error(`Error accessing ${url}:`, err);
-    });
-}
-
-// Define the domain to scan
-const domain = 'example.com';
-
-// Define the paths to test
-const paths = [
-    '/',
-    '/somepath',
-    '/anotherpath',
-    // Add more paths to test as needed
-];
-
-// Test directory listing for each path
-// paths.forEach(path => {
-//     testDirectoryListing(domain, path);
-// });
-// 
-const puppeteer = require('puppeteer');
-
-async function getCookies() {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    const url = window.location
-
-    // Navigate to a webpage where the cookies are stored
-    await page.goto('https://www.c3xpress.com');
-
-    // Get all cookies from the browser session
-    const cookies = await page.cookies();
-
-    // Print the cookies
-    console.log(cookies);
-
-    await browser.close();
-}
-// getCookies();
-const cookies = [
-    {
-        name: '_fbp',
-        value: 'fb.1.1710833874012.1433916463',
-        domain: '.c3xpress.com',
-        path: '/',
-        expires: 1718609874,
-        size: 33,
-        httpOnly: false,
-        secure: false,
-        session: false,
-        sameSite: 'Lax',
-        priority: 'Medium',
-        sameParty: false,
-        sourceScheme: 'Secure'
-    },
-    {
-        name: '_ga_MST41ZD5FT',
-        value: 'GS1.1.1710833873.1.0.1710833873.0.0.116622274',
-        domain: '.c3xpress.com',
-        path: '/',
-        expires: 1745393873.455833,
-        size: 59,
-        httpOnly: false,
-        secure: false,
-        session: false,
-        priority: 'Medium',
-        sameParty: false,
-        sourceScheme: 'Secure'
-    },
-    {
-        name: '_ga',
-        value: 'GA1.1.1267382486.1710833873',
-        domain: '.c3xpress.com',
-        path: '/',
-        expires: 1745393873.385038,
-        size: 30,
-        httpOnly: false,
-        secure: false,
-        session: false,
-        priority: 'Medium',
-        sameParty: false,
-        sourceScheme: 'Secure'
-    },
-    {
-        name: '_gcl_au',
-        value: '1.1.1643812785.1710833872',
-        domain: '.c3xpress.com',
-        path: '/',
-        expires: 1718609871,
-        size: 32,
-        httpOnly: false,
-        secure: false,
-        session: false,
-        priority: 'Medium',
-        sameParty: false,
-        sourceScheme: 'Secure'
-    }
-]
-async function scanSessionVulnerability(cookies) {
-    const results = {
-        session_does_not_expire_on_close: false,
-        session_timeout: "",
-        session_fixation: false,
-        session_hijacking: false,
-        file: "" // No file provided as this is for browser-side analysis
-    };
-
-    // Check if the session does not expire on closing the browser
-    results.session_does_not_expire_on_close = cookies.some(cookie => !cookie.session);
-
-    // Check session timeout
-    const now = Math.floor(Date.now() / 1000); // Current time in seconds
-    cookies.forEach(cookie => {
-        if (!cookie.session) {
-            // Session cookie detected
-            if (cookie.expires - now > 60 * 60 * 24 * 30) {
-                results.session_timeout = "High"; // More than 30 days expiration time
-            } else {
-                results.session_timeout = "Normal"; // Less than 30 days expiration time
-            }
-        }
-    });
-
-    const secureTransmitted = cookies.every(cookie => cookie.secure);
-    const httpOnly = cookies.every(cookie => cookie.httpOnly);
-    const sameSiteSecure = cookies.every(cookie => cookie.sameSite === 'Strict' || cookie.sameSite === 'Lax');
-    const domainPathRestriction = cookies.every(cookie => cookie.domain && cookie.path);
-    const sessionIdChanges = /* Add your logic to check if session ID changes after authentication */ true; // Example logic
-    // Check for session fixation
-    const sessionIds = cookies.filter(cookie => cookie.name === 'sessionid').map(cookie => cookie.value);
-    const uniqueSessionIds = new Set(sessionIds);
-    if (uniqueSessionIds.size > 1) {
-        // Session identifier changes, indicating protection against session fixation
-        results.session_fixation = false;
-    } else {
-        // Session identifier remains constant, indicating session fixation vulnerability
-        results.session_fixation = true;
-    }
-
-    results.session_hijacking = secureTransmitted && httpOnly && sameSiteSecure && domainPathRestriction && sessionIdChanges;
-
-    return results;
-}
-// (async () => {
-//     let data = await scanSessionVulnerability(cookies)
-//     console.log(data)
-// })()
-const axios = require('axios');
-const cheerio = require('cheerio');
-const { sensitivedata } = require('./src/sensitive/availableapikeys');
-
-async function findFrameworks(url) {
+const fs=require("fs")
+const path=require("path")
+// Middleware function to check directory listing
+// Function to check if directory listing is enabled for a given directory URL
+async function checkDirectoryListingEnabled(directoryUrl) {
     try {
-        const response = await axios.get(url);
-        const html = response.data;
-        const $ = cheerio.load(html);
+        // Send a GET request to the directory URL
+        const response = await axios.get(directoryUrl);
+        // If the response status is 200, directory listing is enabled
+        return response.status === 200;
+    } catch (error) {
+        // If an error occurs (e.g., directory does not exist or access is denied), directory listing is disabled
+        return false;
+    }
+}
+// Function to get URLs of all directories within a given directory (including subdirectories), excluding 'node_modules' and '.git'
+async function getDirectoryUrls(directory) {
+    try {
+        let directoryUrls = [];
 
-        // Framework detection logic
-        const frameworks = [];
+        // Read the contents of the directory asynchronously
+        const files = await fs.promises.readdir(directory);
 
-        // Check for presence of React
-        if ($('[data-reactroot]').length > 0 || $('[id="root"]').length > 0) {
-            frameworks.push('React');
-        }
-
-        // Check for presence of Vue
-        if ($('[data-v-]').length > 0) {
-            frameworks.push('Vue');
-        }
-
-        // Check for presence of Angular
-        if ($('[ng-app]').length > 0 || $('[ng-version]').length > 0) {
-            frameworks.push('Angular');
-        }
-
-        // Check for presence of Next.js
-        if ($('meta[name="next-head-count"]').length > 0 || $('[data-next-root]').length > 0) {
-            frameworks.push('Next.js');
-        }
-
-        // Add checks for other frameworks
-
-        if (frameworks.length === 0) {
-            console.log('No frameworks detected.');
-        } else {
-            console.log('Frameworks used:', frameworks);
-            //   get js file where bundle is located
-            let scripts = $('script').map((i, el) => $(el).attr('src')).get()
-            for (let i = 0; i < scripts.length; i++) {
-                if (scripts[i].includes('bundle') || scripts[i].includes('main') || scripts[i].includes('index')) {
-                    fetch(url + scripts[i])
-                        .then(response => response.text())
-                        .then(data => {
-                            sensitivedata.forEach((sensitive) => {
-                                // find when in query sensitive field available
-
-                                if (data.includes(sensitive)) {
-                                    console.log('Sensitive data exposed:', sensitive);
-                                }
-                            })
-                        })
+        // Iterate through each file/directory
+        for (const file of files) {
+            const filePath = path.join(directory, file);
+            // Check if it's a directory
+            const fileStats = await fs.promises.stat(filePath);
+            if (fileStats.isDirectory()) {
+                // Skip 'node_modules' and '.git' directories
+                if (file !== 'node_modules' && file !== '.git') {
+                    // Add the URL of the directory
+                    const url = filePath.replace(__dirname, '').replace(/\\/g, '/');
+                    directoryUrls.push(url);
+                    // Recursively get URLs of directories within this directory
+                    const subDirectoryUrls = await getDirectoryUrls(filePath);
+                    directoryUrls = directoryUrls.concat(subDirectoryUrls);
                 }
             }
         }
 
+        return directoryUrls;
     } catch (error) {
-        console.error('Error fetching or parsing the web app:', error);
+        console.error('Error:', error);
+        return [];
     }
 }
 
-// Example usage
-findFrameworks('https://lmpfrontend.handsintechnology.in');
+// Example usage:
+const directory = process.cwd(); // Replace with the path to your directory
 
+// Get all directory URLs
+getDirectoryUrls(directory)
+    .then(async directoryUrls => {
+        console.log('Directory URLs:', directoryUrls);
 
-
+        // Check if directory listing is enabled for each directory URL
+        for (const directoryUrl of directoryUrls) {
+            const isDirectoryListingEnabled = await checkDirectoryListingEnabled(directoryUrl);
+            console.log(`${directoryUrl} - Directory listing enabled:`, isDirectoryListingEnabled);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });

@@ -3,6 +3,7 @@ const { Schema } = mongoose;
 const CryptoJS = require("crypto-js")
 const { Project_Security_Logs } = require("./Project_Security_Logs");
 const { AllowedDomainsModel } = require("./AllowedDomainsModel");
+const InjectionModel = require("./Security/Injection.model");
 const secretkey = process.env.SECREY_KEY
 const UserSchema = new Schema({
   // domain: { type: Array, unique: true, trim: true, default: [] },
@@ -29,6 +30,7 @@ UserSchema.virtual('id').get(function () {
 UserSchema.pre("save", async function (next) {
   if (this.isNew) {
     await Project_Security_Logs.create({ user: this._id, })
+    await InjectionModel.create({user: this._id})
     next()
   }
 });

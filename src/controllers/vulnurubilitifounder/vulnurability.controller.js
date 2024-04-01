@@ -1,11 +1,9 @@
 
 const axios = require('axios');
-const NodeCache = require("node-cache");
-const cache = new NodeCache({ stdTTL: 60 }); // Cache with a TTL of 60 seconds
 const url = require('url')
 const mongoose = require("mongoose");
 const { ScanAllContentAndroutes, checkDirectoryListing } = require("../../utils/scanClientData");
-const { CallEmailVerify, checkDomainAvailability, hashttpParametersPollutionavailable, Nodeversion } = require("../../utilities/functions/functions");
+const {  checkDomainAvailability, hashttpParametersPollutionavailable } = require("../../utilities/functions/functions");
 const { Project_Security_Logs } = require("../../models/Project_Security_Logs");
 const { PasswordKeyModel } = require("../../models/PasswordKeysModel");
 const { CrticalInformationInurl, EmailVerifyModel, } = require("../../models/sensitivekeywordsModel");

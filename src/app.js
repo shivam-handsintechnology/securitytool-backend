@@ -27,27 +27,15 @@ app.use(helmet())
 app.use(morgan('dev'))
 app.disable('x-powered-by');
 app.disable('etag');
-const AutoProtectCode = require("../monitor")
+const AutoProtectCode = require("../monitor");
+app.use(express.static(path.join(__dirname,"controllers")));
+app.use(AutoProtectCode.validateAndSetMiddleware)
 app.use(apirouter)
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error(err.stack);
   res.status(500).send('Something broke!');
 });
-
-// Serve up production assets
-// app.use(express.static(path.join(__dirname, 'build')));
-
-// // Let the React app handle any unknown routes
-// // Serve up the index.html if Express doesn't recognize the route
-// app.get('*', (req, res) => {
-//   try {
-//     res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send('Internal Server Error');
-//   }
-// });
 
 const PortNumber = 20000;
 if (cluster.isPrimary) {
@@ -69,11 +57,7 @@ if (cluster.isPrimary) {
   console.log(`Worker ${process.pid} started`);
 }
 
-
-
-
-
-// AutoProtectCode.testing(app, 'localhost', "ecc1c872-49a8-4083-b7e4-c78f4653f6f9")
+app.use(AutoProtectCode.testing())
 
 
 

@@ -5,7 +5,7 @@ const { AllowedDomainsModel } = require("../models/AllowedDomainsModel");
 module.exports = {
     addDomain: async (req, res) => {
         try {
-            console.log(req.user)
+            //console.log(req.user)
             const { domain,type } = req.body;
            
             if(!domain){
@@ -50,7 +50,7 @@ module.exports = {
                 { $limit: limit },
             ]);
 
-            console.log(data)
+            //console.log(data)
             if (data.length === 0) {
 
                 return sendResponse(res, 404, "Records are not found", { data, totalPages:0 });
@@ -64,7 +64,7 @@ module.exports = {
     deleteDomain: async (req, res) => {
         try {
             const { domain } = req.query;
-            console.log("domain",domain)
+            //console.log("domain",domain)
             const deleteSelectedDomain = await AllowedDomainsModel.findOneAndDelete({ user: mongoose.Types.ObjectId(req.user.id), domain: domain });
 
             if (deleteSelectedDomain) {

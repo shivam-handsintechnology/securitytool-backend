@@ -20,7 +20,7 @@ const makeRequest = async(uri) => {
       const headers = error.response.headers;
       const status = error.response.status;
       headers['connection']=undefined
-      console.log({error:status});
+      //console.log({error:status});
       headers['HTTP/2']=status 
       return { headers, status };
     } else {

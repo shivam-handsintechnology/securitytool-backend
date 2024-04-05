@@ -56,12 +56,9 @@ module.exports = {
             await WhitelisttDirectryListingWords.insertMany(data, { ordered: false });
             return res.status(200).json({ message: "Words added to white list" });
         } catch (error) {
-            console.log("error", error.name)
+            //console.log("error", error.name)
             if (error.name === 'MongoBulkWriteError') {
-                // ;list of words that are already exist
-                let words = error?.result?.result?.writeErrors?.map((item) => item.err)
-                console.log("word exist ", words)
-                return res.status(400).json({ message: "Words already exist", words });
+                return res.status(400).json({ message: "some Words already exist", error:error.message });
             }
             return res.status(500).json({ message: error.message });
         }
@@ -69,7 +66,6 @@ module.exports = {
     // Get all words from white list
     getAllWords: async (req, res) => {
         try {
-
             const words = await WhitelisttDirectryListingWords.aggregate([{ $project: { _id: 0, word: 1 } }]);
             return res.status(200).json({ words });
         } catch (error) {

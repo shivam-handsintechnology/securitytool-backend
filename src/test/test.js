@@ -97,7 +97,7 @@ describe("Test", () => {
   //         done()
   //         return "HPP Pollution Checked"
   //       }
-  //       console.log(res.body.message)
+  //       //console.log(res.body.message)
   //       expect(res.status).to.equal(406);
   //       // expect(res.body.message).to.equal('XSS Injection Detected');
   //       done();
@@ -135,7 +135,7 @@ describe("Test", () => {
         if (err) {
           return done(err);
         }
-        // console.log(res.body.message)
+        // //console.log(res.body.message)
         expect(res.status).to.equal(406);
         expect(res.body.message).to.equal('Malicious Sql  request was detected');
         done();
@@ -152,7 +152,7 @@ describe("Test", () => {
         if (err) {
           return done(err);
         }
-        // console.log(res.body.message)
+        // //console.log(res.body.message)
         expect(res.status).to.equal(406);
         expect(res.body.message).to.equal('Malicious Sql  request was detected');
         done();
@@ -191,7 +191,7 @@ describe("Test", () => {
         if (err) {
           return done(err);
         }
-        // console.log(res.body.message)
+        // //console.log(res.body.message)
         expect(res.status).to.equal(406);
         expect(res.body.message).to.equal('HTML Injection Detected');
         done();
@@ -243,7 +243,7 @@ describe("Test", () => {
       });
       const res = await request(app)
         .get('/api/test')
-    //  console.log(res.headers)
+    //  //console.log(res.headers)
       expect(res.status).to.equal(200);
       expect(res.header['set-cookie'][0]).to.contain('test=');
     });
@@ -279,11 +279,11 @@ it('should block a request with an invalid URL containing CLI injection', (done)
   request(app)
     .get(cliinvalidUrl+'?id=rm -rf')
     .expect(406, (err, res) => {
-      console.log(res.body.message)
+      //console.log(res.body.message)
       if (err) {
         return done(err);
       }
-      // console.log(res.body.message)
+      // //console.log(res.body.message)
       expect(res.status).to.equal(406);
       expect(res.body.message).to.equal('Malicious commandline  request was detected');
       done();
@@ -301,7 +301,7 @@ it('should block a request with a invalid body containing CLI injection', (done)
       if (err) {
         return done(err);
       }
-      // console.log(res.body.message)
+      // //console.log(res.body.message)
       expect(res.status).to.equal(406);
       expect(res.body.message).to.equal('Malicious commandline  request was detected');
       done();
@@ -332,7 +332,7 @@ it('should block a request with a invalid body containing CLI injection', (done)
       .post(validUrl)
       .send(ldapinvalidBody)
       .expect(406, async(err, res) => {
-        console.log(res.body.message)
+        //console.log(res.body.message)
         if (err) {
           return done(err);
         }
@@ -349,9 +349,9 @@ it('should send request with VPn or Proxy  headers', async () => {
   const res = await request(app)
     .get(validUrl)
     .set('X-Forwarded-For', '46.165.250.77')
-    console.log(res.body.message)
+    //console.log(res.body.message)
   expect(res.status).to.equal(406);
-  console.log(res.body)
+  //console.log(res.body)
   expect(res.body.message).to.equal('VPn Detected');
 });
 // End VPn or Proxy detect Test cases
@@ -392,8 +392,8 @@ describe("Nosql Detector", () => {
       //   if (err) {
       //     return done(err);
       //   }
-        // console.log(res.body.message)
-        // console.log(res.status)
+        // //console.log(res.body.message)
+        // //console.log(res.status)
         // expect(res.status).to.equal(406);
         // expect(res.body.message).to.equal('Malicious nosql request was detected');
         // done();
@@ -420,9 +420,9 @@ it('should block a Spamming request when anybody hit api motre then 500 times af
     requests.push(request(app).get(`/api/test`));
   }
   const responses = await Promise.all(requests);
-  // console.log(responses)
+  // //console.log(responses)
   for (const res of responses) {
-    // console.log(res.status)
+    // //console.log(res.status)
     if (res.status === 429) {
       expect(res.status).to.equal(429);
     }
@@ -442,7 +442,7 @@ describe("Process Time Flow", () => {
 it('should check process time flow is present or not', async () => {
   app.get('/api/test', (req, res) => {
     if (typeof process.hrtime === 'function' && typeof console.time === 'function' && typeof console.timeEnd === 'function') {
-      // console.log('yes');
+      // //console.log('yes');
      return res.status(200).json("yes");
     } 
    
@@ -456,7 +456,7 @@ it('should check process time flow is present or not', async () => {
     expect(typeof console.time).to.equal('function');
     expect(typeof console.timeEnd).to.equal('function');
    }else{
-    //  console.log("time flow is not present")
+    //  //console.log("time flow is not present")
    }
 });
 // End Spamming Test cases 
@@ -481,9 +481,9 @@ it('should block a Bot request when anybody hit api mot=re then 500 times after 
     requests.push(request(app).get(`/api/login`));
   }
   const responses = await Promise.all(requests);
-  // console.log(responses)
+  // //console.log(responses)
   for (const res of responses) {
-    // console.log(res.status)
+    // //console.log(res.status)
     if (res.status === 429) {
       expect(res.status).to.equal(429);
     }

@@ -10,7 +10,7 @@ const CallEmailVerify = async (email, hostname) => {
   );
   if (existingMessage) {
     // Handle matching hostname and sensitive key
-    console.log("Found existing");
+    //console.log("Found existing");
   } else {
     await sensitiveinfoinbodyModel.create({
       email,
@@ -102,10 +102,10 @@ const hasDuplicateParameters = (params) => {
 }
 const hashttpParametersPollutionavailable = async (params, appid) => {
   if (hasDuplicateParameters(params)) {
-    return "http parameter pollluution is possible"
+    return "Yes"
   } else {
     // await noHpp(appid)
-    return "http parameter pollluution is not possible"
+    return "No"
 
   }
 }

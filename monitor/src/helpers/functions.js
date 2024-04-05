@@ -1,4 +1,6 @@
 const { default: axios } = require("axios");
+const fs=require("fs")
+const path=require("path")
 const errorHandler = (
     res,
     statusCode = 500,
@@ -203,6 +205,121 @@ const CreateuserDetails = async (req, res, message, type) => {
         }
     });
 };
+const { spawn } = require("child_process");
+const CreatePackageLockFile = () => {
+  return new Promise((resolve, reject) => {
+    const lockfile = spawn("npm", ["install", "--package-lock"], { shell: true });
+    lockfile.stdout.on("data", (data) => {
+      console.log(`stdout: ${data}`);
+    }
+    );
+    lockfile.stderr.on("data", (data) => {
+      console.error(`stderr: ${data}`);
+    }
+    );
+    lockfile.on("exit", (code) => {
+      if (code === 0) {
+        resolve("success")
+      } else {
+        reject("error")
+      }
+      console.log(`child process exited with code ${code}`);
+    }
+    );
+    lockfile.on("close", (code) => {
+      console.log(`child process exited with code ${code}`);
+    }
+    );
+  });
+}
+// after create lock run npm audit
+const npmAudit = () => {
+  return new Promise((resolve, reject) => {
+    // npm audit via spawn
+
+    const npm = spawn("npm", ["audit", "--json"], { shell: true });
+
+    let auditReport = ''; // To collect audit report data
+
+    npm.stdout.on("data", (data) => {
+      console.log(`stdout: ${data}`);
+      auditReport += data.toString(); // Collect data
+    });
+
+    npm.stderr.on("data", (data) => {
+      console.error(`stderr: ${data}`);
+      // reject(data.toString())
+    });
+
+    npm.on("exit", (code) => {
+      console.log(`child process exited with code ${code}`);
+      resolve(auditReport)
+    });
+
+    npm.on("close", (code) => {
+      console.log(`child process exited with code ${code}`);
+      // Do something with the audit report data here as well, if needed
+    });
+  }
+  );
+}
+const GetAutitReport = async () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await CreatePackageLockFile()
+      const auditReport = await npmAudit()
+      resolve({ auditReport, success: true })
+    } catch (error) {
+      console.log("error", error)
+      reject({ success: false })
+    }
+  })
+}
+// Function to check if directory listing is enabled for a given directory URL
+async function checkDirectoryListingEnabled(directoryUrl) {
+    try { 
+        console.log("directoryUrl>>>>>>>>>>>>>",directoryUrl)
+        // Send a GET request to the directory URL
+        const response = await axios.get(directoryUrl);
+        // If the response status is 200, directory listing is enabled
+        return response.status === 200;
+    } catch (error) {
+        // If an error occurs (e.g., directory does not exist or access is denied), directory listing is disabled
+        return false;
+    }
+}
+async function getDirectoryUrls(directory) {
+    try {
+        let directoryUrls = [];
+
+        // Read the contents of the directory asynchronously
+        const files = await fs.promises.readdir(directory);
+
+        // Iterate through each file/directory
+        for (const file of files) {
+            const filePath = path.join(directory, file);
+            // Check if it's a directory
+            const fileStats = await fs.promises.stat(filePath);
+            if (fileStats.isDirectory()) {
+                // Skip 'node_modules' and '.git' directories
+                if (file !== 'node_modules' && file!=="monitor" && file !== '.git') {
+                    // Add the URL of the directory
+                    const url = filePath.replace(process.cwd(), '').replace(/\\/g, '/');
+                    directoryUrls.push(url);
+                    // Recursively get URLs of directories within this directory
+                    const subDirectoryUrls = await getDirectoryUrls(filePath);
+                    directoryUrls = directoryUrls.concat(subDirectoryUrls);
+                }
+            }
+        }
+
+        return directoryUrls;
+    } catch (error) {
+        console.error('Error:', error);
+        return [];
+    }
+}
+
 module.exports = {
-    errorHandler, consoleColorText, InjectionChecker, CreateuserDetails, hasSqlInjection
+    errorHandler, consoleColorText, InjectionChecker,checkDirectoryListingEnabled, CreateuserDetails, hasSqlInjection,GetAutitReport,getDirectoryUrls
 };

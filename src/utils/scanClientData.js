@@ -9,25 +9,25 @@ const {
 async function checkDirectoryListing(url) {
   try {
     const response = await axios.get(url);
-    console.log(response.status);
+    //console.log(response.status);
     if (response.status === 200 && response.data.includes('Index of')) {
-      console.log('Directory listing is enabled.');
+      //console.log('Directory listing is enabled.');
       return 'Directory listing is enabled.';
     } else {
-      console.log('Directory listing is disabled.');
+      //console.log('Directory listing is disabled.');
       return 'Directory listing is disabled.';
     }
   } catch (error) {
 
     if (error?.response?.status >= 400) {
       if (error?.response?.status === 404) {
-        console.log('Page not found.');
+        //console.log('Page not found.');
         return 'Page not found.';
       } else if (error?.response?.status === 403) {
-        console.log('Access forbidden.');
+        //console.log('Access forbidden.');
         return 'Access forbidden.';
       } else {
-        console.log('Directory listing is disabled.');
+        //console.log('Directory listing is disabled.');
         return 'Directory listing is disabled.';
       }
     }
@@ -68,14 +68,17 @@ async function ScanDangerousMethods(routes, hostname) {
             dangerousMethods.includes(method)
           );
           results.push(
-            `this location '${item.path}' uses the '${dangerousMethod}' method`
+            {
+              "location":item.path,
+              "method":dangerousMethod
+            }
           );
         }
       });
       if (results.length > 0) {
         resolve(results); //application_accepts_arbitrary_methods
       } else {
-        resolve(null); //application_ not_accepts_arbitrary_methods
+        resolve(results); //application_ not_accepts_arbitrary_methods
       }
     } catch (error) {
       reject(error);
@@ -187,7 +190,7 @@ async function scanHardPasswordHashing(content, file) {
   ) {
     const keyword = crypto_createHashRegexmatch[1];
     if (listOfSupportedHashes.includes(keyword)) {
-      console.log({ keyword });
+      //console.log({ keyword });
       results.splice(0, 1);
       results.push(`found a file where ${keyword} password hashing is used in ${file}`);
     }
@@ -327,7 +330,7 @@ async function scanSQLvulnerability(content, file) {
         return;
       }
 
-      console.log('Query results:', results);
+      //console.log('Query results:', results);
     });
  // Do not use queries like this because this will be dangerous 
  const query = 'SELECT * FROM users';
@@ -393,5 +396,6 @@ const ScanAllContentAndroutes = async (content, file, routes, hostname, middlewa
 }
 module.exports = {
   ScanAllContentAndroutes,
-  checkDirectoryListing
+  checkDirectoryListing,
+  ScanDangerousMethods
 };

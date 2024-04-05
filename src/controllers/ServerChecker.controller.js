@@ -9,22 +9,20 @@ const { hasRobotsTxt } = require('../utils/functions');
 const { ClientLoagsModel } = require('../models/ClientLoagsModel');
 const ErrorMessagesData = require("../data/json/ErrorMessagesData.json");
 const { error } = require('console');
-const { sessionvunurability } = require('../utils/sessionvalidationclient');
+const { sessionvulnerabilityinitialdata } = require('../data/initialdata');
+const { sessionvulnerability } = require('../utils/sessionvalidationclient');
 module.exports = {
   getRobotsTxt: async (req, res) => {
     try {
-
-      await hasRobotsTxt(req.query.domain).then((d) => {
-        return sendResponse(res, 200, d, d)
+       await hasRobotsTxt(req.query.domain).then((d) => {
+        return sendResponse(res, 200, d, { succces: true,data:d})
       }).catch((err) => {
-        return sendResponse(res, 500, err, err)
+        console.log("err", err)
+        return sendResponse(res, 200, err, { succces: false,data:err})
       }
       )
-      // return sendResponse(res, 200, d, d)
-
-
     } catch (err) {
-      console.log("errorr", err)
+      //console.log("errorr", err)
       errorHandler(res, 500, err)
     }
   }
@@ -59,7 +57,7 @@ module.exports = {
       let httpErrorMessage = ErrorMessagesData.http_error.map((d) => {
         return d.code
       })
-      console.log("httpErrorMessage", httpErrorMessage)
+      //console.log("httpErrorMessage", httpErrorMessage)
 
       if (!req.query.hostname) {
         throw new Error("hostname is required")
@@ -82,35 +80,24 @@ module.exports = {
   },
   sessionData: async (req, res) => {
     try {
-      console.log("user_id", req.user.id)
+      //console.log("user_id", req.user.id)
       let { hostname,type } = req.query;
       let data={}
       if (!hostname) {
         throw new Error("hostname is required")
       }
-      if (!type) {
-        throw new Error("type is required")
-      }
-      if(type === "web"){
         data = await ClientLoagsModel.findOne(
-          { user: mongoose.Types.ObjectId(req.user.id),hostname:hostname } )
-          console.log("data",data)
-          //convert hostname to url
-          let url = `http://${hostname}`
-         let sessionvunulrability = await sessionvunurability(url)
-         .then((data) =>({data:data,error:false}))
-         .catch((error) => ({error:true,message:error.message}))
-         console.log("sessionvunulrability",sessionvunulrability)
-      }else{
-        data = await ClientLoagsModel.findOne(
-          { user: mongoose.Types.ObjectId(req.user.id),hostname:hostname } )
-      }
+          { 
+          user: mongoose.Types.ObjectId(req.user.id),hostname:hostname } )
+          console.log("data",data.sessionvulnerability)
+          data = data ? data.LogsData.sessionvulnerability :sessionvulnerabilityinitialdata
+      
        
       if (!data) {
         return sendResponse(res, 200, "Records are not found");
       }
 
-      return sendResponse(res, 200, "Fetch all domains",data.LogsData );
+      return sendResponse(res, 200, "Fetch all domains",data );
     } catch (error) {
       return sendResponse(res, 500, error.message);
 

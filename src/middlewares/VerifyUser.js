@@ -4,8 +4,8 @@ const { sendResponse } = require("../utils/dataHandler");
 const verifyToken = (req, res, next) => {
   var Authenticate = true;
   const authHeader = req.headers.authorization;
-  console.log()
-  // console.log({authHeader})
+  //console.log()
+  // //console.log({authHeader})
   if (!authHeader) {
     Authenticate = false;
     return sendResponse(res, 403, "missing authorization", { Authenticate })

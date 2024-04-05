@@ -26,11 +26,11 @@ async function checkWebsiteAvailability(website) {
     const endTime = new Date().getTime();
     const responseTime = endTime - startTime;
     // Handle success response
-    console.log(`${website.name} is available. Response Time: ${responseTime}ms`)
+    //console.log(`${website.name} is available. Response Time: ${responseTime}ms`)
   } catch (error) {
     // Handle error response
     if (error.code === 'CERT_HAS_EXPIRED') {
-      console.log(`${website.name} is down. Error: ${error.message}`);
+      //console.log(`${website.name} is down. Error: ${error.message}`);
     }
 
     // Send email alert
@@ -50,9 +50,9 @@ function sendEmailAlert(websiteName, alertMessage) {
   };
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      console.log('Error sending email:', error);
+      //console.log('Error sending email:', error);
     } else {
-      console.log('Email sent:', info.response);
+      //console.log('Email sent:', info.response);
     }
   });
 }
@@ -63,7 +63,7 @@ function sendEmailAlert(websiteName, alertMessage) {
 
 // Start monitoring loop
 function startMonitoring() {
-  console.log('Monitoring started...');
+  //console.log('Monitoring started...');
   // setInterval(() => {
   // websites.forEach((website) => {
   //   checkWebsiteAvailability(website);
@@ -79,18 +79,9 @@ const SSLverifier = async (url) => {
         port: 443,
         rejectUnauthorized: false,
       };
-      const startTime = performance.now(); // Start measuring response time
       const req = https.request(options, (res) => {
-        const endTime = performance.now(); // Stop measuring response time
-        const responseTime = endTime - startTime;
-
-        const serverType = res.headers['server'];
-        const serverVersion = res.headers['x-powered-by'];
-        console.log({ serverType, serverVersion, responseTime });
-
         const certificate = res.socket.getPeerCertificate();
         const negotiatedProtocol = res.socket.getProtocol();
-
         const {
           subject,
           issuer,
@@ -143,6 +134,9 @@ const SSLverifier = async (url) => {
       });
 
       req.on('error', (error) => {
+         if(error.code === 'ENOTFOUND'){
+          reject('Invalid URL');  
+        }
         reject(error.message);
       });
 

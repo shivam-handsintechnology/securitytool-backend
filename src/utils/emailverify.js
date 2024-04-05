@@ -64,7 +64,7 @@ module.exports.verify = function verify(email, options, callback) {
 
   if (params.options.dns) dnsConfig(params.options);
 
-  console.log('# Verifying ' + params.email);
+  //console.log('# Verifying ' + params.email);
 
   startDNSQueries(params);
 };
@@ -72,7 +72,7 @@ module.exports.verify = function verify(email, options, callback) {
 function startDNSQueries(params) {
   let domain = params.email.split(/[@]/).splice(-1)[0].toLowerCase();
 
-  console.log('Resolving DNS... ' + domain);
+  //console.log('Resolving DNS... ' + domain);
   dns.resolveMx(domain, (err, addresses) => {
     if (err || typeof addresses === 'undefined') {
       params.callback(err, null);
@@ -89,12 +89,12 @@ function startDNSQueries(params) {
         if (addresses[i].priority < priority) {
           priority = addresses[i].priority;
           lowestPriorityIndex = i;
-          console.log('MX Records ' + JSON.stringify(addresses[i]));
+          //console.log('MX Records ' + JSON.stringify(addresses[i]));
         }
       }
 
       params.options.smtp = addresses[lowestPriorityIndex].exchange;
-      console.log('Choosing ' + params.options.smtp + ' for connection');
+      //console.log('Choosing ' + params.options.smtp + ' for connection');
       beginSMTPQueries(params);
     }
   });
@@ -108,7 +108,7 @@ function beginSMTPQueries(params) {
   let ended = false;
   let tryagain = false;
 
-  console.log('Creating connection...');
+  //console.log('Creating connection...');
   let socket = net.createConnection(params.options.port, params.options.smtp);
   let callback = (err, object) => {
     callback = () => {}; // multiple sources could call the callback, replace the function immediately to prevent it from being called twice
@@ -198,7 +198,7 @@ function beginSMTPQueries(params) {
   });
 
   socket.on('connect', function (data) {
-    console.log('Connected');
+    //console.log('Connected');
   });
 
   socket.on('error', function (err) {
@@ -207,7 +207,7 @@ function beginSMTPQueries(params) {
   });
 
   socket.on('end', function () {
-    console.log('Closing connection');
+    //console.log('Closing connection');
     callback(null, {
       success: success,
       info: params.email + ' is ' + (success ? 'a valid' : 'an invalid') + ' address',

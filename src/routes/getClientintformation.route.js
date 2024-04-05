@@ -1,13 +1,20 @@
 // Import required modules
 const router = require("express").Router();
-const Vulnurabilitycontroller = require('../controllers/vulnurubilitifounder/vulnurability.controller')
-const getMiddlewareController = require('../controllers/middlwaresController').getMiddlewareControllerForClient
+const Vulnurabilitycontroller = require('../controllers/vulnurubilitifounder/vulnurability.controller');
+const Validators = require("../helpers/Validators");
 const verifyToken = require('../middlewares/VerifyUser')
-// console.log('Vulnurabilitycontroller', Vulnurabilitycontroller)
-router.get("/httpparameterpollution", verifyToken, Vulnurabilitycontroller.httpparameterpollution);
-router.get("/sslverify", Vulnurabilitycontroller.sslverify);
+const { ValidationMiddlewareQuery } = require("../middlewares/ValidationMiddleware");
+const getMiddlewareController = require('../controllers/middlwaresController').getMiddlewareControllerForClient
+// //console.log('Vulnurabilitycontroller', Vulnurabilitycontroller)
+router.get("/httpparameterpollution", verifyToken,
+//  ValidationMiddlewareQuery(Validators.DomainValidationSchema), 
+ Vulnurabilitycontroller.httpparameterpollution);
+router.get("/sslverify",
+verifyToken,
+//  ValidationMiddlewareQuery(Validators.DomainValidationSchema), 
+ Vulnurabilitycontroller.sslverify);
+router.get('/plaincredential', verifyToken, Vulnurabilitycontroller.plaincredential)
 router.post("/alloweddomains", Vulnurabilitycontroller.alloweddomains);
-
 router.post("/createuserdetails", Vulnurabilitycontroller.createuserdetails);
 router.post("/responsecodeavailableornot", Vulnurabilitycontroller.responsecodeavailableornot);
 router.post("/emailverify", Vulnurabilitycontroller.emailverify);
@@ -30,7 +37,7 @@ router.get("/logsdata", Vulnurabilitycontroller.logsdata);
 router.post('/sessionstoragedata', Vulnurabilitycontroller.sessionstoragedata)
 router.get('/directory_listing_is_enabled_on_the_server', verifyToken, Vulnurabilitycontroller.directory_listing_is_enabled_on_the_server)
 // router.get('/default_web_page', verifyToken, Vulnurabilitycontroller.default_web_page)
-router.get('/plaincredential', verifyToken, Vulnurabilitycontroller.plaincredential)
+
 router.get("/accesscontrollalloworigin", verifyToken, Vulnurabilitycontroller.accesscontrollalloworigin);
 router.get('/securityheaders', Vulnurabilitycontroller.securityheaders)
 router.get('/nodeversion', verifyToken, Vulnurabilitycontroller.nodeversion)

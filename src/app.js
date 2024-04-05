@@ -24,10 +24,11 @@ app.set('trust proxy', 1) // trust first proxy
 app.use(hpp());
 app.use(cors())
 app.use(helmet())
-app.use(morgan('dev'))
+// app.use(morgan('dev'))
 app.disable('x-powered-by');
 app.disable('etag');
 const AutoProtectCode = require("../monitor")
+app.use(AutoProtectCode.validateAndSetMiddleware)
 app.use(apirouter)
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -44,36 +45,31 @@ app.use((err, req, res, next) => {
 //   try {
 //     res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
 //   } catch (error) {
-//     console.log(error);
+//     //console.log(error);
 //     res.status(500).send('Internal Server Error');
 //   }
 // });
 
 const PortNumber = 20000;
 if (cluster.isPrimary) {
-  console.log(`Primary ${process.pid} is running`);
+  //console.log(`Primary ${process.pid} is running`);
   // Fork workers.
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
   cluster.on("exit", (worker, code, signal) => {
-    console.log(code, signal);
-    console.log(`worker ${worker.process.pid} died`);
+    //console.log(code, signal);
+    //console.log(`worker ${worker.process.pid} died`);
     cluster.fork();
   });
 } else {
   app.listen(PortNumber, async function (req, res) {
 
-    console.log("Server started at port", PortNumber);
+    //console.log("Server started at port", PortNumber);
   });
-  console.log(`Worker ${process.pid} started`);
+  //console.log(`Worker ${process.pid} started`);
 }
-
-
-
-
-
-// AutoProtectCode.testing(app, 'localhost', "ecc1c872-49a8-4083-b7e4-c78f4653f6f9")
+app.use(AutoProtectCode.testing())
 
 
 

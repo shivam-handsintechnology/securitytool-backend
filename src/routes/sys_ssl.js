@@ -10,7 +10,7 @@ router.get('/', async function (req, res) {
 });
 router.get('/ssl', async (request, response) => {
   try {
-    console.log(request.hostname)
+    //console.log(request.hostname)
     var hostname = request.hostname
     // var hostname='sercuritytool.handsintechnology.in'
     if (hostname == 'localhost') {
@@ -44,10 +44,10 @@ router.get('/ssl', async (request, response) => {
           const insecureCookies = cookies.filter((cookie) => !/;\s*secure/i.test(cookie));
           if (insecureCookies.length > 0) {
             SecureCookies = 'Website uses insecure cookies:', insecureCookies
-            console.log('Website uses insecure cookies:', insecureCookies);
+            //console.log('Website uses insecure cookies:', insecureCookies);
           } else {
             SecureCookies = 'Website does not use insecure cookies'
-            console.log('Website does not use insecure cookies');
+            //console.log('Website does not use insecure cookies');
           }
           const crt = req.socket.getPeerCertificate()
           let CA = crt.issuer['CN']
@@ -57,18 +57,18 @@ router.get('/ssl', async (request, response) => {
           var CheckCurrentDate = new Date()
           validTo = new Date(validTo);
           CheckCurrentDate = new Date(CheckCurrentDate);
-          console.log({ currentDate: CheckCurrentDate })
-          console.log({ validTo: validTo })
+          //console.log({ currentDate: CheckCurrentDate })
+          //console.log({ validTo: validTo })
           if (CheckCurrentDate < validTo) {
-            console.log(
-              "CheckCurrentDate is not expire",
-            );
+            // console.log(
+            //   "CheckCurrentDate is not expire",
+            // );
           } else {
-            console.log(
-              "CheckCurrentDate is expired"
-            );
+            // console.log(
+            //   "CheckCurrentDate is expired"
+            // );
           }
-          console.log(request.protocol)
+          //console.log(request.protocol)
           let obj = {
             daysRemaining: getDaysRemaining(new Date(), validTo),
             valid: res.socket.authorized ? "The website has a valid SSL certificate." : "The website has not a valid SSL certificate.",
@@ -80,11 +80,11 @@ router.get('/ssl', async (request, response) => {
             protocol: request.protocol === "https" ? "Connection is Secure" : "Connection is not secure",
             CA
           }
-          console.log(obj)
+          //console.log(obj)
           return sendResponse(response, 200, "SSL Certificate found", obj)
         });
         req.on('error', (data) => {
-          console.log(data)
+          //console.log(data)
         });
         req.end();
       }
@@ -96,7 +96,7 @@ router.get('/ssl', async (request, response) => {
       // res.status(401).send("hostname is not valid")
     }
   } catch (error) {
-    console.log(error)
+    //console.log(error)
     return errorHandler(response, 500, error.message, { message: error.message })
   }
 })

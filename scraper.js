@@ -15,7 +15,7 @@ async function scrapeFrameworks(url) {
     const scriptTags = document.querySelectorAll('script[src]');
     scriptTags.forEach(script => {
       const src = script.getAttribute('src');
-      console.log("src",src)
+      //console.log("src",src)
       if (src.includes('angular') || src.includes('react') || src.includes('vue')) {
         frameworksUsed.frontend.push(src);
       }
@@ -42,8 +42,8 @@ async function scrapeFrameworks(url) {
 const domain = 'https://www.c3xpress.com/'; // Replace with the domain you want to scrape
 scrapeFrameworks(domain)
   .then(frameworks => {
-    console.log('JavaScript frameworks used in the frontend:', frameworks.frontend);
-    console.log('Backend frameworks used:', frameworks.backend);
+    //console.log('JavaScript frameworks used in the frontend:', frameworks.frontend);
+    //console.log('Backend frameworks used:', frameworks.backend);
   })
   .catch(err => {
     console.error('Error:', err);

@@ -97,19 +97,19 @@ const CreatStatusCodesDetails = async (ErrorStatuscode, message, url, hostname, 
       message,
       hostname
     }
-    console.log("UserRawData", UserRawData)
+    //console.log("UserRawData", UserRawData)
     const filter = { user: id, ErrorStatuscode };
     if (url.includes('/login')) {
       const finduser = await ResponseCodesLoginPageModels.findOne(filter)
       if (finduser) {
-        console.log("already exist")
+        //console.log("already exist")
       } else {
         await ResponseCodesLoginPageModels.create({ user: id, UserRawData })
       }
     } else {
       const finduser = await StatusCodeModels.findOne(filter)
       if (finduser) {
-        console.log("already exist")
+        //console.log("already exist")
       } else {
         await StatusCodeModels.create({ user: id, UserRawData })
       }
@@ -141,13 +141,15 @@ async function hasRobotsTxt(originurl) {
         }
       });
       req.on('error', err => {
-        console.log(err)
+        if(err.code === 'ENOTFOUND'){
+          reject('Invalid URL');  
+        }
         reject(JSON.stringify(err));
       });
 
       req.end();
     } catch (error) {
-      console.log(error)
+      //console.log(error)
       reject(error)
     }
   });
@@ -270,7 +272,7 @@ async function InjectionChecker(req) {
   let containsSql = false
     , validateXss = false, validatehtml = false, containCommand = false;
   value = JSON.stringify(entries)
-  // console.log({value})
+  // //console.log({value})
   if (hasSqlInjection(value) === true) {
     containsSql = true;
   }
@@ -288,7 +290,7 @@ async function InjectionChecker(req) {
 }
 async function checkForSensitiveInfoInBody(data, keysToMatch) {
   try {
-    // console.log({data})
+    // //console.log({data})
     let matchedData = null; // Initialize variable to store matched data
     const recursiveSearch = (currentData) => {
       if (typeof currentData === "object" && currentData !== null) {
@@ -308,7 +310,7 @@ async function checkForSensitiveInfoInBody(data, keysToMatch) {
 
     return matchedData;
   } catch (error) {
-    console.log(error);
+    //console.log(error);
   }
 }
 
@@ -371,7 +373,7 @@ async function CheckJwttokenSecurity(req) {
 }
 async function CheckPasswordKeyText(data, keysToMatch) {
   try {
-    // console.log({data})
+    // //console.log({data})
     let matchedData = null; // Initialize variable to store matched data
 
     const recursiveSearch = (currentData) => {
@@ -392,7 +394,7 @@ async function CheckPasswordKeyText(data, keysToMatch) {
 
     return matchedData;
   } catch (error) {
-    console.log(error);
+    //console.log(error);
   }
 }
 module.exports = {

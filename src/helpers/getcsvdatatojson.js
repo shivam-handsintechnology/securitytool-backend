@@ -32,7 +32,7 @@ exports.getcsvdatainjson = async (csvdata, columns) => {
                     results.push(data);
                 })
                 .on('end', async () => {
-                    console.log(results);
+                    //console.log(results);
                     // Remove the temporary file
                     await unlinkAsync(csvdata);
                     resolve(results);

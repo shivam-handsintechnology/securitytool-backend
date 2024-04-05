@@ -5,7 +5,7 @@ const { headerValidation } = require('./headerValidation')
 const checkMyHeaders = async (url) => {
   
   const { headers, status } = await makeRequest(url)
-  console.log({status})
+  //console.log({status})
   setHeaders(headers)
   setStatus(status)
   headerValidation(headers)

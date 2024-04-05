@@ -4,6 +4,7 @@ const ClientLoagsModelSchema = mongoose.Schema({
   hostname: { type: String, unique: true },
   LogsData: { type: Object },
   auditReport: { type: Object },
+  webSessionVulnurability: { type: Object },
 });
 const ClientLoagsModel = mongoose.model(
   "ClientLoagsModel",

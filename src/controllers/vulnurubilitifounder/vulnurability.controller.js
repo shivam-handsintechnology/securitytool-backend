@@ -21,69 +21,76 @@ const { PasswordValidateModel } = require('../../models/PasswordVaildateModel');
 const SensitiveInfoInBodyModel = require('../../models/SensitiveInfoInBodyModel');
 const { sessionvunurability } = require('../../utils/sessionvalidationclient');
 const { AllowedDomainsModel } = require('../../models/AllowedDomainsModel');
-
+const { scanStaticUrl } = require('../../helpers/scanStaticUrl');
+const { DomainValidation } = require('../../helpers/Validators');
 module.exports = {
     httpparameterpollution: async (req, res) => {
         try {
-            let data = {}
-            console.log("yurlreq>>>>>>", req.query.url)
-            await axios.get(req.query.url + "/sitescanner?id=1&id=5").then(async (response) => {
-                //check iframe injection is possible or not in this app
-                console.log(response.headers)
-                if (response.headers) {
-
-                    if (response.headers["content-security-policy"] && response.headers["x-frame-options"] === "DENY" || response.headers["x-frame-options"] === "SAMEORIGIN") {
-                        data["xframe"] = "No"
-                    }
-                    else if (!response.headers["content-security-policy"] && response.headers["x-frame-options"] !== "SAMEORIGIN" || response.headers["x-frame-options"] !== "DENY") {
-                        data["xframe"] = "Yes"
-                    }
-                }
-                if (response.data) {
-                    console.log("httpparameter", response.data)
-                    if (response.data) {
-                        let d = await hashttpParametersPollutionavailable(response.data)
-                        return sendResponse(res, 200, d, data)
-                    }
-                }
-            }).catch((error) => {
-                console.log(error?.response?.headers)
-                if (error.response && error.response.headers) {
-
-                    if (error.response.headers["content-security-policy"] && error.response.headers["x-frame-options"] === "DENY" || error.response.headers["x-frame-options"] === "SAMEORIGIN") {
-                        data["xframe"] = "No"
-                    }
-                    else if (!error.response.headers["content-security-policy"] && error.response.headers["x-frame-options"] !== "SAMEORIGIN" || error.response.headers["x-frame-options"] !== "DENY") {
-                        data["xframe"] = "Yes"
-                    }
-
-
-
-                }
-                return sendResponse(res, 200, "Something is Wrong", data)
-            })
-
-
+            let domain=req.query.domain
+            let url = `http://${domain}/sitescanner?id=1&id=2&id=3`;
+            let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
+            if(isExistDomain){
+             let response=  await axios.get(url)
+             if(response.status===200){
+                console.log("data",response.data)
+                let isHttp=await hashttpParametersPollutionavailable(response.data)
+                sendResponse(res,200,"success",isHttp)
+             }else{
+                sendResponse(res,200,"success","Data Not found")
+             }
+             console.log("response",response.data)
+            }else{
+                return errorHandler(res, 500,"Domain is Not Find" );
+            }
+            
+           
+        } catch (error) {
+            console.error("Error processing request:", error);
+            return errorHandler(res, 500, error.message || "Internal Server Error");
         }
-        catch (error) {
-            console.error("Error retrieving allowed domains:", error.message);
-            return errorHandler(res, 500, error.message)
+    },
+    hashpassworddb: async (req, res) => {
+        try {
+            let domain=req.query.domain
+            let url = `http://${domain}/passwords-insecure`;
+            let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
+            if(isExistDomain){
+             let response=  await axios.get(url)
+             if(response.status===200){
+                console.log("data",response.data)
+                let isHttp=await hashttpParametersPollutionavailable(response.data)
+                sendResponse(res,200,"success",isHttp)
+             }else{
+                sendResponse(res,200,"success","Data Not found")
+             }
+             console.log("response",response.data)
+            }else{
+                return errorHandler(res, 500,"Domain is Not Find" );
+            }
+            
+           
+        } catch (error) {
+            console.error("Error processing request:", error);
+            return errorHandler(res, 500, error.message || "Internal Server Error");
         }
     },
     sslverify: async (req, res) => {
         try {
-            const hostname = req.query.hostname
-            if (hostname) {
-                // console.log("get hostname", hostname)
-                const data = await SSLverifier(hostname)
-                // console.log("get data", data)
-                return sendResponse(res, 200, "fetch ssl ", data)
-            } else {
-                return sendResponse(res, 200, "Hostname is required", {})
+            if(!req.query.hostname) {
+                return errorHandler(res, 400, "Please provide a hostname",{succces:false,message:"Please provide a hostname"});
             }
-            // Example usage
+            const response = await SSLverifier(req.query.hostname)
+                .then((data) => {
+                    console.log("data", data)
+                    return { succces: true, data,message:"SSL verified successfully" }
+                }
+                ).catch((error) => {
+                    return { succces: false, data: {},message:"SSL verification failed"}
+                }
+                )
+            return sendResponse(res, 200, "fetch", response)
         } catch (error) {
-            console.error("Error retrieving allowed domains:", error.message);
+            console.log("error", error)
             return errorHandler(res, 500, error.message)
         }
     },
@@ -94,11 +101,11 @@ module.exports = {
                 const alloweddomains = await User.findOne({ appid: req.query.appid }).select("_id")
                 if (alloweddomains) {
                     const validDomain = await checkDomainAvailability(req.query.hostname)
-                    if(!validDomain){
+                    if (!validDomain) {
                         return errorHandler(res, 404, "please enter valid domain", { allowed: false })
                     }
-                    let obj={ domain:req.query.hostname,user:alloweddomains._id,type:req.query.type}
-                    const includedomain = await AllowedDomainsModel.findOne({ domain:req.query.hostname,user:alloweddomains._id}).select("_id")
+                    let obj = { domain: req.query.hostname, user: alloweddomains._id, type: req.query.type }
+                    const includedomain = await AllowedDomainsModel.findOne({ domain: req.query.hostname, user: alloweddomains._id }).select("_id")
                     if (includedomain) {
                         return sendResponse(res, 200, "fetch", { allowed: true })
                     } else if (!includedomain) {
@@ -117,9 +124,9 @@ module.exports = {
                 // const params = req.body.params
                 const nodejsveresion = req.body.nodejsveresion
                 const fileContent = req.body.fileContent
-                console.log("fileContent", fileContent)
+                //console.log("fileContent", fileContent)
                 const routes = application
-                console.log("application", application)
+                //console.log("application", application)
                 const middlewares = application?.filter((layer) => layer.name !== "router" &&
                     layer.name !== "bound dispatch" &&
                     layer.name !== "jsonParser" &&
@@ -136,12 +143,12 @@ module.exports = {
                 ).lean();
                 if (alloweddomains) {
                     const validDomain = await checkDomainAvailability(hostname)
-                    if(!validDomain){
+                    if (!validDomain) {
                         return errorHandler(res, 404, "please enter valid domain", { allowed: false })
                     }
-                    let obj={ domain:hostname,user:alloweddomains._id,type:req.body.type}
-                    const includedomain = await AllowedDomainsModel.findOne({ domain:hostname,user:alloweddomains._id}).select("_id")
-                     if (includedomain) {
+                    let obj = { domain: hostname, user: alloweddomains._id, type: req.body.type }
+                    const includedomain = await AllowedDomainsModel.findOne({ domain: hostname, user: alloweddomains._id }).select("_id")
+                    if (includedomain) {
                         const logs = async () => {
                             return new Promise((resolve, reject) => {
                                 try {
@@ -156,7 +163,7 @@ module.exports = {
                                             }
                                             resolve({ ...data, sessionvulnerability: resultarray })
                                         }).catch((error) => {
-                                            console.log("error", error)
+                                            //console.log("error", error)
                                             reject(error)
                                         })
 
@@ -205,12 +212,12 @@ module.exports = {
                             return { error: error }
                         })
 
-                        console.log("alllogs", alllogs)
+                        //console.log("alllogs", alllogs)
                         let auditReport = {}
                         if (req.body.auditReport) {
                             auditReport = req.body.auditReport
                         }
-                        console.log("auditReport", auditReport)
+                        //console.log("auditReport", auditReport)
 
                         // Create Logs 
 
@@ -253,7 +260,7 @@ module.exports = {
                                             }
                                             resolve({ ...data, sessionvulnerability: resultarray })
                                         }).catch((error) => {
-                                            console.log("error", error)
+                                            //console.log("error", error)
                                             reject(error)
                                         })
 
@@ -302,12 +309,12 @@ module.exports = {
                             return { error: error }
                         })
 
-                        console.log("alllogs", alllogs)
+                        //console.log("alllogs", alllogs)
                         let auditReport = {}
                         if (req.body.auditReport) {
                             auditReport = req.body.auditReport
                         }
-                        console.log("auditReport", auditReport)
+                        //console.log("auditReport", auditReport)
 
                         // Create Logs 
 
@@ -363,9 +370,9 @@ module.exports = {
     //             // const params = req.body.params
     //             const nodejsveresion = req.body.nodejsveresion
     //             const fileContent = req.body.fileContent
-    //             console.log("fileContent", fileContent)
+    //             //console.log("fileContent", fileContent)
     //             const routes = application
-    //             console.log("application", application)
+    //             //console.log("application", application)
     //             const middlewares = application?.filter((layer) => layer.name !== "router" &&
     //                 layer.name !== "bound dispatch" &&
     //                 layer.name !== "jsonParser" &&
@@ -395,7 +402,7 @@ module.exports = {
     //                                     }
     //                                     resolve({ ...data, sessionvulnerability: resultarray })
     //                                 }).catch((error) => {
-    //                                     console.log("error", error)
+    //                                     //console.log("error", error)
     //                                     reject(error)
     //                                 })
 
@@ -444,12 +451,12 @@ module.exports = {
     //                     return { error: error }
     //                 })
 
-    //                 console.log("alllogs", alllogs)
+    //                 //console.log("alllogs", alllogs)
     //                 let auditReport = {}
     //                 if (req.body.auditReport) {
     //                     auditReport = req.body.auditReport
     //                 }
-    //                 console.log("auditReport", auditReport)
+    //                 //console.log("auditReport", auditReport)
 
     //                 // Create Logs 
 
@@ -490,7 +497,7 @@ module.exports = {
         try {
             let { UserRawData, appid } = req.body;
             // ip = "206.84.234.30"
-            console.log("ip checker", UserRawData.ip)
+            //console.log("ip checker", UserRawData.ip)
             const update = UserRawData;
             const alloweddomains = await User.findOne(
                 { appid },
@@ -514,7 +521,7 @@ module.exports = {
                         }
 
                     );
-                    console.log({ d })
+                    //console.log({ d })
                 }
 
 
@@ -522,7 +529,7 @@ module.exports = {
                 res.status(403).json("you are not allowed");
             }
         } catch (error) {
-            console.log("createuserdetails", error)
+            //console.log("createuserdetails", error)
 
         }
         //  return  res.status(200).json("Ok")
@@ -597,13 +604,13 @@ module.exports = {
                         hostname,
                     });
                     if (existingMessage) {
-                        // console.log("Found existing HashedPassword in Db");
+                        // //console.log("Found existing HashedPassword in Db");
                         await PasswordValidateModel.findOneAndUpdate(
                             { user: mongoose.Types.ObjectId(alloweddomains._id), hostname },
                             { HashedPassword: HashedPassword.message }
                         );
                     } else {
-                        // console.log("Create New HashedPassword in Db");
+                        // //console.log("Create New HashedPassword in Db");
                         await PasswordValidateModel.create({
                             _id: alloweddomains._id,
                             hostname: hostname,
@@ -618,9 +625,9 @@ module.exports = {
                     );
                     if (existingMessage) {
                         // Handle matching hostname and sensitive key
-                        // console.log("Found existing sensitivedata in body");
+                        // //console.log("Found existing sensitivedata in body");
                     } else {
-                        // console.log("Create New sensitivedata in body");
+                        // //console.log("Create New sensitivedata in body");
                         await SensitiveInfoInBodyModel.create({
                             user: mongoose.Types.ObjectId(alloweddomains._id),
                             hostname,
@@ -636,12 +643,12 @@ module.exports = {
                 res.status(403).json("you are not allowed");
             }
         } catch (error) {
-            // console.log("sensitive error", error);
+            // //console.log("sensitive error", error);
         }
     },
     sensitivekeysinurl: async (req, res) => {
         try {
-            // console.log(req.body)
+            // //console.log(req.body)
             let { data, url, hostname, appid } = req.body;
 
             const alloweddomains = await User.findOne(
@@ -662,18 +669,18 @@ module.exports = {
                         },
                         { _id: 0 }
                     );
-                    // console.log({ existingMessage });
+                    // //console.log({ existingMessage });
                     if (existingMessage) {
-                        // console.log("Found existing sensitive key in URL");
+                        // //console.log("Found existing sensitive key in URL");
                     } else {
-                        // console.log("Creating new sensitive key in URL");
+                        // //console.log("Creating new sensitive key in URL");
                         const d = await CrticalInformationInurl.create({
                             user: alloweddomains._id,
                             hostname,
                             url,
                             sensitivekeys: sensitivekey,
                         });
-                        // console.log(d);
+                        // //console.log(d);
                         // Return success response for creating new data
                         return res.status(201).json({ success: true });
                     }
@@ -686,7 +693,7 @@ module.exports = {
             }
             //
         } catch (error) {
-            // console.log({ sensitivekeysinurlerror: error });
+            // //console.log({ sensitivekeysinurlerror: error });
             // Handle the error routerropriately
             return res.status(500).json({ error: "Internal Server Error" });
         }
@@ -701,7 +708,7 @@ module.exports = {
             ).lean();
             if (alloweddomains) {
                 const finduser = await ClientLoagsModel.findOne({ user: mongoose.Types.ObjectId(alloweddomains._id), hostname: sid });
-                // console.log({ ClientLoagsModel: finduser })
+                // //console.log({ ClientLoagsModel: finduser })
                 if (finduser) {
                     const updatedata = await ClientLoagsModel.findOneAndUpdate(
                         { user: mongoose.Types.ObjectId(alloweddomains._id), hostname: sid },
@@ -745,7 +752,7 @@ module.exports = {
                     var DangerousMethods = ""
                     var npmvulnurabilties = ""
                     var LogsData = finduser.LogsData;
-                    console.log("LogsData", LogsData)
+                    //console.log("LogsData", LogsData)
                     LogsData.map((k, v) => {
 
                         if (Object.keys(k).includes('npmvulnurabilties')) {
@@ -817,7 +824,7 @@ module.exports = {
                                 dwp += value.toString()
                             }
                         }
-                        // // console.log(Object.keys(k))
+                        // // //console.log(Object.keys(k))
                     })
                     sql = deleteDuplicate(sql)
                     session = deleteDuplicate(session)
@@ -869,11 +876,11 @@ module.exports = {
             }
             if (localStorageData) {
 
-                // // console.log(localStorageData)
+                // // //console.log(localStorageData)
 
             }
             if (sessionStorageData) {
-                // // console.log(sessionStorageData)
+                // // //console.log(sessionStorageData)
             }
             res.json("hello")
             return false
@@ -889,17 +896,17 @@ module.exports = {
                     },
                     { _id: 0 }
                 );
-                // console.log(existingMessage);
+                // //console.log(existingMessage);
                 if (existingMessage) {
-                    // console.log("Found existing sensitive key in URL");
+                    // //console.log("Found existing sensitive key in URL");
                 } else {
-                    // console.log("Creating new sensitive key in URL");
+                    // //console.log("Creating new sensitive key in URL");
                     const d = await CrticalInformationInurl.create({
                         hostname,
                         url,
                         sensitivekeys: sensitivekey,
                     });
-                    // console.log(d);
+                    // //console.log(d);
                     // Return success response for creating new data
                     return res.status(201).json({ success: true });
                 }
@@ -920,7 +927,7 @@ module.exports = {
             return sendResponse(res, 200, 'Directory listing.', data)
 
         } catch (error) {
-            // console.log(error)
+            // //console.log(error)
             return errorHandler(res, 500, error.message)
         }
     },
@@ -934,7 +941,7 @@ module.exports = {
             else if (protocol == "https") {
                 return sendResponse(res, 200, 'Credentials are not transmitted to server in plain text', { cra: "Credentials are not transmitted to server in plain text" })
             }
-            // // console.log(response.request.res.httpVersion);
+            // // //console.log(response.request.res.httpVersion);
         } catch (error) {
             const protocol = error.request.protocol.replace(':', "")
             if (protocol == "http") {
@@ -943,8 +950,8 @@ module.exports = {
             else if (protocol == "https") {
                 return sendResponse(res, 200, 'Credentials are not transmitted to server in plain text', { cra: "Credentials are not transmitted to server in plain text" })
             }
-            // // console.log(error.request.res.httpVersion);
-            // console.log('Error:', error.message);
+            // // //console.log(error.request.res.httpVersion);
+            // //console.log('Error:', error.message);
         }
     },
     accesscontrollalloworigin: async (req, res) => {
@@ -999,7 +1006,7 @@ module.exports = {
                 res.json("please provide url")
             }
         } catch (error) {
-            // console.log({error})
+            // //console.log({error})
             errorHandler(res, 500, error.message)
         }
 
@@ -1013,7 +1020,7 @@ module.exports = {
                 throw new Error("User not exist")
             }
         } catch (error) {
-            // console.log({ error })
+            // //console.log({ error })
             errorHandler(res, 500, error.message)
         }
     },
@@ -1023,14 +1030,14 @@ module.exports = {
             const dependencies = JSON.parse(fileContent).dependencies
             const dependencieslist = Object.keys(dependencies)
             if (dependencieslist.includes('sequelize')) {
-                // console.log("sequelize is used")
+                // //console.log("sequelize is used")
             }
             else if (dependencieslist.includes('mysql2' || 'mysql')) {
-                // console.log("mysql is used")
+                // //console.log("mysql is used")
             } else if (dependencieslist.includes('mongoose')) {
-                // console.log("mongodb find")
+                // //console.log("mongodb find")
             } else {
-                // console.log("any database not found")
+                // //console.log("any database not found")
             }
             res.json("ok")
         } catch (error) {

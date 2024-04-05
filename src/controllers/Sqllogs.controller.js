@@ -2,6 +2,7 @@ const { default: mongoose } = require('mongoose')
 const { Project_Security_Logs } = require('../models/Project_Security_Logs')
 const { sendResponse } = require('../utils/dataHandler')
 const { errorHandler } = require('../utils/errorHandler')
+const getRandomColor = require('../helpers/randomColorGenerator')
 const getAllSqllLogs = async (req, res) => {
     try {
         // Get total count of users
@@ -11,7 +12,7 @@ const getAllSqllLogs = async (req, res) => {
             obj["type"] = type
         }
         const totalCount = await Project_Security_Logs.countDocuments(obj);
-        //console.log({ totalCount })
+        ////console.log({ totalCount })
         // Convert page and limit to numbers
         const pageNumber = totalCount > 10 ? parseInt(page) || 1 : 1;
         const limitNumber = parseInt(limit) || 10;
@@ -68,14 +69,14 @@ const getSingleSqllLogsCount = async (req, res) => {
         data.forEach(entry => {
             result[entry._id] = entry.count
         })
-        let finalResult = {}
+        let finalResult =[]
         typeTitles.forEach(title => {
-            finalResult[title] = result[title] || 0
-
+            title!=="VPN"&&  title!=="Remote-FiLe-Inclusion" && finalResult.push({
+                name:title=="cmd"?"Command Line":title==="xss-injection"?"XSS":title==="html"?"HTML":title==="XML-Injection"?"XML":title,value:result[title] || 0,color:getRandomColor(title)
+            })
         })
-        delete finalResult["xss-injection"]
-        delete finalResult["Remote-FiLe-Inclusion"]
-        delete finalResult["VPN"]
+       
+        console.log(finalResult)
         sendResponse(res, 200, "data fetch successfully", finalResult)
 
         res.json({
@@ -83,13 +84,13 @@ const getSingleSqllLogsCount = async (req, res) => {
         })
 
     } catch (error) {
-        errorHandler(res, error)
+      return   errorHandler(res, error)
     }
 }
 const deleteSingleSqllLogs = async (req, res) => {
     try {
         const ip = req.body.ip
-        console.log(ip)
+        //console.log(ip)
 
         const data = await Project_Security_Logs.findOneAndDelete({ ip })
         if (data) {
@@ -105,9 +106,9 @@ const deleteSingleSqllLogs = async (req, res) => {
 const deleteAllSqllLogs = async (req, res) => {
     const ip = req.body.ip
     if (req.body.ip == "") {
-        console.log("empty")
+        //console.log("empty")
     }
-    console.log(ip)
+    //console.log(ip)
     try {
         if (ip) {
             const data = await Project_Security_Logs.deleteMany({ ip: ip })

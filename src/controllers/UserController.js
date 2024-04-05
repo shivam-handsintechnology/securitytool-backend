@@ -40,7 +40,7 @@ const searchInFiles = async (ssh, files, searchTerm) => {
               const variableName = match[2];
               const nextLine = lines[index + 1];
               const filePath = file.replace(/"/g, '\\"');
-              const modifiedContent = `${line}\nconsole.log("je")`;
+              const modifiedContent = `${line}\n//console.log("je")`;
 
               if (filePath && nextLine) {
                 const escapedFilePath = filePath.replace(/"/g, '\\"');
@@ -120,7 +120,7 @@ Register = async (req, res) => {
       return sendResponse(res, 200, "register successfully", { appid: user.appid });
     }
   } catch (error) {
-    console.log(error)
+    //console.log(error)
     return errorHandler(res)
   }
 }
@@ -137,7 +137,7 @@ Login = async (req, res) => {
 
     const user = await User.findOne({ email: req.body.email })
     if (user) {
-      console.log(user.password)
+      //console.log(user.password)
       var bytes = CryptoJS.AES.decrypt(user.password, key);
       var decrypted = bytes.toString(CryptoJS.enc.Utf8);
       if (decrypted == req.body.password) {
@@ -155,7 +155,7 @@ Login = async (req, res) => {
     }
 
   } catch (error) {
-    console.log(error)
+    //console.log(error)
     return errorHandler(res)
   }
 
@@ -238,7 +238,7 @@ Logout = async (req, res) => {
     jwt.destroy(token)
     sendResponse(res, 200, "logout successfully")
   } catch (error) {
-    console.log({ error });
+    //console.log({ error });
     return errorHandler(res)
   }
 }
@@ -333,7 +333,7 @@ const Profile = async (req, res) => {
     }
   }
   catch (error) {
-    console.log(error)
+    //console.log(error)
     return errorHandler(res)
   }
 }

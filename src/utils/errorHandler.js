@@ -1,4 +1,4 @@
-const errorHandler = (res, statusCode = 500, message = "internal server error", data) => {
+const errorHandler = (res, statusCode = 500, message = "internal server error", data=null) => {
       const response = { statusCode, message, data }
       res.status(statusCode).json(response)
 }

@@ -34,13 +34,15 @@ module.exports = {
              if(response.status===200){
                 console.log("data",response.data)
                 let isHttp=await hashttpParametersPollutionavailable(response.data)
-                sendResponse(res,200,"success",isHttp)
+                let data={succces: false, data:isHttp,message:isHttp}
+                sendResponse(res,200,"success",data)
+
              }else{
-                sendResponse(res,200,"success","Data Not found")
+               throw new Error("Data Not found")
              }
              console.log("response",response.data)
             }else{
-                return errorHandler(res, 500,"Domain is Not Find" );
+                return errorHandler(res, 500, error.message,{succces: false, data: {},message: error.message})
             }
             
            
@@ -76,22 +78,14 @@ module.exports = {
     },
     sslverify: async (req, res) => {
         try {
-            if(!req.query.hostname) {
-                return errorHandler(res, 400, "Please provide a hostname",{succces:false,message:"Please provide a hostname"});
-            }
-            const response = await SSLverifier(req.query.hostname)
-                .then((data) => {
-                    console.log("data", data)
-                    return { succces: true, data,message:"SSL verified successfully" }
-                }
-                ).catch((error) => {
-                    return { succces: false, data: {},message:"SSL verification failed"}
-                }
-                )
-            return sendResponse(res, 200, "fetch", response)
+            let domain=req.query.domain
+            let url=`http://${domain}`
+            console.log(url)
+            const response = await SSLverifier(url)
+            return sendResponse(res, 200, "fetch", { succces: true, data:response.data,message:"SSL verified successfully" })
         } catch (error) {
             console.log("error", error)
-            return errorHandler(res, 500, error.message)
+            return errorHandler(res, 500, error.message,{succces: false, data: {},message: error.message})
         }
     },
     alloweddomains: async (req, res) => {
@@ -980,31 +974,21 @@ module.exports = {
     },
     securityheaders: async (req, res) => {
         try {
-            const url = require('url')
-            if (req.query.url) {
-                const { isUrlValid } = require('../../utils/ScanHeaders/helpers')
-                if (!isUrlValid(req.query.url)) throw new Error('Invalid URL format!')
-                const hostname = url.parse(req.query.url).hostname
-                const valid = await checkDomainAvailability(hostname)
+                const valid = await checkDomainAvailability(req.query.domain)
 
                 if (!valid) {
                     return res.json("please enter valid url")
                 } else if (valid) {
-
                     const checkMyHeaders = require('../../utils/ScanHeaders')
-                    const data = await checkMyHeaders(req.query.url)
+                    let url=`http://${req.query.domain}/`
+                    const data = await checkMyHeaders(url)
                         .then((messages) => messages)
                     const rawHeaders = data.headers
-                    const session = await sessionvunurability(req.query.url)
-                        .then((data) => data)
-                        .catch((error) => error)
-                    return res.json({ headersinfo: data.messages, sessionvunurability: session, rawHeaders })
+                    return sendResponse(res,200,"fetch all data",{ headersinfo: data.messages, rawHeaders })
 
                 }
 
-            } else {
-                res.json("please provide url")
-            }
+          
         } catch (error) {
             // //console.log({error})
             errorHandler(res, 500, error.message)

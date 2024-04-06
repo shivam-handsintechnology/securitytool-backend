@@ -10,4 +10,6 @@ router.get("/sitescanner", (req, res) => {
   router.get("/DirectoryListingEnable",controllers.DirectoryListingEnable )
   router.get("/getEndpoints",controllers.getEndpoints )
   router.get("/passwords-insecure",controllers.passwordsInsecure )
+  router.get("/support-oldnodejs=version",controllers.supportOldNodejsVersion )
+  router.options("/support-oldnodejs=version",controllers.supportOldNodejsVersion )
   module.exports=router

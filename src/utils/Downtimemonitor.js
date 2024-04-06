@@ -134,15 +134,16 @@ const SSLverifier = async (url) => {
       });
 
       req.on('error', (error) => {
+        console.log("error",error)
          if(error.code === 'ENOTFOUND'){
-          reject('Invalid URL');  
+          reject({message:"Domain Not Found"});  
         }
-        reject(error.message);
+        reject(error);
       });
 
       req.end();
     } catch (error) {
-      reject(error.message);
+      reject(error);
     }
   });
 };

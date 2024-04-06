@@ -12,4 +12,13 @@ router.get("/arbitrary-methods", verifyToken,
 router.get("/passwords-insecure", verifyToken,
     // ValidationMiddlewareQuery(DomainValidationSchema),
     SecurityMisconfiguration.passwordsInsecure)
+router.get("/support-oldnodejs-version", verifyToken,
+    // ValidationMiddlewareQuery(DomainValidationSchema),
+    SecurityMisconfiguration.supportoldnodejsversion)
+router.get("/dangerous-http-methods-enabled", verifyToken,
+    // ValidationMiddlewareQuery(DomainValidationSchema),
+    SecurityMisconfiguration.DangerousHttpMethodsEnabled)
+router.get("/option-methods-enabled", verifyToken,
+    // ValidationMiddlewareQuery(DomainValidationSchema),
+    SecurityMisconfiguration.OptionsMethodsEnabled)
 module.exports = router

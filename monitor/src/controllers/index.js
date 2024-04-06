@@ -138,5 +138,21 @@ module.exports={
           })
         }
         },
+        supportOldNodejsVersion:async(req, res) => {
+        try{
+            res.status(200).json({
+              message:"success",
+              data:{version:process.version},
+              statusCode:200
+            })
+          
+        }catch(error){
+          res.status(500).json({
+            message:error.message,
+            statusCode:500,
+            data:{}
+          })
+        }
+        },
 
 }

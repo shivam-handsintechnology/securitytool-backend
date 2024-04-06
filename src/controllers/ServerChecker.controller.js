@@ -14,16 +14,12 @@ const { sessionvulnerability } = require('../utils/sessionvalidationclient');
 module.exports = {
   getRobotsTxt: async (req, res) => {
     try {
-       await hasRobotsTxt(req.query.domain).then((d) => {
-        return sendResponse(res, 200, d, { succces: true,data:d})
-      }).catch((err) => {
-        console.log("err", err)
-        return sendResponse(res, 200, err, { succces: false,data:err})
-      }
-      )
-    } catch (err) {
+     let data=  await hasRobotsTxt(req.query.domain)
+        return sendResponse(res, 200, d, { succces: true,data,message:""})
+    } catch (error) {
       //console.log("errorr", err)
-      errorHandler(res, 500, err)
+      console.log("error", error)
+      return errorHandler(res, 500, error.message,{succces: false, data: {},message: error.message})
     }
   }
   ,

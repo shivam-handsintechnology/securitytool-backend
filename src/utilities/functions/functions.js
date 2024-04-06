@@ -1,5 +1,4 @@
 const dns = require("dns");
-const { httpParameterPollutionModel } = require("../../models/httpParameterPollutionModel");
 const { EmailVerifyModel } = require("../../models/sensitivekeywordsModel");
 const { sensitiveinfoinbodyModel } = require("../../models/SensitiveInfoInBodyModel");
 const { NodeVersionModel } = require("../../models/NodeVersionModel");
@@ -47,28 +46,8 @@ const validatePassword = async (str = '') => {
 
   return { containsSpecialCharacter, containsLowercase, containsUppercase, containsNumber }
 };
-const noHpp = async (appid) => {
-  const existingMessage = await httpParameterPollutionModel.findOne({});
-  if (existingMessage) {
-    await httpParameterPollutionModel.findOneAndUpdate(
-      { appid },
-      { isPolluted: false }
-    );
-  } else {
-    await httpParameterPollutionModel.create({ appid, isPolluted: false });
-  }
-}
-const isHpp = async (appid) => {
-  const existingMessage = await httpParameterPollutionModel.findOne({ appid });
-  if (existingMessage) {
-    await httpParameterPollutionModel.findOneAndUpdate(
-      { appid },
-      { isPolluted: true }
-    );
-  } else {
-    await httpParameterPollutionModel.create({ appid, isPolluted: true });
-  }
-}
+
+
 const Nodeversion = async (appid, version) => {
   const existingMessage = await NodeVersionModel.findOne({ appid });
   if (existingMessage) {
@@ -82,14 +61,7 @@ const Nodeversion = async (appid, version) => {
     return data
   }
 }
-const hasArrayParameters = (params) => {
-  for (const param in params) {
-    if (Array.isArray(params[param])) {
-      return true; // Array parameter found
-    }
-  }
-  return false; // No array parameters found
-}
+
 const hasDuplicateParameters = (params) => {
   const seen = new Set();
   for (const param in params) {

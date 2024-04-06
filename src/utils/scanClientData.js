@@ -33,58 +33,131 @@ async function checkDirectoryListing(url) {
     }
   }
 }
-async function scanDirectoryOptionMethod(routes, hostname) {
+async function scanDirectoryOptionMethod(routes) {
   const results = [];
+  let optionsCount = 0; // Variable to store the count of OPTIONS methods
   return new Promise((resolve, reject) => {
     try {
       routes.forEach((item) => {
         if (item.methods.includes("OPTIONS")) {
-          results.push(`this location '${item.path}' uses the OPTIONS method`);
+          optionsCount++; // Increment count for OPTIONS method
+          results.push({labels:item.path,values:"yes"});
         }
       });
-      if (results.length > 0) {
-        resolve(results); // OPTIONS method enabled
-      } else {
-        resolve(null); // OPTIONS method disabled
-      }
+      resolve(results)
     } catch (error) {
       reject(error);
     }
   });
 }
+// Sample endpoints data
+
 // application_accepts_arbitrary_methods
-async function ScanDangerousMethods(routes, hostname) {
-  const results = [];
-  const dangerousMethods = ["DELETE", "PUT", "PATCH"];
+async function ScanArbitaryMethods(endpoints) {
+  function isStandardMethod(method) {
+    const standardMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE"];
+    return standardMethods.includes(method.toUpperCase());
+  }
   return new Promise((resolve, reject) => {
     try {
-      routes.forEach((item) => {
+      let endpointsWithArbitraryMethods = {};
 
-        const hasDangerousMethod = dangerousMethods.some((method) =>
-          item.methods.includes(method)
-        );
-        if (hasDangerousMethod) {
-          const dangerousMethod = item.methods.find((method) =>
-            dangerousMethods.includes(method)
-          );
-          results.push(
-            {
-              "location":item.path,
-              "method":dangerousMethod
-            }
-          );
-        }
+      endpoints.forEach(endpoint => {
+          endpoint.methods.forEach(method => {
+              if (!isStandardMethod(method)) {
+                  if (!endpointsWithArbitraryMethods[endpoint.path]) {
+                      endpointsWithArbitraryMethods[endpoint.path] = [method];
+                  } else {
+                      endpointsWithArbitraryMethods[endpoint.path].push(method);
+                  }
+              }
+          });
       });
-      if (results.length > 0) {
-        resolve(results); //application_accepts_arbitrary_methods
-      } else {
-        resolve(results); //application_ not_accepts_arbitrary_methods
-      }
-    } catch (error) {
+      const formattedData = Object.entries(endpointsWithArbitraryMethods).map(([label, value]) => ({
+        labels: label,
+        values: value
+      }));
+        resolve(formattedData)
+    
+      } catch (error) {
       reject(error);
     }
   });
 }
+
+// application is use dangerous methods
+// application is use dangerous methods
+async function ScanDangerousMethods(endpoints) {
+  function isDangerousMethod(method) {
+    const dangerousMethods = ["DELETE", "PUT", "PATCH"];
+    return dangerousMethods.includes(method.toUpperCase());
+  }
+  return new Promise((resolve, reject) => {
+    const endpointsWithDangerousMethods = {};
+
+    endpoints.forEach(endpoint => {
+        endpoint.methods.forEach(method => {
+            if (isDangerousMethod(method)) {
+                if (!endpointsWithDangerousMethods[endpoint.path]) {
+                    endpointsWithDangerousMethods[endpoint.path] = [method];
+                } else {
+                    endpointsWithDangerousMethods[endpoint.path].push(method);
+                }
+            }
+        });
+    });
+
+    // Convert values to strings
+    for (const key in endpointsWithDangerousMethods) {
+      if (Object.hasOwnProperty.call(endpointsWithDangerousMethods, key)) {
+        endpointsWithDangerousMethods[key] = endpointsWithDangerousMethods[key].join(', ');
+      }
+    }
+
+
+   let data= Object.entries(endpointsWithDangerousMethods).map(([label, value]) => ({
+      labels: label,
+      values: value
+  }))
+    resolve(data);
+  });
+}
+async function combineAndCountMethods(routes) {
+  try {
+      const optionMethods = await scanDirectoryOptionMethod(routes);
+      const arbitraryMethods = await ScanArbitaryMethods(routes);
+      const dangerousMethods = await ScanDangerousMethods(routes);
+
+      // Combine all results into one array
+      const combinedResults = [...optionMethods, ...arbitraryMethods, ...dangerousMethods];
+
+      // Count occurrences of each label
+      const labelCounts = {};
+      combinedResults.forEach(({ labels }) => {
+          if (labelCounts[labels]) {
+              labelCounts[labels]++;
+          } else {
+              labelCounts[labels] = 1;
+          }
+      });
+
+      // Convert labelCounts object to array of objects
+      const result = Object.keys(labelCounts).map(label => ({ label, value: labelCounts[label] }));
+      
+      return result;
+  } catch (error) {
+      console.error("Error:", error);
+      throw error;
+  }
+}
+
+// Sample usage
+
+
+
+// Sample usage
+
+
 
 function containsSequelizeCode(fileContent) {
   // Check if the file content contains Sequelize-related code
@@ -377,6 +450,22 @@ async function DefaultWebPage(routes, hostname) {
 }
 
 
+async function getLatestNodeVersion(version) {
+  try {
+    version=version.replace(/v/g,"")
+    version=parseInt(version)
+    if(version<20){
+      return {older_version_support:true}
+    }else{
+      return {older_version_support:false}
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    return null;
+  }
+}
+
+
 // Scan package.json file
 
 
@@ -396,6 +485,6 @@ const ScanAllContentAndroutes = async (content, file, routes, hostname, middlewa
 }
 module.exports = {
   ScanAllContentAndroutes,
-  checkDirectoryListing,
-  ScanDangerousMethods
+  checkDirectoryListing,scanDirectoryOptionMethod,
+  ScanDangerousMethods,getLatestNodeVersion,ScanArbitaryMethods,combineAndCountMethods
 };

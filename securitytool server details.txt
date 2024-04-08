@@ -7,4 +7,4 @@ password:sadashiv@612
 
 github.com
 
-token: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
+token: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

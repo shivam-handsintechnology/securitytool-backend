@@ -1,6 +1,7 @@
 const Joi = require('joi');
 const { sendResponse } = require('../utils/dataHandler');
 const { errorHandler } = require('../utils/errorHandler');
+const { AllowedDomainsModel } = require('../models/AllowedDomainsModel');
 
 const ValidationMiddleware = (schema) => {
     return (req, res, next) => {
@@ -41,5 +42,18 @@ const ValidationMiddlewareQuery = (schema) => {
         }
     };
 };
+const AuthDomainMiddleware=async(req,res,next)=>{
+   try {
+    let domain=req.query.domain
+    let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
+    if(isExistDomain){
+     next()
+    }else{
+    return errorHandler(res, 500, "Domain is Not Allowed")
+    }
+   } catch (error) {
+    return errorHandler(res, 500,error.message)
+   }
+}
 
-module.exports = {ValidationMiddleware,ValidationMiddlewareQuery};
+module.exports = {ValidationMiddleware,ValidationMiddlewareQuery,AuthDomainMiddleware};

@@ -44,8 +44,6 @@ module.exports = {
             }else{
                 return errorHandler(res, 500, error.message,{succces: false, data: {},message: error.message})
             }
-            
-           
         } catch (error) {
             console.error("Error processing request:", error);
             return errorHandler(res, 500, error.message || "Internal Server Error");

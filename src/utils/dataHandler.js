@@ -1,5 +1,5 @@
 const sendResponse=(res,statusCode=500,message="Success",data)=>{
-    const response={statusCode,message,data}
+    const response={statusCode,succces:true,message,data}
     return res.status(statusCode).json(response)
 }
 const handelErrors=(err, req, res, next) => {

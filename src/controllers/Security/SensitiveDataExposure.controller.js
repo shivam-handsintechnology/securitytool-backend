@@ -9,15 +9,7 @@ module.exports={
             let url = `http://${domain}/fileContent`;
                 let response = await axios.get(url)
                 if (response.status === 200) {
-                
-                    let data = response.data.map(item => {
-                        return {
-                            ...item,
-                            directoryPath: item.directoryPath.replace(/\\/g, "/")
-                        };
-                    });
-                    
-                    sendResponse(res, 200, "success", data)
+                    sendResponse(res, 200, "success", response.data.data)
                 } else {
                     sendResponse(res, 200, "success", [])
                 }

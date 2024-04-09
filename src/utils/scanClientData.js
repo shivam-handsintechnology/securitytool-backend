@@ -323,6 +323,7 @@ async function scanRedirectvulnerability(content, file) {
   return results;
 }
 async function scanSessionvulnerability(content, file, middlewares) {
+  
   const results = {
     jsonwebtoken: false,
     session: false,
@@ -485,6 +486,6 @@ const ScanAllContentAndroutes = async (content, file, routes, hostname, middlewa
 }
 module.exports = {
   ScanAllContentAndroutes,
-  checkDirectoryListing,scanDirectoryOptionMethod,
+  checkDirectoryListing,scanDirectoryOptionMethod,scanSessionvulnerability,
   ScanDangerousMethods,getLatestNodeVersion,ScanArbitaryMethods,combineAndCountMethods
 };

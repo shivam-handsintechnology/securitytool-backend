@@ -72,19 +72,20 @@ const searchInFiles = async (ssh, files, searchTerm) => {
 Register = async (req, res) => {
   try {
     // const isValidHostname = await checkDomainAvailability(req.body.domain);
-    const { containsSpecialCharacter, containsLowercase, containsUppercase, containsNumber } = await validatePassword(req.body.password)
-    if (!containsSpecialCharacter) {
-      return sendResponse(res, 406, "Please enter password 1 Special charater");
-    }
-    else if (!containsLowercase) {
-      return sendResponse(res, 406, "Please enter password 1  Lowercase letter",);
-    }
-    else if (!containsUppercase) {
-      return sendResponse(res, 406, "Please enter password 1  Uppercase letter",);
-    }
-    else if (!containsNumber) {
-      return sendResponse(res, 406, "Please enter password 1  Number letter",);
-    }
+    // const { containsSpecialCharacter, containsLowercase, containsUppercase, containsNumber } = await validatePassword(req.body.password)
+    // if (!containsSpecialCharacter) {
+    //   throw new Error()
+    //   return sendResponse(res, 406, "Please enter password 1 Special charater");
+    // }
+    // else if (!containsLowercase) {
+    //   return sendResponse(res, 406, "Please enter password 1  Lowercase letter",);
+    // }
+    // else if (!containsUppercase) {
+    //   return sendResponse(res, 406, "Please enter password 1  Uppercase letter",);
+    // }
+    // else if (!containsNumber) {
+    //   return sendResponse(res, 406, "Please enter password 1  Number letter",);
+    // }
     const error = ValidateUserSignUp(req.body)
     if (error) {
       return sendResponse(res, 400, error,);
@@ -132,31 +133,25 @@ Login = async (req, res) => {
   try {
     const error = ValidateUserLogin(req.body)
     if (error) {
-      return sendResponse(res, 400, error,);
+      throw new Error("user does not exist") 
     }
 
     const user = await User.findOne({ email: req.body.email })
-    if (user) {
-      //console.log(user.password)
+    if (!user) {
+      throw new Error("user does not exist")
+    }
+   
       var bytes = CryptoJS.AES.decrypt(user.password, key);
       var decrypted = bytes.toString(CryptoJS.enc.Utf8);
-      if (decrypted == req.body.password) {
-        const token = jwt.sign({ id: user._id, appid: user.appid }, process.env.JWT_SECRET, { expiresIn: "365d" })
-        // Set access token in a cookie
-        res.cookie('access_token', token, { secure: false });
-
-        return sendResponse(res, 200, "login successfully", { token, appid: user.appid });
-      } else {
-        return sendResponse(res, 406, "please enter valid credentials")
-      }
-    }
-    else if (!user) {
-      return sendResponse(res, 404, "user does not exist");
-    }
+      if (decrypted !== req.body.password) {
+        throw new Error("please enter valid credentials")
+      } 
+    const token = jwt.sign({ id: user._id, appid: user.appid }, process.env.JWT_SECRET, { expiresIn: "365d" })
+    return sendResponse(res, 200, "login successfully", { token, appid: user.appid });
 
   } catch (error) {
-    //console.log(error)
-    return errorHandler(res)
+    console.log(error)
+    return errorHandler(res,500,error.message,)
   }
 
 }

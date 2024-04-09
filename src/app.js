@@ -49,6 +49,7 @@ if (cluster.isPrimary) {
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
+  
   cluster.on("exit", (worker, code, signal) => {
     //console.log(code, signal);
     //console.log(`worker ${worker.process.pid} died`);

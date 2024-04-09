@@ -26,6 +26,7 @@
     "crypto-js": "^4.1.1",
     "csv-parser": "^3.0.0",
     "dotenv": "^16.0.3",
+    "email-verify-security": "^0.2.1",
     "express": "^4.18.2",
     "express-fileupload": "^1.5.0",
     "express-rate-limit": "^7.1.5",

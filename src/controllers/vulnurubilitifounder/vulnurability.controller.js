@@ -23,6 +23,7 @@ const { sessionvunurability } = require('../../utils/sessionvalidationclient');
 const { AllowedDomainsModel } = require('../../models/AllowedDomainsModel');
 const { scanStaticUrl } = require('../../helpers/scanStaticUrl');
 const { DomainValidation } = require('../../helpers/Validators');
+const verifyEmail = require('../../utils/emailverify');
 module.exports = {
     httpparameterpollution: async (req, res) => {
         try {
@@ -554,14 +555,20 @@ module.exports = {
     emailverify: async (req, res) => {
         try {
             let { email, hostname, appid, ip } = req.body;
-            const EmailExist = await EmailVerifyModel.findOne({ ip: ip, appid, email });
-            if (EmailExist) {
+                let isVerifyEmail=await verifyEmail(email)
+                if(!isVerifyEmail){
+                    const EmailExist = await EmailVerifyModel.findOne({ ip: ip, appid, email });
+                    if (!EmailExist) {
+                        await EmailVerifyModel.create({ ip: ip, appid, email })
+                        return sendResponse(res, 200, "fetch", EmailExist)
+                    }else{
+                        throw new Error("Email Exist ")
+                    }
 
-                return sendResponse(res, 200, "fetch", EmailExist)
-            }
-
+                }
+                return sendResponse(res, 200, "fetch", isVerifyEmail)
         } catch (error) {
-            return res.status(500).json({ message: "Internal Server Error" });
+            return res.status(500).json({ message: error.message });
         }
     },
     passwordkeys: async (req, res) => {

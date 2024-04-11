@@ -14,6 +14,6 @@ module.exports = async function checkVerification(req, res, next) {
     next();
   } else {
     // Person is not verified, send an error response or redirect
-    res.status(401).json('Unauthorized'); // Example error response
+    return  res.status(401).json('Unauthorized'); // Example error response
   }
 }

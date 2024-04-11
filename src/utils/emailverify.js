@@ -10,7 +10,7 @@ async function verifyEmail(email) {
       return resolve(info.success)
     
   } catch (err) {
-     reject(err)
+     resolve(false)
   }
   })
 }

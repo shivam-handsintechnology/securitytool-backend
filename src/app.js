@@ -34,12 +34,12 @@ app.use(helmet())
 app.disable('x-powered-by');
 app.disable('etag');
 const AutoProtectCode = require("monitornodejstestversion")
-app.use(AutoProtectCode.validateAndSetMiddleware)
+app.use(AutoProtectCode.validateAndSetMiddleware( "8dae6ee9-ad81-417a-93a0-f60a7e9e570c"))
 app.use(apirouter)
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error(err.stack);
-  res.status(500).send('Something broke!');
+  res.status(500).json({message:'Something broke!'});
 });
 
 const PortNumber = 20000;

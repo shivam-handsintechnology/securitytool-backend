@@ -2,6 +2,7 @@
 const { default: mongoose } = require('mongoose')
 const { middlewareModel } = require('../models/midlwaresModel')
 const { sendResponse } = require('../utils/dataHandler')
+const { errorHandler } = require('../utils/errorHandler')
 const getMiddlewareController = async (req, res) => {
   try {
     const data = await middlewareModel.aggregate([
@@ -24,12 +25,12 @@ const getMiddlewareController = async (req, res) => {
       }
     ])
     if (data) {
-      sendResponse(res, 200, "data fetch successfully", data[0])
+     return  sendResponse(res, 200, "data fetch successfully", data[0])
     } else {
-      sendResponse(res, 404, "data Not Found")
+      return sendResponse(res, 404, "data Not Found")
     }
   } catch (error) {
-    console.error(error)
+   return errorHandler(res,500,error.message)
   }
 }
 const getMiddlewareControllerForClient = async (req, res) => {
@@ -38,9 +39,9 @@ const getMiddlewareControllerForClient = async (req, res) => {
 
       const data = await middlewareModel.findOne({ appid: req.query.appid })
       if (data) {
-        sendResponse(res, 200, "data fetch successfully", data)
+        return  sendResponse(res, 200, "data fetch successfully", data)
       } else {
-        sendResponse(res, 404, "Your App id Not matched")
+        return  sendResponse(res, 404, "Your App id Not matched")
       }
     } else {
       return sendResponse(res, 404, "Please enter appid")
@@ -48,6 +49,7 @@ const getMiddlewareControllerForClient = async (req, res) => {
 
   } catch (error) {
     console.error(error)
+    return errorHandler(res,500,error.message)
   }
 }
 const findAndUpdateMiddlewareController = async (req, res) => {
@@ -57,16 +59,16 @@ const findAndUpdateMiddlewareController = async (req, res) => {
     const data = await middlewareModel.findOneAndUpdate({ user: req.user.id }, body, { new: true }).select("-__v -appid -_id -user -createdAt -updatedAt -BlockUserMiddlware -ldapInjectionDetectorMiddlware")
     if (data) {
       const message = Object.keys(req.body).toString().replace('Middlware', '') + " " + "updated successfully"
-      sendResponse(res, 200, message, data)
       setTimeout(() => {
         process.exit()
       }, 5000);
+      return  sendResponse(res, 200, message, data)
     } else {
-      sendResponse(res, 404, "data Not Found")
+     return sendResponse(res, 404, "data Not Found")
     }
 
   } catch (error) {
-    console.error(error)
+    return errorHandler(res,500,error.message)
   }
 }
 const middlwareController = {

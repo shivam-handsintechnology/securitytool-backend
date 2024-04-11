@@ -19,11 +19,7 @@ router.use("/api/security", verifytoken, Security)
 router.use("/api/client", GetClientInformation)
 router.use("/api/auth", Authrouter)
 // Broken Authentication and Session Management
-router.get("/api/AuthSessionGuardian/SessionManagement",
-verifytoken,
-// ValidationMiddlewareQuery(DomainValidationSchema),
-AuthDomainMiddleware,
-AuthSessionGuardian.SessionManagement
+router.use("/api/AuthSessionGuardian",AuthSessionGuardian
 )
 // Insecure Direct Object References
 router.use("/api/InsecureObjectRefGuard", InsecureObjectRefGuard)

@@ -76,10 +76,9 @@ module.exports = {
     sslverify: async (req, res) => {
         try {
             let domain=req.query.domain
-            let url=`http://${domain}`
-            console.log(url)
-            const response = await SSLverifier(url)
-            return sendResponse(res, 200, "fetch", { succces: true, data:response.data,message:"SSL verified successfully" })
+           
+            const response = await SSLverifier(domain).then(data=>data)
+            return sendResponse(res, 200, "fetch", { succces: true, data:response,message:"SSL verified successfully" })
         } catch (error) {
             console.log("error", error)
             return errorHandler(res, 500, error.message,{succces: false, data: {},message: error.message})

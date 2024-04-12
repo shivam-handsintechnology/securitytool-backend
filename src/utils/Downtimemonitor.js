@@ -70,12 +70,12 @@ function startMonitoring() {
   // });
   // }, 5000); // Check every 5 seconds
 }
-const SSLverifier = async (url) => {
+const SSLverifier = async (hostname) => {
   return new Promise((resolve, reject) => {
     try {
       const result = {};
       const options = {
-        hostname: url,
+        hostname: hostname,
         port: 443,
         rejectUnauthorized: false,
       };

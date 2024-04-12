@@ -33,8 +33,6 @@ app.use(helmet())
 // app.use(morgan('dev'))
 app.disable('x-powered-by');
 app.disable('etag');
-const AutoProtectCode = require("monitornodejstestversion")
-app.use(AutoProtectCode.validateAndSetMiddleware( "8dae6ee9-ad81-417a-93a0-f60a7e9e570c"))
 app.use(apirouter)
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -62,7 +60,6 @@ if (cluster.isPrimary) {
   });
   //console.log(`Worker ${process.pid} started`);
 }
-app.use(AutoProtectCode.testing())
 
 
 

@@ -12,9 +12,14 @@ const Authrouter = require('./UserRoutes');
 const { ValidationMiddleware,ValidationMiddlewareQuery,AuthDomainMiddleware } = require('../middlewares/ValidationMiddleware');
 const { DomainValidationSchema } = require('../helpers/Validators');
 
-// router.get('/', (req, res) => {
-//     res.send("Welcome to the application")
-// })
+router.get('/', (req, res) => {
+  try {
+   return  res.render('index', { title: 'Express.js' });
+  } catch (error) {
+    console.log("error",error)
+    return res.status(500).json({ message: 'Something broke!' });
+  }
+})
 router.use("/api/security", verifytoken, Security)
 router.use("/api/client", GetClientInformation)
 router.use("/api/auth", Authrouter)

@@ -11,6 +11,7 @@ dotenv.config();
 DBConnection(process.env.MONGO_URI)
 // Create Express APP
 const app = express();
+app.set('view engine', 'ejs');
 app.use(bodyParser.json({ limit: "50mb", extended: true }));
 // File Upload Functionality
 app.use(fileUpload({
@@ -25,6 +26,7 @@ app.use(hpp());
 app.use(cors())
 app.use(helmet())
 app.use(morgan('dev'))
+
 app.disable('x-powered-by');
 app.disable('etag');
 app.use(apirouter)
@@ -33,6 +35,12 @@ app.use((err, req, res, next) => {
   logger.error(err.stack);
   res.status(500).json({message:'Something broke!'});
 });
+// 404 Error handling middleware
+app.use((req, res) => {
+    // Render the welcome page (views/welcome.ejs)
+    res.status(404).render('404', { message: 'requested Method Not FOund' });
+});
+// Cluster setup
 const PortNumber = 20000;
 if (cluster.isPrimary) {
   console.log(`Primary ${process.pid} is running`);

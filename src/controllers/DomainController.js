@@ -2,20 +2,18 @@ const { checkDomainAvailability } = require("../utilities/functions/functions");
 const { sendResponse } = require("../utils/dataHandler");
 const { default: mongoose } = require("mongoose");
 const { AllowedDomainsModel } = require("../models/AllowedDomainsModel");
+const User = require("../models/User");
 module.exports = {
     addDomain: async (req, res) => {
         try {
             //console.log(req.user)
-            const { domain,type } = req.body;
+            const { domain } = req.body;
            
             if(!domain){
                 return sendResponse(res, 400, "domain is required");
             }
             else if(domain.includes("localhost")){
                 return sendResponse(res, 400, "Domain should not be localhost");
-            }
-            else if(!type){
-                return sendResponse(res, 400, "Type is required");
             }
             const result = await checkDomainAvailability(domain);
             if (result) {
@@ -24,7 +22,42 @@ module.exports = {
                 if (existdomain) {
                     return sendResponse(res, 400, "Domain already exist");
                 } else {
-                    obj["type"]=type
+                    await AllowedDomainsModel.create(obj);
+                    return sendResponse(res, 200, "Domain added successfully");
+                }
+
+            }
+            return sendResponse(res, 404, "Domain not found");
+        } catch (error) {
+            return sendResponse(res, 500, error.message);
+
+        }
+    },
+    addDomainToMiddlware: async (req, res) => {
+        try {
+            //console.log(req.user)
+            const { domain,appid } = req.body;
+           
+            if(!domain){
+                return sendResponse(res, 400, "domain is required");
+            }
+            if(!id){
+                return sendResponse(res, 400, "id is required");
+            }
+            else if(domain.includes("localhost")){
+                return sendResponse(res, 400, "Domain should not be localhost");
+            }
+          
+            const result = await checkDomainAvailability(domain);
+            if (result) {
+                let user=await User.findOne({appid})
+                console.log("User",user)
+                return false
+                let obj={ user: id, domain: domain }
+                let existdomain = await AllowedDomainsModel.findOne(obj);
+                if (existdomain) {
+                    return sendResponse(res, 200, "Domain already exist");
+                } else {
                     await AllowedDomainsModel.create(obj);
                     return sendResponse(res, 200, "Domain added successfully");
                 }

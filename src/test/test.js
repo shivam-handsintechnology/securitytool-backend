@@ -108,7 +108,7 @@ describe("Test", () => {
 // Sql injection test cases
   it('should allow a request with a valid URL', (done) => {
     app.post(validUrl, (req, res) => {
-      res.status(200).json(req.body);
+      return res.status(200).json(req.body);
     });
     request(app)
       .post(validUrl)

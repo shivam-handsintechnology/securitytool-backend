@@ -5,12 +5,13 @@ const apirouter = require('./routes')
 const checkVerification = require('./middlewares/verifyClient')
 const { DBConnection } = require("./config/connection");
 const JsSnippetController = require('./controllers/JsSnippetController');
-const cors = require("cors"),session = require('express-session'), fileUpload = require('express-fileupload'), express = require("express"); hpp = require('hpp'), morgan = require('morgan'), helmet = require('helmet'), bodyParser = require('body-parser'), dotenv = require('dotenv'), cluster = require("cluster"), os = require("os"), numCPUs = os.cpus().length, process = require("process");
+const cors = require("cors"), fileUpload = require('express-fileupload'), express = require("express"); hpp = require('hpp'), morgan = require('morgan'), helmet = require('helmet'), bodyParser = require('body-parser'), dotenv = require('dotenv'), cluster = require("cluster"), os = require("os"), numCPUs = os.cpus().length, process = require("process");
 // Connected to mongodb
 dotenv.config();
 DBConnection(process.env.MONGO_URI)
 // Create Express APP
 const app = express();
+app.set('view engine', 'ejs');
 app.use(bodyParser.json({ limit: "50mb", extended: true }));
 // File Upload Functionality
 app.use(fileUpload({
@@ -21,48 +22,41 @@ app.use(fileUpload({
 app.get('/protected', JsSnippetController.JsSnippet);
 app.post('/protected', JsSnippetController.getALlDataFromSnippet);
 app.set('trust proxy', 1) // trust first proxy
-app.use(session({
-  secret: 'keyboard cat',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: true }
-}))
 app.use(hpp());
 app.use(cors())
 app.use(helmet())
-// app.use(morgan('dev'))
+app.use(morgan('dev'))
+
 app.disable('x-powered-by');
 app.disable('etag');
-const AutoProtectCode = require("monitornodejstestversion")
-app.use(AutoProtectCode.validateAndSetMiddleware)
 app.use(apirouter)
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error(err.stack);
-  res.status(500).send('Something broke!');
+  res.status(500).json({message:'Something broke!'});
 });
-
+// 404 Error handling middleware
+app.use((req, res) => {
+    // Render the welcome page (views/welcome.ejs)
+    res.status(404).render('404', { message: 'requested Method Not FOund' });
+});
+// Cluster setup
 const PortNumber = 20000;
 if (cluster.isPrimary) {
-  //console.log(`Primary ${process.pid} is running`);
+  console.log(`Primary ${process.pid} is running`);
   // Fork workers.
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
-  
   cluster.on("exit", (worker, code, signal) => {
-    //console.log(code, signal);
-    //console.log(`worker ${worker.process.pid} died`);
+    console.log(`worker ${worker.process.pid} died`);
     cluster.fork();
   });
 } else {
   app.listen(PortNumber, async function (req, res) {
-
-    //console.log("Server started at port", PortNumber);
+    console.log(`Server is running on port ${PortNumber}`);
   });
-  //console.log(`Worker ${process.pid} started`);
 }
-app.use(AutoProtectCode.testing())
 
 
 

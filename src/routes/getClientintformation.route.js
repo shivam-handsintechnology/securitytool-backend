@@ -1,26 +1,33 @@
 // Import required modules
 const router = require("express").Router();
 const Vulnurabilitycontroller = require('../controllers/vulnurubilitifounder/vulnurability.controller');
+const DomainController = require('../controllers/DomainController');
 const Validators = require("../helpers/Validators");
 const verifyToken = require('../middlewares/VerifyUser')
-const { ValidationMiddlewareQuery } = require("../middlewares/ValidationMiddleware");
+const { ValidationMiddlewareQuery,AuthDomainMiddlewarePackage } = require("../middlewares/ValidationMiddleware");
 const getMiddlewareController = require('../controllers/middlwaresController').getMiddlewareControllerForClient
-// //console.log('Vulnurabilitycontroller', Vulnurabilitycontroller)
+// Insecure Direct Object References (3. HTTP parameter pollution)
 router.get("/httpparameterpollution", verifyToken,
 //  ValidationMiddlewareQuery(Validators.DomainValidationSchema), 
  Vulnurabilitycontroller.httpparameterpollution);
+//  SSL Information 
 router.get("/sslverify",
 verifyToken,
 //  ValidationMiddlewareQuery(Validators.DomainValidationSchema), 
  Vulnurabilitycontroller.sslverify);
 router.get('/plaincredential', verifyToken, Vulnurabilitycontroller.plaincredential)
-router.post("/alloweddomains", Vulnurabilitycontroller.alloweddomains);
+// Allowed Domains
+router.post("/alloweddomains",DomainController.addDomainToMiddlware);
+// Inections Data Create
 router.post("/createuserdetails", Vulnurabilitycontroller.createuserdetails);
-router.post("/responsecodeavailableornot", Vulnurabilitycontroller.responsecodeavailableornot);
-router.post("/emailverify", Vulnurabilitycontroller.emailverify);
+// Error Message (Server returns HTTP 403 error message,Server returns HTTP error message,Helpful error message displayed at login page)
+router.post("/error-messages", Vulnurabilitycontroller.errorMessages);
+router.post("/emailverify",AuthDomainMiddlewarePackage, Vulnurabilitycontroller.emailverify);
 router.get("/passwordkeys", Vulnurabilitycontroller.passwordkeys);
-router.post("/sensitivekeysandPasswordValidate", Vulnurabilitycontroller.sensitivekeysandPasswordValidate);
-router.post("/sensitivekeysinurl", Vulnurabilitycontroller.sensitivekeysinurl);
+// Sensitive information revealed in HTTP response
+router.post("/sensitive-information-check",AuthDomainMiddlewarePackage, Vulnurabilitycontroller.sensitiveInformationCheck);
+// Critical information in URL
+router.post("/sensitivekeysinurl",AuthDomainMiddlewarePackage, Vulnurabilitycontroller.sensitivekeysinurl);
 // router.post("/scanhardcodedata", Vulnurabilitycontroller.scanhardcodedata);
 // router.post("/scanpasswordhashing", Vulnurabilitycontroller.scanpasswordhashing);
 // router.post("/optionmethodvulnerability", Vulnurabilitycontroller.optionmethodvulnerability);

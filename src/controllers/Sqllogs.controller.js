@@ -29,14 +29,14 @@ const getAllSqllLogs = async (req, res) => {
             // Sort by username in ascending order
         ];
         const data = await Project_Security_Logs.aggregate(pipeline)
-        sendResponse(res, 200, "data fetch successfully", {
+        return sendResponse(res, 200, "data fetch successfully", {
             data,
             totalCount,
             currentPage: pageNumber,
             totalPages: Math.ceil(totalCount / limitNumber)
         })
     } catch (error) {
-        errorHandler(res, error)
+        return  errorHandler(res, error)
     }
 }
 const getSingleSqllLogs = async (req, res) => {
@@ -44,9 +44,9 @@ const getSingleSqllLogs = async (req, res) => {
         const ip = req.body.ip
         if (ip) {
             const data = await Project_Security_Logs.findOne({ ip })
-            sendResponse(res, 200, "data fetch successfully", data)
+            return sendResponse(res, 200, "data fetch successfully", data)
         } else {
-            sendResponse(res, 404, "plesae enter valid id")
+            return sendResponse(res, 404, "plesae enter valid id")
         }
     } catch (error) {
         errorHandler(res, error)
@@ -77,11 +77,9 @@ const getSingleSqllLogsCount = async (req, res) => {
         })
        
         console.log(finalResult)
-        sendResponse(res, 200, "data fetch successfully", finalResult)
-
-        res.json({
-            message: 'okay'
-        })
+       return sendResponse(res, 200, "data fetch successfully", finalResult)
+ 
+    
 
     } catch (error) {
       return   errorHandler(res, error)
@@ -94,9 +92,9 @@ const deleteSingleSqllLogs = async (req, res) => {
 
         const data = await Project_Security_Logs.findOneAndDelete({ ip })
         if (data) {
-            sendResponse(res, 200, "data deleted successfully", data)
+            return   sendResponse(res, 200, "data deleted successfully", data)
         } else {
-            sendResponse(res, 404, "please enter valid id", data)
+          return  sendResponse(res, 404, "please enter valid id", data)
         }
 
     } catch (error) {
@@ -112,12 +110,12 @@ const deleteAllSqllLogs = async (req, res) => {
     try {
         if (ip) {
             const data = await Project_Security_Logs.deleteMany({ ip: ip })
-            sendResponse(res, 200, "data deleted  successfully", data)
+            return sendResponse(res, 200, "data deleted  successfully", data)
         } else {
-            errorHandler(res, 404, "data not found")
+            return errorHandler(res, 404, "data not found")
         }
     } catch (error) {
-        errorHandler(res, error)
+        return errorHandler(res, error)
     }
 }
 

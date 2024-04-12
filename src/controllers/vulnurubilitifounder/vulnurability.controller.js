@@ -36,12 +36,11 @@ module.exports = {
                 console.log("data",response.data)
                 let isHttp=await hashttpParametersPollutionavailable(response.data)
                 let data={succces: false, data:isHttp,message:isHttp}
-                sendResponse(res,200,"success",data)
+                return   sendResponse(res,200,"success",data)
 
              }else{
                throw new Error("Data Not found")
              }
-             console.log("response",response.data)
             }else{
                 return errorHandler(res, 500, error.message,{succces: false, data: {},message: error.message})
             }
@@ -60,11 +59,10 @@ module.exports = {
              if(response.status===200){
                 console.log("data",response.data)
                 let isHttp=await hashttpParametersPollutionavailable(response.data)
-                sendResponse(res,200,"success",isHttp)
+                return  sendResponse(res,200,"success",isHttp)
              }else{
-                sendResponse(res,200,"success","Data Not found")
+                return sendResponse(res,200,"success","Data Not found")
              }
-             console.log("response",response.data)
             }else{
                 return errorHandler(res, 500,"Domain is Not Find" );
             }
@@ -492,6 +490,7 @@ module.exports = {
             // ip = "206.84.234.30"
             //console.log("ip checker", UserRawData.ip)
             const update = UserRawData;
+            console.log({UserRawData})
             const alloweddomains = await User.findOne(
                 { appid },
                 { password: 0, createdAt: 0, updatedAt: 0 }
@@ -527,7 +526,7 @@ module.exports = {
         }
         //  return  res.status(200).json("Ok")
     },
-    responsecodeavailableornot: async (req, res) => {
+    errorMessages: async (req, res) => {
         try {
             let { data, hostname, url, appid } = req.body;
             const alloweddomains = await User.findOne(
@@ -554,15 +553,15 @@ module.exports = {
     },
     emailverify: async (req, res) => {
         try {
-            let { email, hostname, appid, ip } = req.body;
+            let { email, domain, appid, ip } = req.body;
                 let isVerifyEmail=await verifyEmail(email)
                 if(!isVerifyEmail){
-                    const EmailExist = await EmailVerifyModel.findOne({ ip: ip, appid, email });
+                    const EmailExist = await EmailVerifyModel.findOne({ email, domain, appid, ip });
                     if (!EmailExist) {
-                        await EmailVerifyModel.create({ ip: ip, appid, email })
+                        await EmailVerifyModel.create({email, domain, appid, ip })
                         return sendResponse(res, 200, "fetch", EmailExist)
                     }else{
-                        throw new Error("Email Exist ")
+                        return sendResponse(res, 200, "fetch", EmailExist)
                     }
 
                 }
@@ -583,120 +582,147 @@ module.exports = {
             return res.status(500).json({ message: "Internal Server Error" });
         }
     },
-    sensitivekeysandPasswordValidate: async (req, res) => {
+    // sensitiveInformationCheck: async (req, res) => {
+    //     try {
+    //         var { hostname, currentData, appid } = req.body;
+    //         const alloweddomains = await User.findOne(
+    //             { appid },
+    //             { password: 0, createdAt: 0, updatedAt: 0 }
+    //         ).lean();
+    //         if (alloweddomains) {
+    //             const sensitivedatainbody = await checkForSensitiveInfoInBody(
+    //                 currentData,
+    //                 sensitivedata
+    //             );
+    //             const password = await CheckPasswordKeyText(currentData, passwordkeys);
+    //             if (password) {
+    //                 const HashedPassword = await isHashedPassword(password);
+    //                 const existingMessage = await PasswordValidateModel.findOne({
+    //                     user: mongoose.Types.ObjectId(alloweddomains._id),
+    //                     hostname,
+    //                 });
+    //                 if (existingMessage) {
+    //                     // //console.log("Found existing HashedPassword in Db");
+    //                     await PasswordValidateModel.findOneAndUpdate(
+    //                         { user: mongoose.Types.ObjectId(alloweddomains._id), hostname },
+    //                         { HashedPassword: HashedPassword.message }
+    //                     );
+    //                 } else {
+    //                     // //console.log("Create New HashedPassword in Db");
+    //                     await PasswordValidateModel.create({
+    //                         _id: alloweddomains._id,
+    //                         hostname: hostname,
+    //                         HashedPassword: HashedPassword.message,
+    //                     });
+    //                 }
+    //             }
+    //             if (sensitivedatainbody) {
+    //                 const existingMessage = await SensitiveInfoInBodyModel.findOne(
+    //                     { user: mongoose.Types.ObjectId(alloweddomains._id), hostname, sensitivekeys: sensitivedatainbody },
+    //                     { exist: true }
+    //                 );
+    //                 if (existingMessage) {
+    //                     // Handle matching hostname and sensitive key
+    //                     // //console.log("Found existing sensitivedata in body");
+    //                 } else {
+    //                     // //console.log("Create New sensitivedata in body");
+    //                     await SensitiveInfoInBodyModel.create({
+    //                         user: mongoose.Types.ObjectId(alloweddomains._id),
+    //                         hostname,
+    //                         sensitivekeys: sensitivedatainbody,
+    //                     });
+    //                     // Return success response for creating new data
+    //                     res.status(200).json({ succes: true });
+    //                 }
+    //             } else {
+    //                 res.status(200).json({ sucess: true });
+    //             }
+    //         } else {
+    //             res.status(403).json("you are not allowed");
+    //         }
+    //     } catch (error) {
+    //         // //console.log("sensitive error", error);
+    //     }
+    // },
+    sensitiveInformationCheck: async (req, res) => {
         try {
-            var { hostname, currentData, appid } = req.body;
-            const alloweddomains = await User.findOne(
-                { appid },
-                { password: 0, createdAt: 0, updatedAt: 0 }
-            ).lean();
-            if (alloweddomains) {
-                const sensitivedatainbody = await checkForSensitiveInfoInBody(
-                    currentData,
-                    sensitivedata
-                );
-                const password = await CheckPasswordKeyText(currentData, passwordkeys);
-                if (password) {
-                    const HashedPassword = await isHashedPassword(password);
-                    const existingMessage = await PasswordValidateModel.findOne({
-                        user: mongoose.Types.ObjectId(alloweddomains._id),
-                        hostname,
+            const { data, url, domain, appid,type } = req.body;
+            const { _id } = req.user;
+            console.log(_id)
+            const sensitivekey = await checkForSensitiveInfoInBody(data, sensitivedata);
+            let successMessage;
+            if (sensitivekey) {
+                const existingMessage = await CrticalInformationInurl.findOne({
+                    user: _id,
+                    domain,
+                    sensitivekeys: sensitivekey,
+                    appid,
+                    type
+                });
+    
+                if (existingMessage) {
+                    console.log("data>>>>",existingMessage)
+                    successMessage = "Sensitive key already exists in the URL.";
+                } else {
+                  let data=  await CrticalInformationInurl.create({
+                        user: _id,
+                        domain,
+                        url,
+                        sensitivekeys: sensitivekey,
+                        appid,type
                     });
-                    if (existingMessage) {
-                        // //console.log("Found existing HashedPassword in Db");
-                        await PasswordValidateModel.findOneAndUpdate(
-                            { user: mongoose.Types.ObjectId(alloweddomains._id), hostname },
-                            { HashedPassword: HashedPassword.message }
-                        );
-                    } else {
-                        // //console.log("Create New HashedPassword in Db");
-                        await PasswordValidateModel.create({
-                            _id: alloweddomains._id,
-                            hostname: hostname,
-                            HashedPassword: HashedPassword.message,
-                        });
-                    }
-                }
-                if (sensitivedatainbody) {
-                    const existingMessage = await SensitiveInfoInBodyModel.findOne(
-                        { user: mongoose.Types.ObjectId(alloweddomains._id), hostname, sensitivekeys: sensitivedatainbody },
-                        { exist: true }
-                    );
-                    if (existingMessage) {
-                        // Handle matching hostname and sensitive key
-                        // //console.log("Found existing sensitivedata in body");
-                    } else {
-                        // //console.log("Create New sensitivedata in body");
-                        await SensitiveInfoInBodyModel.create({
-                            user: mongoose.Types.ObjectId(alloweddomains._id),
-                            hostname,
-                            sensitivekeys: sensitivedatainbody,
-                        });
-                        // Return success response for creating new data
-                        res.status(200).json({ succes: true });
-                    }
-                } else {
-                    res.status(200).json({ sucess: true });
+                    console.log("data>>>>",data)
+                    successMessage = "New sensitive key added to the URL.";
                 }
             } else {
-                res.status(403).json("you are not allowed");
+                successMessage = "No sensitive key found in the data.";
             }
+    
+            return res.status(200).json({ success: true, message: successMessage });
         } catch (error) {
-            // //console.log("sensitive error", error);
-        }
-    },
-    sensitivekeysinurl: async (req, res) => {
-        try {
-            // //console.log(req.body)
-            let { data, url, hostname, appid } = req.body;
-
-            const alloweddomains = await User.findOne(
-                { appid },
-                { password: 0, createdAt: 0, updatedAt: 0 }
-            ).lean();
-            if (alloweddomains) {
-                const sensitivekey = await checkForSensitiveInfoInBody(
-                    data,
-                    sensitivedata
-                );
-                if (sensitivekey) {
-                    const existingMessage = await CrticalInformationInurl.findOne(
-                        {
-                            user: mongoose.Types.ObjectId(alloweddomains._id),
-                            hostname,
-                            sensitivekeys: sensitivekey,
-                        },
-                        { _id: 0 }
-                    );
-                    // //console.log({ existingMessage });
-                    if (existingMessage) {
-                        // //console.log("Found existing sensitive key in URL");
-                    } else {
-                        // //console.log("Creating new sensitive key in URL");
-                        const d = await CrticalInformationInurl.create({
-                            user: alloweddomains._id,
-                            hostname,
-                            url,
-                            sensitivekeys: sensitivekey,
-                        });
-                        // //console.log(d);
-                        // Return success response for creating new data
-                        return res.status(201).json({ success: true });
-                    }
-                } else {
-                    // Return response indicating that no sensitive key was found
-                    return res.status(200).json({ sensitivekey: false });
-                }
-            } else {
-                res.status(403).json("you are not allowed");
-            }
-            //
-        } catch (error) {
-            // //console.log({ sensitivekeysinurlerror: error });
-            // Handle the error routerropriately
+            console.log({ sensitivekeysinurlerror: error });
             return res.status(500).json({ error: "Internal Server Error" });
         }
     },
+   sensitivekeysinurl: async (req, res) => {
+        try {
+            const { data, url, domain, appid,type } = req.body;
+            const { _id } = req.user;
+            console.log(_id)
+            const sensitivekey = await checkForSensitiveInfoInBody(data, sensitivedata);
+            let successMessage;
+            if (sensitivekey) {
+                const existingMessage = await CrticalInformationInurl.findOne({
+                    user: _id,
+                    domain,
+                    sensitivekeys: sensitivekey,
+                    appid,type
+                });
+    
+                if (existingMessage) {
+                    successMessage = "Sensitive key already exists in the URL.";
+                } else {
+                  let data=  await CrticalInformationInurl.create({
+                        user: _id,
+                        domain,
+                        url,
+                        sensitivekeys: sensitivekey,
+                        appid,type
+                    });
+                    console.log("data>>>>",data)
+                    successMessage = "New sensitive key added to the URL.";
+                }
+            } else {
+                successMessage = "No sensitive key found in the data.";
+            }
+    
+            return res.status(200).json({ success: true, message: successMessage });
+        } catch (error) {
+            console.log({ sensitivekeysinurlerror: error });
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+    },
+    
 
     addlogsdata: async (req, res) => {
         try {
@@ -713,17 +739,17 @@ module.exports = {
                         { user: mongoose.Types.ObjectId(alloweddomains._id), hostname: sid },
                         { LogsData: logs }
                     );
-                    res.json(updatedata);
+                    return   res.json(updatedata);
                 } else if (!finduser) {
                     const newdata = await ClientLoagsModel.create({
                         user: mongoose.Types.ObjectId(alloweddomains._id),
                         LogsData: logs,
                         hostname: sid,
                     });
-                    res.json(newdata);
+                    return res.json(newdata);
                 }
             } else {
-                res.status(403).json("you are not allowed");
+               return res.status(403).json("you are not allowed");
             }
         } catch (error) {
             // console.log
@@ -839,12 +865,12 @@ module.exports = {
                         DangerousMethods,
                         npmvulnurabilties
                     }
-                    res.status(200).json(data);
+                    return res.status(200).json(data);
                 } else if (!finduser) {
-                    res.status(404).json("not found");
+                    return res.status(404).json("not found");
                 }
             } else {
-                res.status(403).json("you are not allowed");
+                return  res.status(403).json("you are not allowed");
             }
         } catch (error) {
             return res.status(500).json({ message: "Internal Server Error" });
@@ -881,7 +907,7 @@ module.exports = {
             if (sessionStorageData) {
                 // // //console.log(sessionStorageData)
             }
-            res.json("hello")
+            return  res.json("hello")
             return false
             const sensitivekey = await checkForSensitiveInfoInBody(
                 data,
@@ -914,7 +940,7 @@ module.exports = {
                 return res.status(200).json({ sensitivekey: false });
             }
 
-            res.json("hello")
+            return res.json("hello")
         } catch (error) {
             return res.status(500).json({ message: "Internal Server Error" });
         }
@@ -1028,7 +1054,7 @@ module.exports = {
             } else {
                 // //console.log("any database not found")
             }
-            res.json("ok")
+            return res.json("ok")
         } catch (error) {
             return errorHandler(res, 500, error.message)
         }

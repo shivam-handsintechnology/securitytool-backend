@@ -5,6 +5,7 @@ const { AllowedDomainsModel } = require("../../models/AllowedDomainsModel")
 const { default: axios } = require("axios")
 const { ScanDangerousMethods, getLatestNodeVersion,ScanArbitaryMethods,scanDirectoryOptionMethod } = require("../../utils/scanClientData")
 const { PasswordHashingDataModel } = require("../../models/Security/SecurityMisconfiguration.model")
+const { errorHandler } = require("../../utils/errorHandler")
 const ObjectId = mongoose.Types.ObjectId
 module.exports = {
     arbitraryMethods: async (req, res) => {
@@ -18,9 +19,9 @@ module.exports = {
               
                 let data = await ScanArbitaryMethods(response.data.data)
                 
-                sendResponse(res, 200, "success", data)
+              return  sendResponse(res, 200, "success", data)
             } else {
-                sendResponse(res, 200, "success", [])
+              return  sendResponse(res, 200, "success", [])
             }
             console.log("response", response.data)
         } else {
@@ -28,9 +29,11 @@ module.exports = {
         }
        } catch (error) {
         console.log("error",error)
+        return errorHandler(res,500,error.message)
        }
     },
     DangerousHttpMethodsEnabled: async (req, res) => {
+     try {
         let domain = req.query.domain
         let url = `http://${domain}/getEndpoints`;
         let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
@@ -39,16 +42,20 @@ module.exports = {
             if (response.status === 200) {
                 console.log("data", response.data)
                 let data = await ScanDangerousMethods(response.data.data)
-                sendResponse(res, 200, "success", data)
+               return sendResponse(res, 200, "success", data)
             } else {
-                sendResponse(res, 200, "success", [])
+              return  sendResponse(res, 200, "success", [])
             }
             console.log("response", response.data)
         } else {
             return sendResponse(res, 500, "Domain is Not Find");
         }
+     } catch (error) {
+        return errorHandler(res,500,error.message)
+     }
     },
     OptionsMethodsEnabled: async (req, res) => {
+      try {
         let domain = req.query.domain
         let url = `http://${domain}/getEndpoints`;
         let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
@@ -57,14 +64,17 @@ module.exports = {
             if (response.status === 200) {
                 console.log("data", response.data)
                 let data = await scanDirectoryOptionMethod(response.data.data)
-                sendResponse(res, 200, "success", data)
+                return  sendResponse(res, 200, "success", data)
             } else {
-                sendResponse(res, 200, "success", [])
+                return sendResponse(res, 200, "success", [])
             }
             console.log("response", response.data)
         } else {
             return sendResponse(res, 500, "Domain is Not Find");
         }
+      } catch (error) {
+        return errorHandler(res,500,error.message)
+      }
     },
     passwordsInsecure: async (req, res) => {
         try {
@@ -93,17 +103,18 @@ module.exports = {
 
                     return sendResponse(res, 200, "success", obj);
                 } else {
-                    sendResponse(res, 200, "success", "Data Not found")
+                    return  sendResponse(res, 200, "success", "Data Not found")
                 }
             } else {
                 throw new Error("Domain Is Not exist ")
             }
         } catch (error) {
             console.log(":error", error)
-            return sendResponse(res, 500, "success", error.message)
+            return errorHandler(res, 500, "success", error.message)
         }
     },
     supportoldnodejsversion: async (req, res) => {
+       try {
         let domain = req.query.domain
         let url = `http://${domain}/support-oldnodejs=version`;
         let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
@@ -116,13 +127,16 @@ module.exports = {
                 }
 
                 let data = await getLatestNodeVersion(response.data.data.version)
-                sendResponse(res, 200, "success", data)
+                return sendResponse(res, 200, "success", data)
 
             } else {
-                sendResponse(res, 200, "success", [])
+                return sendResponse(res, 200, "success", [])
             }
         } else {
             return sendResponse(res, 500, "Domain is Not Find");
         }
+       } catch (error) {
+        return errorHandler(res, 500, "success", error.message) 
+       }
     },
 }

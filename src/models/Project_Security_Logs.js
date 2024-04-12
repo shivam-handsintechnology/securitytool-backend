@@ -78,6 +78,9 @@ const psec_logs = new Schema({
   count: {
     type: Number
   },
+  appid: {
+    type: String,ref:'users'
+  },
 
 }, {
   timestamps: true,

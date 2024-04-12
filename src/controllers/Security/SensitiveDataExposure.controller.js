@@ -53,14 +53,14 @@ module.exports={
     SensitiveKeysinUrl: async (req, res) => {
         try {
             let { appid } = req.user;
-            let {  type, page = 1, limit = 10,complete } = req.query; // Default to page 1 and page size of 10 if not provided
+            let {  type, page = 1, limit = 10,complete,domain } = req.query; // Default to page 1 and page size of 10 if not provided
             page = parseInt(page);
             limit = parseInt(limit);
             
             let skip = (page - 1) * limit;
             let pipeline=[]
             if(!complete){
-                pipeline= [{ $match: { appid, type } },
+                pipeline= [{ $match: { appid, type,domain } },
                     { $group: { _id: "$url", count: { $sum: 1 } } },
                     { $project: { labels: "$_id", values: "$count", _id: 0 } },
                     { $sort: { labels: 1 } }, 
@@ -68,7 +68,7 @@ module.exports={
                     { $limit: limit }]
             }
             if(complete){
-                pipeline= [{ $match: { appid, type } },
+                pipeline= [{ $match: { appid, type,domain } },
                     { $sort: { url: 1 } }, 
                     { $skip: skip }, 
                     { $limit: limit }]
@@ -76,7 +76,7 @@ module.exports={
             }
             let [totalCountData, data] = await Promise.all([
                 CrticalInformationInurl.aggregate([
-                    { $match: { appid, type } },
+                    { $match: { appid, type,domain } },
                     { $group: { _id: null, totalCount: { $sum: 1 } } }
                 ]),
                 CrticalInformationInurl.aggregate(pipeline)

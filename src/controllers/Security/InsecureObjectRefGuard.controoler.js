@@ -8,9 +8,10 @@ module.exports = {
             let url = `http://${domain}/DirectoryListingEnable`;
                 let response = await axios.get(url)
                 if (response.status === 200) {
-                    sendResponse(res, 200, "success",response.data.data)
+                    console.log("response",response.data)
+                  return   sendResponse(res, 200, "success",response.data)
                 } else {
-                    sendResponse(res, 200, "success", [])
+                    sendResponse(res, 200, "success",{ directoryUrls:[]})
                 }
           
            } catch (error) {

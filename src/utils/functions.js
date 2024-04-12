@@ -119,38 +119,52 @@ const CreatStatusCodesDetails = async (ErrorStatuscode, message, url, hostname, 
     console.error(error)
   }
 }
-async function hasRobotsTxt(originurl) {
 
-  if (originurl === 'localhost') {
-    return Promise.reject(new Error('localhost not allowed'));
+async function hasRobotsTxt(hostname) {
+  // Check if the hostname is localhost, if so, reject with an error
+  if (hostname.includes('localhost')) {
+   reject(new Error('localhost not allowed'));
   }
+
+  // Construct the options for the HTTPS request
   const options = {
     method: 'HEAD',
-    hostname: originurl,
+    hostname: hostname,
     port: 443,
     path: '/robots.txt',
   };
+
+  // Return a promise to handle the asynchronous operation
   return new Promise((resolve, reject) => {
     try {
+      // Send the HTTPS request
       const req = https.request(options, res => {
-
         if (res.statusCode === 200) {
-          resolve('robot.txt file available');
+          resolve('robots.txt file available');
         } else if (res.statusCode === 404) {
-          resolve('robot.txt file not available');
+          resolve('robots.txt file not available');
+        } else {
+          // Handle other status codes
+     reject(new Error(`Unexpected status code: ${res.statusCode}`));
+         
         }
-      });
-      req.on('error', err => {
-        if(err.code === 'ENOTFOUND'){
-          reject('Invalid URL');  
-        }
-        reject(JSON.stringify(err));
       });
 
+      // Handle errors with the request
+      req.on('error', err => {
+        if (err.code === 'ENOTFOUND') {
+         reject(new Error('Hostname not found'));
+        } else {
+          reject(new Error(`Unexpected error: ${err.message}`));
+        }
+      });
+
+      // End the request
       req.end();
     } catch (error) {
-      //console.log(error)
-      reject(error)
+      console.log(error)
+      // Catch synchronous errors
+     reject(error);
     }
   });
 }
@@ -290,7 +304,7 @@ async function InjectionChecker(req) {
 }
 async function checkForSensitiveInfoInBody(data, keysToMatch) {
   try {
-    // //console.log({data})
+
     let matchedData = null; // Initialize variable to store matched data
     const recursiveSearch = (currentData) => {
       if (typeof currentData === "object" && currentData !== null) {
@@ -373,9 +387,7 @@ async function CheckJwttokenSecurity(req) {
 }
 async function CheckPasswordKeyText(data, keysToMatch) {
   try {
-    // //console.log({data})
     let matchedData = null; // Initialize variable to store matched data
-
     const recursiveSearch = (currentData) => {
       if (typeof currentData === "object" && currentData !== null) {
         // If the current data is an object, recursively search its properties

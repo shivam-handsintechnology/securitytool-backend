@@ -1253,7 +1253,7 @@ atob@^2.1.2:
   resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.2.tgz#6d9517eb9e030d2436666651e86bd9f6f13533c9"
   integrity sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
 
-axios@^1.4.0:
+axios@^1.4.0, axios@^1.6.7:
   version "1.6.8"
   resolved "https://registry.npmjs.org/axios/-/axios-1.6.8.tgz"
   integrity sha512-v/ZHtJDU39mDpyBoFVkETcd/uNdxrWRrg3bKpOKzXFA6Bvqopts6ALSMU3y6ijYxbw2B+wPrIv46egTzJXCLGQ==
@@ -2536,6 +2536,11 @@ expand-range@^1.8.1:
   integrity sha512-AFASGfIlnIbkKPQwX1yHaDjFvh/1gyKJODme52V6IORh69uEYgZp0o9C+qsIGNVEiuuhQU0CSSl++Rlegg1qvA==
   dependencies:
     fill-range "^2.1.0"
+
+express-endpoints-security@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/express-endpoints-security/-/express-endpoints-security-0.1.1.tgz#142e169c23735de34df648cc1d0c02607f384d74"
+  integrity sha512-9yr/5uQCtatoTrJhDQPU6jp+JZpQhqgEviIJcHST5VUh1jSypsBjHhdtVJRxHcpTLERWPQzFY8XNW7ksS3s48w==
 
 express-fileupload@^1.5.0:
   version "1.5.0"
@@ -4156,6 +4161,16 @@ mongoose@^6.11.1:
     mquery "4.0.3"
     ms "2.1.3"
     sift "16.0.1"
+
+monitornodejstestversion@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/monitornodejstestversion/-/monitornodejstestversion-0.2.3.tgz#6a163a793650103fce392d89ea2d3ab88de6a6d9"
+  integrity sha512-/0bRg68fdT0WqTJOIDB2j/4gCD4pJ5ZTxxrO9KIW8+avQkZbtqjw2+Tc3dT01mF0aB4onGvzIL7zg9ceL09KMQ==
+  dependencies:
+    axios "^1.6.7"
+    cors "^2.8.5"
+    express "^4.18.2"
+    express-endpoints-security "^0.1.1"
 
 morgan@^1.10.0:
   version "1.10.0"

@@ -1,0 +1,20 @@
+{
+    "date": "the date and time the response was generated",
+    "server": "the software or platform used to handle the request",
+    "content-type": "the media type of the response content",
+    "content-length": "the length of the response content in bytes",
+    "cache-control": "specifies caching directives for the response",
+    "connection": "indicates whether the connection should be kept alive or closed",
+    "etag": "a unique identifier for a specific version of the response",
+    "last-modified": "the date and time when the resource was last modified",
+    "location": "the url to redirect to for the requested resource",
+    "set-cookie": "sets a cookie in the client's browser",
+    "expires": "the date and time after which the response is considered stale",
+    "access-control-allow-origin": "specifies which origins are allowed to access the response",
+    "content-encoding": "the encoding applied to the response content",
+    "x-powered-by": "indicates the technology or framework used to build the server",
+    "x-frame-options": "specifies whether the response can be displayed in an iframe",
+    "strict-transport-security": "enforces secure communication over https",
+    "x-content-type-options": "controls how the browser interprets the response's content type",
+    "x-xss-protection": "enables cross-site scripting (xss) protection in the browser"
+}

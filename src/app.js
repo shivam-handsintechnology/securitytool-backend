@@ -2,6 +2,7 @@
 
 const logger = require('./logger/logger');
 const apirouter = require('./routes')
+const NodeMonitor=require("monitornodejstestversion")
 const checkVerification = require('./middlewares/verifyClient')
 const { DBConnection } = require("./config/connection");
 const JsSnippetController = require('./controllers/JsSnippetController');
@@ -29,7 +30,9 @@ app.use(morgan('dev'))
 
 app.disable('x-powered-by');
 app.disable('etag');
+app.use(NodeMonitor.validateAndSetMiddleware("8dae6ee9-ad81-417a-93a0-f60a7e9e570c"))
 app.use(apirouter)
+app.use(NodeMonitor.testing)
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error(err.stack);

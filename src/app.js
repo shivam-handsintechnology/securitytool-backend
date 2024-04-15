@@ -7,6 +7,7 @@ const checkVerification = require('./middlewares/verifyClient')
 const { DBConnection } = require("./config/connection");
 const JsSnippetController = require('./controllers/JsSnippetController');
 const cors = require("cors"), fileUpload = require('express-fileupload'), express = require("express"); hpp = require('hpp'), helmet = require('helmet'), dotenv = require('dotenv'), cluster = require("cluster"), os = require("os"), numCPUs = os.cpus().length, process = require("process");
+const { createProxyMiddleware } = require('http-proxy-middleware');
 // Connected to mongodb
 dotenv.config();
 DBConnection(process.env.MONGO_URI)
@@ -30,11 +31,13 @@ app.use(helmet())
 app.disable('x-powered-by');
 app.disable('etag');
 app.use("/api",apirouter)
-app.use(express.static(path.join(__dirname, '../client/build')));
+// Serve static files for your frontend
+app.use(express.static(path.join(__dirname, '../client')));
 
-app.get('*', (req, res) => {
- return res.sendFile(path.join(__dirname, '../client', 'build', 'index.html'));
-});
+  // Handle other routes by serving index.html
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client', 'build', 'index.html'));
+  });
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error(err.stack);

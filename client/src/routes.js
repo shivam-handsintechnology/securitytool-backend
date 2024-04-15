@@ -42,6 +42,41 @@ import AllLogs from './pages/master/security/Alllogs';
 import Dashboard from "./pages/master/security/Dashboard";
 import Main from './pages/master/Main';
 import SensitiveData from './pages/master/security/SensitiveDataExposure/SensitiveData';
+import Sessionnotexpire from './pages/Broken Authentication/Sessionnotexpire';
+import Sessiontimeout from './pages/Broken Authentication/Sessiontimeout';
+import Sessiontoken from './pages/Broken Authentication/Sessiontoken';
+import Adversaryhijack from './pages/Broken Authentication/Adversaryhijack';
+import Sessionhijackattack from './pages/Broken Authentication/Sessionhijackattack';
+import Ssl from './pages/SSL/Ssl';
+import Serverreturnserror from './pages/Error Message/Serverreturnserror';
+import Serverhttperror from './pages/Error Message/Serverhttperror';
+import Helpfulerrormessage from './pages/Error Message/Helpfulerrormessage';
+import Directorylisting from './pages/Insecure_Direct_Object_References/Directorylisting';
+import HTTPparameterpollution from './pages/Insecure_Direct_Object_References/HTTPparameterpollution';
+import Serverobotstxtfile from './pages/Insecure_Direct_Object_References/Serverobotstxtfile';
+import Arbitrarymethods from './pages/Security_Misconfiguration/Arbitrarymethods';
+import Passwordplaintext from './pages/Security_Misconfiguration/Passwordplaintext';
+import Olderserverversion from './pages/Security_Misconfiguration/Olderserverversion';
+import DangerousHTTPmethods from './pages/Security_Misconfiguration/DangerousHTTPmethods';
+import OPTIONSmethod from './pages/Security_Misconfiguration/OPTIONSmethod';
+import Weakalgorithm from './pages/Security_Misconfiguration/Weakalgorithm';
+import Adversaryemailidsspaming from './pages/Sensitive_Data_Exposure/Adversaryemailidsspaming';
+import Serversidesourcedisclosure from './pages/Sensitive_Data_Exposure/Serversidesourcedisclosure';
+import Criticalinformationinurl from './pages/Sensitive_Data_Exposure/Criticalinformationinurl';
+import Defaultwebpageinserver from './pages/Sensitive_Data_Exposure/Defaultwebpageinserver';
+import Sensitivedataaccessible from './pages/Sensitive_Data_Exposure/Sensitivedataaccessible';
+import Sensitiveinformationrevealed from './pages/Sensitive_Data_Exposure/Sensitiveinformationrevealed';
+import Cleartextpassword from './pages/Sensitive_Data_Exposure/Cleartextpassword';
+import URLredirection from './pages/Unvalidated_Redirects_Forwards/URLredirection';
+import Crossframescripting from './pages/Cross_Scripting_Site/Crossframescripting';
+import Crosssitescriptingattack from './pages/Cross_Scripting_Site/Crosssitescriptingattack';
+import Storedcrosssitescripting from './pages/Cross_Scripting_Site/Storedcrosssitescripting';
+import XSSpossible from './pages/Cross_Scripting_Site/XSSpossible';
+import Sensitivedatastored from './pages/Sensitive_Data_Local_Storage/Sensitivedatastored';
+import Crossdomainpolicy from './pages/Weak_cross_domain_Policy/Crossdomainpolicy';
+import Originheader from './pages/Weak_cross_domain_Policy/Originheader';
+import AccessControlAllowOrigin from './pages/Weak_cross_domain_Policy/AccessControlAllowOrigin';
+import XXE from './pages/Xml_External_Entity_Attack/XXE';
 
 export const ProtectedRoutes = [
 
@@ -109,156 +144,184 @@ export const ProtectedRoutes = [
     Layout: "AdminLayout",
     element: <AllWebsites />,
   },
-    // {
-  //   path: '/sessioninfo',
-  //   exact: true,
-  //   element: <SessionInfo />,
-  //   Layout: "AdminLayout"
-  // },
-    // {
-  //   path: '/hashgenerater',
-  //   exact: true,
-  //   element: <HashGenerator />,
-  //   Layout: "AdminLayout"
-  // },
-  // {
-  //   path: '/Systeminfo',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Systeminfo />,
-  // },
-  // {
-  //   path: '/Loginsecurity',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Loginsecurity />,
-  // },
-  // {
-  //   path: '/Warningpages',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Warningpages />,
-  // },
+  {
+    path: '/Sessionnotexpire',
+    exact: true,
+    Layout: "AdminLayout",
+    element: <Sessionnotexpire />,
+  },
+  {
+    path: '/Sessiontimeout',
+    exact: true,
+    Layout: "AdminLayout",
+    element: <Sessiontimeout />,
+  },
+  {
+    path: '/Sessiontoken',
+    exact: true,
+    element: <Sessiontoken />,
+  },
+  {
+    path: '/Adversaryhijack',
+    exact: true,
+    element: <Adversaryhijack />,
+  },
+  {
+    path: '/Sessionhijackattack',
+    exact: true,
+    element: <Sessionhijackattack />,
+  },
+  {
+    path: '/Ssl',
+    exact: true,
+    element: <Ssl />,
+  },
+  {
+    path: '/Serverreturnserror',
+    exact: true,
+    element: <Serverreturnserror />,
+  },
+  {
+    path: '/Serverhttperror',
+    exact: true,
+    element: <Serverhttperror />,
+  },
+  {
+    path: '/Helpfulerrormessage',
+    exact: true,
+    element: <Helpfulerrormessage />,
+  },
+  {
+    path: '/Directorylisting',
+    exact: true,
+    element: <Directorylisting />,
+  },
+  {
+    path: '/HTTPparameterpollution',
+    exact: true,
+    element: <HTTPparameterpollution />,
+  },
+  {
+    path: '/Serverobotstxtfile',
+    exact: true,
+    element: <Serverobotstxtfile />,
+  },
+  {
+    path: '/Arbitrarymethods',
+    exact: true,
+    element: <Arbitrarymethods />,
+  },
+  {
+    path: '/Passwordplaintext',
+    exact: true,
+    element: <Passwordplaintext />,
+  },
+  {
+    path: '/Olderserverversion',
+    exact: true,
+    element: <Olderserverversion />,
+  },
+  {
+    path: '/DangerousHTTPmethods',
+    exact: true,
+    element: <DangerousHTTPmethods />,
+  },
+  {
+    path: '/OPTIONSmethod',
+    exact: true,
+    element: <OPTIONSmethod />,
+  },
+  {
+    path: '/Weakalgorithm',
+    exact: true,
+    element: <Weakalgorithm />,
+  },
+  {
+    path: '/Adversaryemailidsspaming',
+    exact: true,
+    element: <Adversaryemailidsspaming />,
+  },
+  {
+    path: '/Serversidesourcedisclosure',
+    exact: true,
+    element: <Serversidesourcedisclosure />,
+  },
+  {
+    path: '/Criticalinformationinurl',
+    exact: true,
+    element: <Criticalinformationinurl />,
+  },
+  {
+    path: '/Defaultwebpageinserver',
+    exact: true,
+    element: <Defaultwebpageinserver />,
+  },
+  {
+    path: '/Sensitivedataaccessible',
+    exact: true,
+    element: <Sensitivedataaccessible />,
+  },
+  {
+    path: '/Sensitiveinformationrevealed',
+    exact: true,
+    element: <Sensitiveinformationrevealed />,
+  },
+  {
+    path: '/Cleartextpassword',
+    exact: true,
+    element: <Cleartextpassword />,
+  },
+  {
+    path: '/URLredirection',
+    exact: true,
+    element: <URLredirection />,
+  },
+  {
+    path: '/Crossframescripting',
+    exact: true,
+    element: <Crossframescripting />,
+  },
+  {
+    path: '/Crosssitescriptingattack',
+    exact: true,
+    element: <Crosssitescriptingattack />,
+  },
+  {
+    path: '/Storedcrosssitescripting',
+    exact: true,
+    element: <Storedcrosssitescripting />,
+  },
+  {
+    path: '/XSSpossible',
+    exact: true,
+    element: <XSSpossible />,
+  },
+  {
+    path: '/Sensitivedatastored',
+    exact: true,
+    element: <Sensitivedatastored />,
+  },
+  {
+    path: '/Crossdomainpolicy',
+    exact: true,
+    element: <Crossdomainpolicy />,
+  },
+  {
+    path: '/Originheader',
+    exact: true,
+    element: <Originheader />,
+  },
+  {
+    path: '/AccessControlAllowOrigin',
+    exact: true,
+    element: <AccessControlAllowOrigin />,
+  },
+  {
+    path: '/XXE',
+    exact: true,
+    element: <XXE />,
+  },
 
-  
-  // {
-  //   path: '/socketchecker',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <SocketChecker />,
-  // },
- 
-  // {
-  //   path: '/Portscanner',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Portscanner />,
-  // },
-  // {
-  //   path: '/Htaccesseditor',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Htaccesseditor />,
-  // },
-  // {
-  //   path: '/Errormonitoring',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Errormonitoring />,
-  // },
-  // {
-  //   path: '/Visitanalytics',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Visitanalytics />,
-  // },
-  // {
-  //   path: '/Livetraffic',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Livetraffic />,
-  // },
- 
-  // {
-  //   path: '/Badwords',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Badwords />,
-  // },
-  // {
-  //   path: '/Badbots',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Badbots />,
-  // },
-  // {
-  //   path: '/Proxy',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Proxy />,
-  // },
-  // {
-  //   path: '/Spam',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Spam />,
-  // },
-  // {
-  //   path: '/Alllogs',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Alllogs />,
-  // },
-
-  // {
-  //   path: '/Badbotlogs',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Badbotlogs />,
-  // },
-  // {
-  //   path: '/Proxylogs',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <BadPoxylogs />,
-  // },
-  // {
-  //   path: '/Spammerlogs',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <SpamLogs />,
-  // },
-  // {
-  //   path: '/Bansip',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Bansip />,
-  // },
-  // {
-  //   path: '/Banscountry',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Banscountry />,
-  // },
-  // {
-  //   path: '/Bansiprange',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Bansiprange />,
-  // },
-  // {
-  //   path: '/Otherbans',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <Otherbans />,
-  // },
-
-  // {
-  //   path: 'apitest',
-  //   exact: true,
-  //   Layout: "AdminLayout",
-  //   element: <ApiTesting />,
-  // },
 ];
 const PublicRoutes = [
   {

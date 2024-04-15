@@ -5,6 +5,11 @@ import useDataFetch from '../../hooks/DataFetchHook'
 const SSLInfo = () => {
     const userData = useSelector(state => state.UserReducer)
     const SSlInfo = useDataFetch(`client/sslverify?domain=${userData.domain}`, [userData.domain])
+    console.log("SSlInfo",SSlInfo)
+  
+   
+    
+
     return (
       <>
         <React.Fragment>

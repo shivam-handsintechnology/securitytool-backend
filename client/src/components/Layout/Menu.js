@@ -112,7 +112,7 @@ export default function Menu(props) {
                 <ul className="nav nav-treeview">
                   {category.UseCases.map((useCase, i) => (
                     <li key={i} className="nav-item">
-                      <Link to={`${useCase.label}`} className="nav-link">
+                      <Link to={`${useCase.link}`} className="nav-link">
                         <i className="far fa-file-alt" />&nbsp; <p>{useCase.label}</p>
                       </Link>
                     </li>

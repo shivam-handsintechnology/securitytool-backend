@@ -3,20 +3,25 @@
     "Category": "Broken Authentication and Session Management",
     "UseCases": [
       {
-        "label": "Session does not expire on closing the browser"
+        "label": "Session does not expire on closing the browser",
+        "link":  "/Sessionnotexpire"
       },
     
       {
-        "label": "Session time-out is high (or) not implemented."
+        "label": "Session time-out is high (or) not implemented.",
+        "link":  "/Sessiontimeout"
       },
       {
-        "label": "Session token being passed in other areas apart from cookie"
+        "label": "Session token being passed in other areas apart from cookie",
+        "link":  "/Sessiontoken"
       },
       {
-        "label": "An adversary can hijack user sessions by session fixation"
+        "label": "An adversary can hijack user sessions by session fixation",
+        "link":  "/Adversaryhijack"
       },
       {
-        "label": "Application is vulnerable to session hijacking attack"
+        "label": "Application is vulnerable to session hijacking attack",
+        "link":  "/Sessionhijackattack"
       },
      
     ]
@@ -43,22 +48,8 @@
   },
   {
     "Category": "SSL",
+    "link": "/SSL",
     "UseCases": [
-      {
-        "label": "The application uses invalid SSL certificates that an adversary might exploit"
-      },
-      {
-        "label": "The application uses self signed SSL certificate"
-      },
-      {
-        "label": "Application uses expired SSL Certificate"
-      },
-      {
-        "label": "Application uses SSL Cookie without secure flag set"
-      },
-      {
-        "label": "Obsolete SSL/TLS protocol detection."
-      }
     ]
   },
   // {
@@ -97,13 +88,16 @@
     "Category": "Error Message",
     "UseCases": [
       {
-        "label": "Server returns HTTP 403 error message"
+        "label": "Server returns HTTP 403 error message",
+        "link" : "/Serverreturnserror"
       },
       {
-        "label": "Server returns HTTP error message"
+        "label": "Server returns HTTP error message",
+        "link" : "/Serverhttperror"
       },
       {
-        "label": "Helpful error message displayed at login page"
+        "label": "Helpful error message displayed at login page",
+        "link" : "/Helpfulerrormessage"
       }
     ]
   },
@@ -111,13 +105,15 @@
     "Category": "Insecure Direct Object References",
     "UseCases": [
       {
-        "label": "Directory listing is enabled on the server"
+        "label": "Directory listing is enabled on the server",
+        "link" : "/Directorylisting"
       },
       // {
       //   "label": "Directory traversal attack"
       // },
       {
-        "label": "HTTP parameter pollution"
+        "label": "HTTP parameter pollution",
+        "link" : "/HTTPparameterpollution"
       },
       // {
       //   "label": "Non-HTML contents directly accessible without logging-in"
@@ -126,7 +122,8 @@
       //   "label": "Internal pages accessible without login"
       // },
       {
-        "label": "The remote server contains a 'robots.txt' file"
+        "label": "The remote server contains a 'robots.txt' file",
+        "link" : "/Serverobotstxtfile"
       }
     ]
   },
@@ -148,10 +145,12 @@
     "Category": "Security Misconfiguration",
     "UseCases": [
       {
-        "label": "Application accepts arbitrary methods"
+        "label": "Application accepts arbitrary methods",
+        "link" : "/Arbitrarymethods"
       },
       {
-        "label": "Application database stores password in plain text"
+        "label": "Application database stores password in plain text",
+        "link" : "/Passwordplaintext"
       },
       // {
       //   "label": "Application displays runtime error message"
@@ -166,16 +165,20 @@
       //   "label": "Application supports default usernames and passwords for logging in the application."
       // },
       {
-        "label": "Application supports older server version"
+        "label": "Application supports older server version",
+        "link" : "/Olderserverversion"
       },
       {
-        "label": "Dangerous HTTP methods are enabled on the server"
+        "label": "Dangerous HTTP methods are enabled on the server",
+        "link" : "/DangerousHTTPmethods"
       },
       {
-        "label": "OPTIONS method enabled"
+        "label": "OPTIONS method enabled",
+        "link" : "/OPTIONSmethod"
       },
       {
-        "label": "Password is encrypted/encoded using weak algorithm"
+        "label": "Password is encrypted/encoded using weak algorithm",
+        "link" : "/Weakalgorithm"
       },
       // {
       //   "label": "Application is vulnerable to Local or remote file inclusion"
@@ -192,22 +195,26 @@
       //   "label": "An adversary can fingerprint the web server from the HTTP responses"
       // },
       {
-        "label": "An adversary can harvest email ids for spamming"
+        "label": "An adversary can harvest email ids for spamming",
+        "link" : "/Adversaryemailidsspaming"
       },
       // {
       //   "label": "Application displays database server error message"
       // },
       {
-        "label": "Application's server side source code disclosure"
+        "label": "Application's server side source code disclosure",
+        "link" : "/Serversidesourcedisclosure"
       },
       // {
       //   "label": "ASP.NET version is revealed in X-AspNet-Version server response header"
       // },
       {
-        "label": "Critical information in URL"
+        "label": "Critical information in URL",
+        "link" : "/Criticalinformationinurl"
       },
       {
-        "label": "Default web-page present in the server"
+        "label": "Default web-page present in the server",
+        "link" : "/Defaultwebpageinserver"
       },
       // {
       //   "label": "Physical server path disclosure"
@@ -219,10 +226,12 @@
       //   "label": "Sensitive application configuration architecture files available at users machine in clear text"
       // },
       {
-        "label": "Sensitive data is accessible from cache"
+        "label": "Sensitive data is accessible from cache",
+        "link" : "/Sensitivedataaccessible"
       },
       {
-        "label": "Sensitive information revealed in HTTP response"
+        "label": "Sensitive information revealed in HTTP response",
+        "link" : "/Sensitiveinformationrevealed"
       },
       // {
       //   "label": "Credentials are transmitted to server in plain text"
@@ -231,7 +240,8 @@
       //   "label": "Sensitive data is transmitted to server in plain text"
       // },
       {
-        "label": "Cleartext Password returned in login response"
+        "label": "Cleartext Password returned in login response",
+        "link" : "/Cleartextpassword"
       }
     ]
   },
@@ -239,7 +249,8 @@
     "Category": "Unvalidated Redirects and Forwards",
     "UseCases": [
       {
-        "label": "The application is vulnerable to a URL redirection flaw"
+        "label": "The application is vulnerable to a URL redirection flaw",
+        "link" : "/URLredirection"
       }
     ]
   },
@@ -247,16 +258,20 @@
     "Category": "Cross-Site Scripting (XSS)",
     "UseCases": [
       {
-        "label": "Application is vulnerable to cross frame scripting"
+        "label": "Application is vulnerable to cross frame scripting",
+        "link" : "/Crossframescripting"
       },
       {
-        "label": "Application is vulnerable to Cross Site Scripting attack"
+        "label": "Application is vulnerable to Cross Site Scripting attack",
+        "link" : "/Crosssitescriptingattack"
       },
       {
-        "label": "Application is vulnerable to stored Cross Site Scripting attack"
+        "label": "Application is vulnerable to stored Cross Site Scripting attack",
+        "link" : "/Storedcrosssitescripting"
       },
       {
-        "label": "Is XSS possible via CSS injection?"
+        "label": "Is XSS possible via CSS injection?",
+        "link" : "/XSSpossible"
       }
     ]
   },
@@ -323,7 +338,8 @@
     "Category": "Sensitive Data stored in local storage",
     "UseCases": [
       {
-        "label": "Is sensitive data or session token stored in local data storage of browser?"
+        "label": "Is sensitive data or session token stored in local data storage of browser?",
+        "link" : "/Sensitivedatastored"
       }
     ]
   },
@@ -331,13 +347,16 @@
     "Category": "Weak Cross domain policy",
     "UseCases": [
       {
-        "label": "Is \"allow-access-from domain\" in cross-domain.xml policy file set to * or unauthorized domains?"
+        "label": "Is \"allow-access-from domain\" in cross-domain.xml policy file set to * or unauthorized domains?",
+        "link" : "/Crossdomainpolicy"
       },
       {
-        "label": "Is \"Origin\" header in client request validated at the server?"
+        "label": "Is \"Origin\" header in client request validated at the server?",
+        "link" : "/Originheader"
       },
       {
-        "label": "Is \"Access-Control-Allow-Origin\" header in server response is set securely?"
+        "label": "Is \"Access-Control-Allow-Origin\" header in server response is set securely?",
+        "link" : "/AccessControlAllowOrigin"
       }
     ]
   },
@@ -345,7 +364,17 @@
     "Category": "XML External Entity Attack",
     "UseCases": [
       {
-        "label": "XML External Entity Attacks (XXE)"
+        "label": "Is \"allow-access-from domain\" in cross-domain.xml policy file set to * or unauthorized domains?",
+        "link" : "/XXE"
+      },
+    ]
+  },
+  {
+    "Category": "",
+    "UseCases": [
+      {
+        "label": "",
+        "link" : ""
       }
     ]
   }

@@ -84,10 +84,7 @@ module.exports = {
             if (data.resoponsecodedata.code) {
                 await CreatStatusCodesDetails(
                     data.resoponsecodedata.code,
-                    data.resoponsecodedata.phrase,
-                    url,
-                    hostname,appid
-                    _id
+                    data.resoponsecodedata.phrase,url,hostname,_id,appid
                 );
             }
             return sendResponse(res, 200, "fetch", "ok")

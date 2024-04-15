@@ -30,25 +30,31 @@
     "Category": "Injection",
     "UseCases": [
       {
-        "label": "Application is vulnerable to Command injection attack"
+        "label": "Application is vulnerable to Command injection attack",
+        "link":"/logs/cmd"
       },
       {
-        "label": "Application is vulnerable to HTML injection attack"
+        "label": "Application is vulnerable to HTML injection attack",
+        "link":"/logs/html"
       },
       {
-        "label": "Application is vulnerable to iframe injection attack"
+        "label": "Application is vulnerable to iframe injection attack",
+        "link":"/logs/iframe"
       },
       {
-        "label": "Application is vulnerable to SQL Injection"
+        "label": "Application is vulnerable to SQL Injection",
+        "link":"/logs/SQLI"
       },
       {
-        "label": "Application is vulnerable to XML injection"
+        "label": "Application is vulnerable to XML injection",
+        "link":"/logs/XML-Injection"
+
       },
     ]
   },
   {
     "Category": "SSL",
-    "link": "/SSL",
+    "link": "/SSLInformation",
     "UseCases": [
     ]
   },

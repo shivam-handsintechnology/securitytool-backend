@@ -88,30 +88,29 @@ const CreateuserDetails = async (req, res, message, type) => {
     console.error(error)
   }
 }
-const CreatStatusCodesDetails = async (ErrorStatuscode, message, url, hostname, id) => {
+const CreatStatusCodesDetails = async (ErrorStatuscode, message, url, hostname, id,appid) => {
   try {
     const StatusCodeModels = require('../models/ServerErrorResponseCodes')
     const ResponseCodesLoginPageModels = require('../models/ResponseCodesLoginPageModels')
     const UserRawData = {
       ErrorStatuscode,
       message,
-      hostname
+      hostname,appid,user: mongoose.Types.ObjectId(id)
     }
-    //console.log("UserRawData", UserRawData)
-    const filter = { user: id, ErrorStatuscode };
-    if (url.includes('/login')) {
-      const finduser = await ResponseCodesLoginPageModels.findOne(filter)
+
+    if (url.includes('/login') || url.includes('/signin')) {
+      const finduser = await ResponseCodesLoginPageModels.findOne(UserRawData)
       if (finduser) {
         //console.log("already exist")
       } else {
-        await ResponseCodesLoginPageModels.create({ user: id, UserRawData })
+        await ResponseCodesLoginPageModels.create(UserRawData)
       }
     } else {
-      const finduser = await StatusCodeModels.findOne(filter)
+      const finduser = await StatusCodeModels.findOne(UserRawData)
       if (finduser) {
         //console.log("already exist")
       } else {
-        await StatusCodeModels.create({ user: id, UserRawData })
+        await StatusCodeModels.create(UserRawData)
       }
     }
 

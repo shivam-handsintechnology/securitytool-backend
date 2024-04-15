@@ -2,12 +2,14 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button } from "react-bootstrap";
-import { usePostData, useDataFetch } from "../../../hooks/DataFetchHook";
+import { usePostData, useDataFetch ,useDeleteData} from "../../../hooks/DataFetchHook";
 import { PaginationComponent } from "../../../hooks/PaginationComponent";
+import LoadingSpinner from "../../../components/LoaderAndError/loader";
 const AllLogs = () => {
   const [limit, setLimit] = useState(5)
   const [pageNumber, setPageNumber] = useState(1)
   const PostDomain = usePostData()
+  const {handleSubmit,Data}=useDeleteData()
   const { type } = useParams()
 
   let columns = [
@@ -27,7 +29,7 @@ const AllLogs = () => {
 
           <Button
             variant="danger acasd mr-1"
-            onClick={(e) => PostDomain.handleSubmit(e,`security/sqllogs/deletesingle`, { ip: rowData.ip })}
+            onClick={(e) => handleSubmit(`injections/${rowData.ip}`)}
           >
             Delete
           </Button>
@@ -47,7 +49,8 @@ const AllLogs = () => {
       width: "28%",
     },
   ]
-  const getAlLLogs = useDataFetch(`security/sqllogs?limit=${limit}&&type=${type}&page=${pageNumber}`, [pageNumber, type, PostDomain.Data])
+  const getAlLLogs = useDataFetch(`injections?limit=${limit}&&type=${type}&page=${pageNumber}`, [pageNumber, type, PostDomain.Data,Data])
+ console.log("getAlLLogs",getAlLLogs)
   return (
     <div>
       {/* <Headers />
@@ -60,7 +63,7 @@ const AllLogs = () => {
             <div className="row mb-2">
               <div className="col-sm-6">
                 <h1 className="m-0 ">
-                  <i className="fas fa-align-justify" /> {type == "isBot" ? "Bot" : type == "VPN" ? "Proxy" : type == "Spam" ? "Spam" : type == "SQLI" ? "Sql Injection" : type == "All" ? "All" : ""} Logs
+                  <i className="fas fa-align-justify text-capitalize" /> {type } Logs
                 </h1>
               </div>
               <div className="col-sm-6">
@@ -72,7 +75,7 @@ const AllLogs = () => {
                   </li>
                   <li className="breadcrumb-item active">
                     {" "}
-                    {type == "isBot" ? "Bot" : type == "VPN" ? "Proxy" : type == "Spam" ? "Spam" : type == "SQLI" ? "Sql Injection" : type == "All" ? "All" : ""} Logs
+                    {type } Logs
                   </li>
                 </ol>
               </div>
@@ -87,7 +90,7 @@ const AllLogs = () => {
               <div className="col-md-12">
                 <div className="card card-primary card-outline">
                   <div className="card-header">
-                    <h3 className="card-title heading-title">SQL Injection Logs</h3>
+                    <h3 className="card-title heading-title text-capitalize">{type} Injection Logs</h3>
                     {/* <button
                       onClick={() => {
                         deleteAllSqllLogs();
@@ -101,16 +104,22 @@ const AllLogs = () => {
                     </button> */}
                   </div>
                   <div className="card-body ">
-                    {getAlLLogs.Data && getAlLLogs.Data.data.length > 0 ? (
+                    {
+                      getAlLLogs.errors.loading ?(
+                        <LoadingSpinner/>
+                      ):getAlLLogs.errors.error ? (
+                        <span className="error">{getAlLLogs.errors.message}</span>
+                      ):
+                    getAlLLogs.data && getAlLLogs.data.data.length > 0 ? (
                       <div>
                         {/* Render pagination component */}
 
                         <PaginationComponent
                           columns={columns}
-                          data={getAlLLogs.Data.data}
+                          data={getAlLLogs.data.data}
                           pageNumber={pageNumber}
                           setPageNumber={setPageNumber}
-                          totalPages={getAlLLogs.Data.totalPages}
+                          totalPages={getAlLLogs.data.totalPages}
                           showData={true}
                         />
                       </div>

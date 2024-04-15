@@ -68,11 +68,6 @@ export default function Menu(props) {
                 <i className="fas fa-info-circle" />&nbsp; <p>Dashboard</p>
               </Link>
             </li>
-            <li className="nav-item ">
-              <Link to="/SSLInformation" className="nav-link ">
-                <i className="fas fa-user-secret" />&nbsp; <p>SSL Information</p>
-              </Link>
-            </li>
             <li  className={`nav-item ${isOpen("whiteList") ? 'menu-open' : ''}`}>
               <a href="#" className="nav-link" onClick={()=>toggleSubMenu("whiteList")}>
                 <i className="fas fa-flag" />&nbsp; <p>Whitelist <i className="fas fa-angle-right right" />
@@ -106,9 +101,14 @@ export default function Menu(props) {
             <li className="nav-header">TOOLS</li>
             {data.map((category, index) => (
               <li key={index} className={`nav-item ${isOpen(`category-${index}`) ? 'menu-open' : ''}`}>
-                <a href="#" className="nav-link" onClick={() => toggleSubMenu(`category-${index}`)}>
+               {
+                category.link? <Link to={`${category.link}`} className="nav-link">
+                <i className="fas fa-flag" />&nbsp; <p>{category.Category} <i className="fas fa-angle-right right" /></p>
+              </Link> :<Link  className="nav-link" onClick={() => toggleSubMenu(`category-${index}`)}>
                   <i className="fas fa-flag" />&nbsp; <p>{category.Category} <i className="fas fa-angle-right right" /></p>
-                </a>
+                </Link>
+               }
+                
                 <ul className="nav nav-treeview">
                   {category.UseCases.map((useCase, i) => (
                     <li key={i} className="nav-item">

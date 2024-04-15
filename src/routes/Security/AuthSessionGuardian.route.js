@@ -3,22 +3,8 @@ const axios = require("axios");
 const router = require("express").Router()
 const { errorHandler } = require("../../utils/errorHandler");
 const { sendResponse } = require("../../utils/dataHandler");
-const { sessionExpireOnClose, sessionTimeout, sessionFixation, sessionHijacking, sessionToken, SessionVulnurability } = require("../../helpers/SessionVulnurabiltyChecker");
-// session Liabraries
+const { sessionExpireOnClose, sessionTimeoutWithObject, sessionFixationWithobject, sessionHijackingWithObject, sessionTokenWithObject, SessionVulnurability } = require("../../helpers/SessionVulnurabiltyChecker");
 
-
-
-// module.exports={
-//     SessionManagement:async(req,res)=>{
-//     try {
-//         let data=await Scanner(req.query.domain).then(res=>res)
-//         sendResponse(res,200,"sucess",data)
-//     } catch (error) {
-//         console.log(error)
-//         return errorHandler(res,500,error.message,{})
-//     }
-//     }
-// }
 router.get("/session-vulnurability", async (req, res) => {
     try {
         // Call the respective controller function
@@ -78,7 +64,7 @@ router.get("/session-timeout", async (req, res) => {
     try {
         // Call the respective controller function
         const response = await axios.get(`http://${req.query.domain}/fileContent`)
-        const results = await sessionTimeout(response);
+        const results = await sessionTimeoutWithObject(response);
         return sendResponse(res,200,"dsad",results)
     } catch (error) {
         return errorHandler(res, 500, error.message);
@@ -90,7 +76,7 @@ router.get("/session-token", async (req, res) => {
     try {
         // Call the respective controller function
         const response = await axios.get(`http://${req.query.domain}/fileContent`)
-        const results = await sessionToken(response);
+        const results = await sessionTokenWithObject(response);
         return sendResponse(res,200,"dsad",results)
     } catch (error) {
         return errorHandler(res, 500, error.message);
@@ -102,7 +88,7 @@ router.get("/session-fixation", async (req, res) => {
     try {
         // Call the respective controller function
         const response = await axios.get(`http://${req.query.domain}/fileContent`)
-        const results = await sessionFixation(response);
+        const results = await sessionFixationWithobject(response);
         return sendResponse(res,200,"dsad",results)
     } catch (error) {
         return errorHandler(res, 500, error.message);
@@ -114,11 +100,12 @@ router.get("/session-hijacking", async (req, res) => {
     try {
         // Call the respective controller function
         const response = await axios.get(`http://${req.query.domain}/fileContent`)
-        const results = await sessionHijacking(response);
+        const results = await sessionHijackingWithObject(response);
         return sendResponse(res,200,"dsad",results)
     } catch (error) {
         return errorHandler(res, 500, error.message);
     }
 });
+// 
 
 module.exports = router

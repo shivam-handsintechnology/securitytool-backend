@@ -6,12 +6,24 @@ const path = require("path")
 const checkVerification = require('./middlewares/verifyClient')
 const { DBConnection } = require("./config/connection");
 const JsSnippetController = require('./controllers/JsSnippetController');
+const session = require('express-session');
+
 const cors = require("cors"), fileUpload = require('express-fileupload'), express = require("express"); hpp = require('hpp'), helmet = require('helmet'), dotenv = require('dotenv'), cluster = require("cluster"), os = require("os"), numCPUs = os.cpus().length, process = require("process");
 // Connected to mongodb
 dotenv.config();
 DBConnection(process.env.MONGO_URI)
 // Create Express APP
 const app = express();
+// Configure express-session middleware
+app.use(session({
+  secret: 'your_secret_key', // Change this to a secure secret key
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+      secure: false, // Set secure to true if using HTTPS
+      maxAge: 86400000 // Max age of the session cookie in milliseconds (1 day in this example)
+  }
+}));
 app.set('view engine', 'ejs');
 app.use(express.json({ limit: "50mb", extended: true }));
 // File Upload Functionality
@@ -31,13 +43,13 @@ app.disable('x-powered-by');
 app.disable('etag');
 app.use("/api", apirouter)
 // Serve static files for your frontend
-app.use(express.static(path.join(__dirname, '../client')));
+// app.use(express.static(path.join(__dirname, '../client')));
 
 
-// Handle other routes by serving index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client', 'build', 'index.html'));
-});
+// // Handle other routes by serving index.html
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, '../client', 'build', 'index.html'));
+// });
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error(err.stack);

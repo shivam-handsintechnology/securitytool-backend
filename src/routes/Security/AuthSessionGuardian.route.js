@@ -65,8 +65,9 @@ router.get("/session-expire-on-close", async (req, res) => {
     try {
         // Call the respective controller function
         const response = await axios.get(`http://${req.query.domain}/fileContent`)
-        const results = await sessionExpireOnClose(response);
-        return sendResponse(res,200,"dsad",results)
+        const data = await sessionExpireOnClose(response);
+        let results=data &&  data.length > 0 ? {"Session does not expire on closing the browser":"Yes" }:{ "Session does not expire on closing the browser":"No"}
+        return sendResponse(res,200,"dsad",[results])
     } catch (error) {
         return errorHandler(res, 500, error.message);
     }

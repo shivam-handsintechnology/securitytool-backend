@@ -11,7 +11,6 @@ const InsecureObjectRefGuard=require("./Security/Insecure_Direct_Object_Referenc
 const Authrouter = require('./UserRoutes');
 const { ValidationMiddleware,ValidationMiddlewareQuery,AuthDomainMiddleware } = require('../middlewares/ValidationMiddleware');
 const { DomainValidationSchema } = require('../helpers/Validators');
-
 router.get('/', (req, res) => {
   try {
    return  res.render('index', { title: 'Express.js' });
@@ -20,17 +19,16 @@ router.get('/', (req, res) => {
     return res.status(500).json({ message: 'Something broke!' });
   }
 })
-router.use("/api/security", verifytoken, Security)
-router.use("/api/client", GetClientInformation)
-router.use("/api/auth", Authrouter)
+router.use("/security", verifytoken, Security)
+router.use("/client", GetClientInformation)
+router.use("/auth", Authrouter)
 // Broken Authentication and Session Management
-router.use("/api/AuthSessionGuardian",AuthSessionGuardian
+router.use("/AuthSessionGuardian",AuthSessionGuardian
 )
 // Insecure Direct Object References
-router.use("/api/InsecureObjectRefGuard", InsecureObjectRefGuard)
+router.use("/InsecureObjectRefGuard", InsecureObjectRefGuard)
 // SecurityMisconfiguration
-router.use("/api/SecurityMisconfiguration", SecurityMisconfiguration)
+router.use("/SecurityMisconfiguration", SecurityMisconfiguration)
 // SensitiveDataExposure
-router.use("/api/SensitiveDataExposure", SensitiveDataExposure)
-
+router.use("/SensitiveDataExposure", SensitiveDataExposure)
 module.exports = router

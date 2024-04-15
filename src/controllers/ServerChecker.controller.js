@@ -1,4 +1,3 @@
-const http = require('http');
 const mongoose = require('mongoose')
 const { sendResponse } = require('../utils/dataHandler');
 const { errorHandler } = require('../utils/errorHandler');
@@ -8,9 +7,7 @@ const { PasswordValidateModel } = require('../models/PasswordVaildateModel');
 const { hasRobotsTxt } = require('../utils/functions');
 const { ClientLoagsModel } = require('../models/ClientLoagsModel');
 const ErrorMessagesData = require("../data/json/ErrorMessagesData.json");
-const { error } = require('console');
 const { sessionvulnerabilityinitialdata } = require('../data/initialdata');
-const { sessionvulnerability } = require('../utils/sessionvalidationclient');
 module.exports = {
   getRobotsTxt: async (req, res) => {
     try {

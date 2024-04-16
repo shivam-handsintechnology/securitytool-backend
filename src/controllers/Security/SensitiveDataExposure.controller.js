@@ -2,6 +2,7 @@ const { sendResponse } = require("../../utils/dataHandler");
 const axios = require("axios");
 const { errorHandler } = require("../../utils/errorHandler");
 const { EmailVerifyModel, CrticalInformationInurl } = require("../../models/sensitivekeywordsModel");
+const {checkServerFingerprinting, Full_Path_Disclosure} = require("../../utils/AppFingerPrinting");
 module.exports={
     sourcecodeDisclousoure:async(req,res)=>{
         try {
@@ -85,6 +86,26 @@ module.exports={
             let totalCount = totalCountData.length > 0 ? totalCountData[0].totalCount : 0;
              
             return sendResponse(res, 200, "fetch", { data, totalPages: Math.ceil(totalCount / limit) });
+        } catch (error) {
+           return errorHandler(res, 500, "fetch", error.message);
+        }
+    }
+    ,
+    FingerprintDetection: async (req, res) => {
+        try {
+            let {  domain } = req.query; // Default to page 1 and page size of 10 if not provided
+             let data=await checkServerFingerprinting(domain)
+             return sendResponse(res, 200, "fetch", data);
+        } catch (error) {
+           return errorHandler(res, 500, "fetch", error.message);
+        }
+    }
+    ,
+    ServerPathDisclosure: async (req, res) => {
+        try {
+            let {  domain } = req.query; // Default to page 1 and page size of 10 if not provided
+             let data=await Full_Path_Disclosure(domain)
+             return sendResponse(res, 200, "fetch", data);
         } catch (error) {
            return errorHandler(res, 500, "fetch", error.message);
         }

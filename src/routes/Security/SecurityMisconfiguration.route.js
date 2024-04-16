@@ -21,4 +21,7 @@ router.get("/dangerous-http-methods-enabled", verifyToken,
 router.get("/option-methods-enabled", verifyToken,
     // ValidationMiddlewareQuery(DomainValidationSchema),
     SecurityMisconfiguration.OptionsMethodsEnabled)
+router.post("/endpoints",
+    // ValidationMiddlewareQuery(DomainValidationSchema),
+    SecurityMisconfiguration.endpoints)
 module.exports = router

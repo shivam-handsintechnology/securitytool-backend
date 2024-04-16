@@ -97,7 +97,7 @@ const CreatStatusCodesDetails = async (ErrorStatuscode, message, url, hostname, 
       message,
       hostname,appid,user: mongoose.Types.ObjectId(id)
     }
-
+console.log("UserRawData",UserRawData)
     if (url.includes('/login') || url.includes('/signin')) {
       const finduser = await ResponseCodesLoginPageModels.findOne(UserRawData)
       if (finduser) {

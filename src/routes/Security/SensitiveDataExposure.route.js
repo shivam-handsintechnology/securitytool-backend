@@ -26,5 +26,9 @@ router.post("/critical-info-url", verifyToken,
     // ValidationMiddlewareQuery(DomainValidationSchema),
     AuthDomainMiddleware,
     SensitiveDataExposure.DefaultWebPage)
+router.get("/fingerprint-detection", verifyToken,
+    // ValidationMiddlewareQuery(DomainValidationSchema),
+    AuthDomainMiddleware,
+    SensitiveDataExposure.FingerprintDetection)
 
 module.exports = router

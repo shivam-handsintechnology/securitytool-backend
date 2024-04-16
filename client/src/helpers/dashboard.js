@@ -1,28 +1,29 @@
  const data=[
   {
     "Category": "Broken Authentication and Session Management",
+    "link": "/Sessionnotexpire",
     "UseCases": [
-      {
-        "label": "Session does not expire on closing the browser",
-        "link":  "/Sessionnotexpire"
-      },
+      // {
+      //   "label": "Session does not expire on closing the browser",
+      //   "link":  "/Sessionnotexpire"
+      // },
     
-      {
-        "label": "Session time-out is high (or) not implemented.",
-        "link":  "/Sessiontimeout"
-      },
-      {
-        "label": "Session token being passed in other areas apart from cookie",
-        "link":  "/Sessiontoken"
-      },
-      {
-        "label": "An adversary can hijack user sessions by session fixation",
-        "link":  "/Adversaryhijack"
-      },
-      {
-        "label": "Application is vulnerable to session hijacking attack",
-        "link":  "/Sessionhijackattack"
-      },
+      // {
+      //   "label": "Session time-out is high (or) not implemented.",
+      //   "link":  "/Sessiontimeout"
+      // },
+      // {
+      //   "label": "Session token being passed in other areas apart from cookie",
+      //   "link":  "/Sessiontoken"
+      // },
+      // {
+      //   "label": "An adversary can hijack user sessions by session fixation",
+      //   "link":  "/Adversaryhijack"
+      // },
+      // {
+      //   "label": "Application is vulnerable to session hijacking attack",
+      //   "link":  "/Sessionhijackattack"
+      // },
      
     ]
   },
@@ -197,9 +198,10 @@
       // {
       //   "label": "An adversary can fingerprint the mail server version"
       // },
-      // {
-      //   "label": "An adversary can fingerprint the web server from the HTTP responses"
-      // },
+      {
+        "label": "An adversary can fingerprint the web server from the HTTP responses",
+        "link": "/Adversaryfingerprint"
+      },
       {
         "label": "An adversary can harvest email ids for spamming",
         "link" : "/Adversaryemailidsspaming"

@@ -77,6 +77,7 @@ import Crossdomainpolicy from './pages/Weak_cross_domain_Policy/Crossdomainpolic
 import Originheader from './pages/Weak_cross_domain_Policy/Originheader';
 import AccessControlAllowOrigin from './pages/Weak_cross_domain_Policy/AccessControlAllowOrigin';
 import XXE from './pages/Xml_External_Entity_Attack/XXE';
+import Adversaryfingerprint from './pages/Sensitive_Data_Exposure/Adversaryfingerprint';
 
 export const ProtectedRoutes = [
 
@@ -240,6 +241,11 @@ export const ProtectedRoutes = [
     path: '/Adversaryemailidsspaming',
     exact: true,
     element: <Adversaryemailidsspaming />,
+  },
+  {
+    path: '/Adversaryfingerprint',
+    exact: true,
+    element: <Adversaryfingerprint />,
   },
   {
     path: '/Serversidesourcedisclosure',

@@ -22,21 +22,26 @@ const SessionManagement = () => {
                 <div className="row">
 
                     <div className="col-md-12 col-lg-12">
-                        <ul className="ul-styling">
-                            {
-                                postSessionData.data && postSessionData.data.length>0 && postSessionData.data.map((obj, index) => (
-                                    <div key={index}>
-                                    {Object.entries(obj).map(([key, value]) => (
-                                        <div key={key}>
-                                            <li className="list-styling"><strong className="text-capitalize">{key}</strong>:{value}</li>
-                                        </div>
-                                    ))}
-                                </div>
-                                   
-                                ))
-
-                            }
-                        </ul>
+                    <table className="table table-striped">
+       <tbody>
+         {postSessionData.data && postSessionData.data.length > 0 ? (
+           postSessionData.data.map((obj, index) => (
+             <tr key={index}>
+               {Object.entries(obj).map(([key, value]) => (
+                 <React.Fragment key={key}>
+                   <td><strong className="text-capitalize">{key}</strong></td>
+                   <td>{value}</td>
+                 </React.Fragment>
+               ))}
+             </tr>
+           ))
+         ) : (
+           <tr>
+             <td colSpan="2">No data available</td>
+           </tr>
+         )}
+       </tbody>
+     </table>
                     </div>
 
                 </div>

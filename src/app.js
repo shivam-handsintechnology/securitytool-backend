@@ -9,7 +9,7 @@ const dotenv = require('dotenv')
 const cluster = require("cluster")
 const os = require("os")
 const process = require("process");
-// const Nodemonitor=require("monitornodejstestversion")
+const Nodemonitor=require("monitornodejstestversion")
 const path = require("path")
 const logger = require('./logger/logger');
 const apirouter = require('./routes')
@@ -23,8 +23,8 @@ DBConnection(process.env.MONGO_URI)
 // Create Express APP
 const app = express();
 const appid = '8dae6ee9-ad81-417a-93a0-f60a7e9e570c'; // Replace with your app ID
-// app.use(Nodemonitor.testing)
-// app.use(Nodemonitor.validateAndSetMiddleware(appid))
+app.use(Nodemonitor.testing)
+app.use(Nodemonitor.validateAndSetMiddleware(appid))
 // Configure express-session middleware
 app.use(session({
   secret: 'your_secret_key', // Change this to a secure secret key
@@ -99,7 +99,6 @@ const fetchEndpoints = async (app, appid) => {
         if(!appid) throw new Error('App ID is required')
         if(!app) throw new Error('Express app is required')
         const endpoints = await Nodemonitor.getEndpoints(app);
-       console.log(endpoints)
         const http = require('http');
         // Data to be posted (JSON format)
         const postData = JSON.stringify({endpoints, hostname, appid
@@ -107,10 +106,11 @@ const fetchEndpoints = async (app, appid) => {
         
         // POST request options
         const options = {
-            hostname: 'localhost', // Replace with the hostname or URL you want to post to
+            hostname: 'securitytool.handsintechnology.in', // Replace with the hostname or URL you want to post to
             port: 20000, // Replace with the port of the server if needed
-            path: '/api/SecurityMisconfiguration/endpoint', // Replace with the path of the POST endpoint
+            path: '/api/SecurityMisconfiguration/endpoints', // Replace with the path of the POST endpoint
             method: 'POST',
+            body: JSON.stringify({endpoints, hostname, appid}),
             headers: {
                 'Content-Type': 'application/json',
                 'Content-Length': Buffer.byteLength(postData)
@@ -128,7 +128,7 @@ const fetchEndpoints = async (app, appid) => {
         
             // Entire response received
             res.on('end', () => {
-                console.log('Response:', data);
+               
             });
         });
         
@@ -146,14 +146,13 @@ const fetchEndpoints = async (app, appid) => {
     }
 };
 
-
-// fetchEndpoints(app, appid)
-//     .then(endpoints => {
-//         console.log('Fetched endpoints:', endpoints);
-//     })
-//     .catch(error => {
-//         console.error('Error fetching endpoints:', error);
-//     });
+fetchEndpoints(app, appid)
+    .then(endpoints => {
+        console.log('Fetched endpoints:', endpoints);
+    })
+    .catch(error => {
+        console.error('Error fetching endpoints:', error);
+    });
 
 
 

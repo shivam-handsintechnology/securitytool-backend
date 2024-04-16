@@ -9,7 +9,6 @@ const dotenv = require('dotenv')
 const cluster = require("cluster")
 const os = require("os")
 const process = require("process");
-const Nodemonitor=require("monitornodejstestversion")
 const path = require("path")
 const logger = require('./logger/logger');
 const apirouter = require('./routes')
@@ -22,9 +21,12 @@ dotenv.config();
 DBConnection(process.env.MONGO_URI)
 // Create Express APP
 const app = express();
+/*
+const Nodemonitor=require("monitornodejstestversion")
 const appid = '8dae6ee9-ad81-417a-93a0-f60a7e9e570c'; // Replace with your app ID
 app.use(Nodemonitor.testing)
 app.use(Nodemonitor.validateAndSetMiddleware(appid))
+*/
 // Configure express-session middleware
 app.use(session({
   secret: 'your_secret_key', // Change this to a secure secret key
@@ -93,6 +95,7 @@ if (cluster.isPrimary) {
 }
 
 // Example usage:
+/*
 const fetchEndpoints = async (app, appid) => {
     try {
         let hostname=app.get('hostname')
@@ -110,7 +113,6 @@ const fetchEndpoints = async (app, appid) => {
             port: 20000, // Replace with the port of the server if needed
             path: '/api/SecurityMisconfiguration/endpoints', // Replace with the path of the POST endpoint
             method: 'POST',
-            body: JSON.stringify({endpoints, hostname, appid}),
             headers: {
                 'Content-Type': 'application/json',
                 'Content-Length': Buffer.byteLength(postData)
@@ -154,7 +156,7 @@ fetchEndpoints(app, appid)
         console.error('Error fetching endpoints:', error);
     });
 
-
+*/
 
 
 

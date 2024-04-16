@@ -6,6 +6,7 @@ const { default: axios } = require("axios")
 const { ScanDangerousMethods, getLatestNodeVersion,ScanArbitaryMethods,scanDirectoryOptionMethod } = require("../../utils/scanClientData")
 const { PasswordHashingDataModel } = require("../../models/Security/SecurityMisconfiguration.model")
 const { errorHandler } = require("../../utils/errorHandler")
+const EndpointsModel = require("../../models/Security/Endpoints.model")
 const ObjectId = mongoose.Types.ObjectId
 module.exports = {
     arbitraryMethods: async (req, res) => {
@@ -142,8 +143,24 @@ module.exports = {
     endpoints: async (req, res) => {
        try {
          const {endpoints,hostname,appid} = req.body
-         console.log("endpoints", req.body)
-         return sendResponse(res, 200, "success", {endpoints,hostname,appid})
+         let response
+            if(!endpoints) throw new Error('Endpoints is required')
+            if(!hostname) throw new Error('Hostname is required')
+            if(!appid) throw new Error('App ID is required')
+            let data = {
+                domain: hostname,
+                appid: appid,
+            }
+            let isExist = await EndpointsModel.findOne(data).select("_id")
+            if(!isExist){
+                data["endpoints"] = endpoints
+                response=  await AllowedDomainsModel.create(data)
+            }else if (isExist ){
+                data["endpoints"] = endpoints
+                response=   await AllowedDomainsModel.findOneAndUpdate({domain:hostname,appid:appid},{domain:hostname,appid:appid,endpoints:endpoints},{new:true,upsert:true})
+            }
+            return sendResponse(res, 200, "success", response)
+
        } catch (error) {
         return errorHandler(res, 500, "success", error.message) 
        }

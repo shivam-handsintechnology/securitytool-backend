@@ -71,7 +71,7 @@ function analyzeResponseForPathDisclosure(response, hostname) {
 
         if (typeof response === 'object') {
             const jsonString = JSON.stringify(response.data);
-            if (jsonString.includes(`/${hostname}/`)) {
+            if (jsonString.includes(process.env.HOME)) {
                 isPhysical_path_disclosure = `Potential server path disclosure vulnerability found in response: ${jsonString}`;
             }
         } else if (typeof response === 'string') {

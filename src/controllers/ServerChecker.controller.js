@@ -12,7 +12,7 @@ module.exports = {
   getRobotsTxt: async (req, res) => {
     try {
      let data=  await hasRobotsTxt(req.query.domain).then(response=>response)
-        return sendResponse(res, 200, d, { succces: true,data,message:""})
+        return sendResponse(res, 200, "fetch",data)
     } catch (error) {
       //console.log("errorr", err)
       console.log("error", error)

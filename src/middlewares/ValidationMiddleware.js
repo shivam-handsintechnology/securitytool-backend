@@ -4,6 +4,7 @@ const { errorHandler } = require('../utils/errorHandler');
 const { AllowedDomainsModel } = require('../models/AllowedDomainsModel');
 const User = require("../models/User");
 const { checkDomainAvailability } = require('../utilities/functions/functions');
+const { query } = require('express');
 const ValidationMiddleware = (schema) => {
     return (req, res, next) => {
         const { error } = Joi.object(schema).validate(req.body)
@@ -22,7 +23,12 @@ const ValidationMiddleware = (schema) => {
 };
 const ValidationMiddlewareQuery = (schema) => {
     return async (req, res, next) => {
-        const { error } = Joi.object(schema).validate(req.query)
+        const data= {
+            ...req.query,
+            ...req.body,
+            ...req.params
+        }
+        const { error } = Joi.object(schema).validate(data)
         const valid = error == null;
         if (valid) {
             next();
@@ -36,9 +42,16 @@ const ValidationMiddlewareQuery = (schema) => {
 };
 const AuthDomainMiddleware = async (req, res, next) => {
     try {
-        let domain = req.query.domain
-        let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
+        let body={
+            ...req.query,
+            ...req.body,
+            ...req.params
+        }
+        let {domain,appid} =body
+        let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain,appid:appid });
         if (isExistDomain) {
+            req.body.domain = domain
+            req.body.appid = appid
             next()
         } else {
             return errorHandler(res, 500, "Domain is Not Allowed")

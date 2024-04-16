@@ -33,18 +33,29 @@ async function checkDirectoryListing(url) {
     }
   }
 }
-async function scanDirectoryOptionMethod(routes) {
-  const results = [];
-  let optionsCount = 0; // Variable to store the count of OPTIONS methods
-  return new Promise((resolve, reject) => {
+async function scanDirectoryOptionMethod(response) {
+  let results = [];
+  return new Promise(async (resolve, reject) => {
     try {
-      routes.forEach((item) => {
-        if (item.methods.includes("OPTIONS")) {
-          optionsCount++; // Increment count for OPTIONS method
-          results.push({labels:item.path,values:"yes"});
+     
+      // Iterate through the data and process each item
+      response.data.data.forEach(async (item) => {
+        try {
+          let modifiedContent = item.content.replace(/"/g, "'");
+          // Check if OPTIONS method is available in the content
+          if (modifiedContent.includes('.options(')) {
+             results.push({filename:item.name,method:"OPTIONS"});
+          }
+
+        } catch (error) {
+          console.error("Error processing file content:", error);
+          reject(error);
+          // Handle error if necessary
         }
       });
-      resolve(results)
+
+      // Resolve results along with optionsAvailable flag
+      resolve( results);
     } catch (error) {
       reject(error);
     }
@@ -52,99 +63,157 @@ async function scanDirectoryOptionMethod(routes) {
 }
 // Sample endpoints data
 
-// application_accepts_arbitrary_methods
-async function ScanArbitaryMethods(endpoints) {
-  function isStandardMethod(method) {
-    const standardMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE"];
-    return standardMethods.includes(method.toUpperCase());
-  }
-  return new Promise((resolve, reject) => {
-    try {
-      let endpointsWithArbitraryMethods = {};
+// // application_accepts_arbitrary_methods
+// async function ScanArbitaryMethods(endpoints) {
+//   function isStandardMethod(method) {
+//     const standardMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE"];
+//     return standardMethods.includes(method.toUpperCase());
+//   }
+//   return new Promise((resolve, reject) => {
+//     try {
+//       let endpointsWithArbitraryMethods = {};
 
-      endpoints.forEach(endpoint => {
-          endpoint.methods.forEach(method => {
-              if (!isStandardMethod(method)) {
-                  if (!endpointsWithArbitraryMethods[endpoint.path]) {
-                      endpointsWithArbitraryMethods[endpoint.path] = [method];
-                  } else {
-                      endpointsWithArbitraryMethods[endpoint.path].push(method);
-                  }
-              }
-          });
-      });
-      const formattedData = Object.entries(endpointsWithArbitraryMethods).map(([label, value]) => ({
-        labels: label,
-        values: value
-      }));
-        resolve(formattedData)
+//       endpoints.forEach(endpoint => {
+//           endpoint.methods.forEach(method => {
+//               if (!isStandardMethod(method)) {
+//                   if (!endpointsWithArbitraryMethods[endpoint.path]) {
+//                       endpointsWithArbitraryMethods[endpoint.path] = [method];
+//                   } else {
+//                       endpointsWithArbitraryMethods[endpoint.path].push(method);
+//                   }
+//               }
+//           });
+//       });
+//       const formattedData = Object.entries(endpointsWithArbitraryMethods).map(([label, value]) => ({
+//         labels: label,
+//         values: value
+//       }));
+//         resolve(formattedData)
     
-      } catch (error) {
-      reject(error);
-    }
-  });
-}
+//       } catch (error) {
+//       reject(error);
+//     }
+//   });
+// }
 
-// application is use dangerous methods
-// application is use dangerous methods
-async function ScanDangerousMethods(endpoints) {
-  function isDangerousMethod(method) {
-    const dangerousMethods = ["DELETE", "PUT", "PATCH"];
-    return dangerousMethods.includes(method.toUpperCase());
+// // application is use dangerous methods
+// // application is use dangerous methods
+// async function ScanDangerousMethods(endpoints) {
+//   function isDangerousMethod(method) {
+//     const dangerousMethods = ["DELETE", "PUT", "PATCH"];
+//     return dangerousMethods.includes(method.toUpperCase());
+//   }
+//   return new Promise((resolve, reject) => {
+//     const endpointsWithDangerousMethods = {};
+
+//     endpoints.forEach(endpoint => {
+//         endpoint.methods.forEach(method => {
+//             if (isDangerousMethod(method)) {
+//                 if (!endpointsWithDangerousMethods[endpoint.path]) {
+//                     endpointsWithDangerousMethods[endpoint.path] = [method];
+//                 } else {
+//                     endpointsWithDangerousMethods[endpoint.path].push(method);
+//                 }
+//             }
+//         });
+//     });
+
+//     // Convert values to strings
+//     for (const key in endpointsWithDangerousMethods) {
+//       if (Object.hasOwnProperty.call(endpointsWithDangerousMethods, key)) {
+//         endpointsWithDangerousMethods[key] = endpointsWithDangerousMethods[key].join(', ');
+//       }
+//     }
+
+
+//    let data= Object.entries(endpointsWithDangerousMethods).map(([label, value]) => ({
+//       labels: label,
+//       values: value
+//   }))
+//     resolve(data);
+//   });
+// }
+async function ScanDangerousMethods(response) {
+  console.log("response",response)
+  const isDangerousMethod = (method) => {
+    const dangerousMethods = ["eval", "exec", "setTimeout", "setInterval", "Function","XMLHttpRequest", "fetch"];
+    return dangerousMethods.includes(method);
   }
-  return new Promise((resolve, reject) => {
-    const endpointsWithDangerousMethods = {};
+ return new Promise(async (resolve, reject) => {
+    try {
+      let results = []
+      // Iterate through the data and process each item
+      response.data.data.forEach(async (item) => {
+        try {
+          const regex = /\.(eval|exec|setTimeout|setInterval|Function|XMLHttpRequest|fetch)\(/ig; // Regex pattern
+          let modifiedContent = item.content.replace(/"/g, "'");
+          const matches = modifiedContent.match(regex);
+          if (matches && matches.length > 0) {
+            matches.forEach(match => {
+              const dangerousMethod = match.replace(/\(|\./g, ''); // Remove "(" and "."
 
-    endpoints.forEach(endpoint => {
-        endpoint.methods.forEach(method => {
-            if (isDangerousMethod(method)) {
-                if (!endpointsWithDangerousMethods[endpoint.path]) {
-                    endpointsWithDangerousMethods[endpoint.path] = [method];
-                } else {
-                    endpointsWithDangerousMethods[endpoint.path].push(method);
-                }
-            }
-        });
-    });
-
-    // Convert values to strings
-    for (const key in endpointsWithDangerousMethods) {
-      if (Object.hasOwnProperty.call(endpointsWithDangerousMethods, key)) {
-        endpointsWithDangerousMethods[key] = endpointsWithDangerousMethods[key].join(', ');
-      }
+              if (isDangerousMethod(dangerousMethod)) {
+                          results.push({method:match.replace(/\(|\./g, ''),filename:item.name});
+              }
+            });
+          }
+        } catch (error) {
+          console.error("Error processing file content:", error);
+          reject(error)
+          // Handle error if necessary
+        }
+      });
+      // Resolve results
+      resolve(results);
+    } catch (error) {
+      reject(error)
     }
-
-
-   let data= Object.entries(endpointsWithDangerousMethods).map(([label, value]) => ({
-      labels: label,
-      values: value
-  }))
-    resolve(data);
-  });
+  })
 }
+const ScanArbitaryMethods = async (response) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      function isStandardMethod(method) {
+        const standardMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE"];
+        return standardMethods.includes(method.toUpperCase());
+      }
+      let results = []
+      // Iterate through the data and process each item
+      response.data.data.forEach(async (item) => {
+        try {
+          const regex = /\.(get|post|put|delete|patch|head|options|trace)\(/ig; // Regex pattern
+          let modifiedContent = item.content.replace(/"/g, "'");
+          const matches = modifiedContent.match(regex);
+          if (matches && matches.length > 0) {
+            matches.forEach(match => {
+              const arbitraryMethod = match.replace(/\(|\./g, ''); // Remove "(" and "."
+              if (!isStandardMethod(arbitraryMethod)) {
+                results.push({method:match.replace(/\(|\./g, ''),filename:item.name});
+              }
+            });
+          }
+
+
+        } catch (error) {
+          console.error("Error processing file content:", error);
+          reject(error)
+          // Handle error if necessary
+        }
+      });
+      // Resolve results
+      resolve(results);
+    } catch (error) {
+      reject(error)
+    }
+  })
+};
 async function combineAndCountMethods(routes) {
   try {
       const optionMethods = await scanDirectoryOptionMethod(routes);
       const arbitraryMethods = await ScanArbitaryMethods(routes);
       const dangerousMethods = await ScanDangerousMethods(routes);
-
-      // Combine all results into one array
-      const combinedResults = [...optionMethods, ...arbitraryMethods, ...dangerousMethods];
-
-      // Count occurrences of each label
-      const labelCounts = {};
-      combinedResults.forEach(({ labels }) => {
-          if (labelCounts[labels]) {
-              labelCounts[labels]++;
-          } else {
-              labelCounts[labels] = 1;
-          }
-      });
-
-      // Convert labelCounts object to array of objects
-      const result = Object.keys(labelCounts).map(label => ({ label, value: labelCounts[label] }));
-      
-      return result;
+      return {optionMethods,arbitraryMethods,dangerousMethods}
+     
   } catch (error) {
       console.error("Error:", error);
       throw error;

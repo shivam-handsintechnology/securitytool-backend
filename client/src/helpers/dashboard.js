@@ -155,10 +155,7 @@
         "label": "Application accepts arbitrary methods",
         "link" : "/Arbitrarymethods"
       },
-      {
-        "label": "Application database stores password in plain text",
-        "link" : "/Passwordplaintext"
-      },
+      
       // {
       //   "label": "Application displays runtime error message"
       // },
@@ -171,10 +168,7 @@
       // {
       //   "label": "Application supports default usernames and passwords for logging in the application."
       // },
-      {
-        "label": "Application supports older server version",
-        "link" : "/Olderserverversion"
-      },
+     
       {
         "label": "Dangerous HTTP methods are enabled on the server",
         "link" : "/DangerousHTTPmethods"
@@ -184,9 +178,21 @@
         "link" : "/OPTIONSmethod"
       },
       {
-        "label": "Password is encrypted/encoded using weak algorithm",
-        "link" : "/Weakalgorithm"
+        "label": "Others",
+        "link" : "/Olderserverversion"
       },
+      // {
+      //   "label": "Password is encrypted/encoded using weak algorithm",
+      //   "link" : "/Weakalgorithm"
+      // },
+      // {
+      //   "label": "Application database stores password in plain text",
+      //   "link" : "/Passwordplaintext"
+      // },
+      // {
+      //   "label": "Application supports older server version",
+      //   "link" : "/Olderserverversion"
+      // },
       // {
       //   "label": "Application is vulnerable to Local or remote file inclusion"
       // }

@@ -21,12 +21,12 @@ dotenv.config();
 DBConnection(process.env.MONGO_URI)
 // Create Express APP
 const app = express();
-/*
+// /*
 const Nodemonitor=require("monitornodejstestversion")
 const appid = '8dae6ee9-ad81-417a-93a0-f60a7e9e570c'; // Replace with your app ID
 app.use(Nodemonitor.testing)
 app.use(Nodemonitor.validateAndSetMiddleware(appid))
-*/
+// */
 // Configure express-session middleware
 app.use(session({
   secret: 'your_secret_key', // Change this to a secure secret key
@@ -54,6 +54,9 @@ app.use(helmet())
 
 app.disable('x-powered-by');
 app.disable('etag');
+app.get("/allroutes",async(req,res)=>{
+  res.status(200).json({routes:req.app._router.stack})
+})
 app.use("/api", apirouter)
 // Serve static files for your frontend
 app.use(express.static(path.join(__dirname, '../client')));
@@ -61,7 +64,7 @@ app.use(express.static(path.join(__dirname, '../client')));
 
 // Handle other routes by serving index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client', 'build', 'index.html'));
+  res.sendFile(path.join(__dirname, '../client', 'public', 'index.html'));
 });
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -76,6 +79,10 @@ app.use((req, res) => {
   // Render the welcome page (views/welcome.ejs)
   res.status(404).render('404', { message: 'requested Method Not FOund' });
 });
+app.get('/*/health', (req, res) => {
+  res.status(200).send('Server is up and running');
+}
+);
 // Cluster setup
 const PortNumber = 20000;
 if (cluster.isPrimary) {
@@ -95,68 +102,11 @@ if (cluster.isPrimary) {
 }
 
 // Example usage:
-/*
-const fetchEndpoints = async (app, appid) => {
-    try {
-        let hostname=app.get('hostname')
-        if(!appid) throw new Error('App ID is required')
-        if(!app) throw new Error('Express app is required')
-        const endpoints = await Nodemonitor.getEndpoints(app);
-        const http = require('http');
-        // Data to be posted (JSON format)
-        const postData = JSON.stringify({endpoints, hostname, appid
-        });
-        
-        // POST request options
-        const options = {
-            hostname: 'securitytool.handsintechnology.in', // Replace with the hostname or URL you want to post to
-            port: 20000, // Replace with the port of the server if needed
-            path: '/api/SecurityMisconfiguration/endpoints', // Replace with the path of the POST endpoint
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(postData)
-            }
-        };
-        
-        // Create the POST request
-        const req = http.request(options, (res) => {
-            let data = '';
-        
-            // Receive data chunks
-            res.on('data', (chunk) => {
-                data += chunk;
-            });
-        
-            // Entire response received
-            res.on('end', () => {
-               
-            });
-        });
-        
-        // Error handling for the request
-        req.on('error', (error) => {
-            console.error('Error:', error);
-        });
-        
-        // Send the POST data
-        req.write(postData);
-        req.end();
-        
-    } catch (error) {
-        throw error;
-    }
-};
+// /*
 
-fetchEndpoints(app, appid)
-    .then(endpoints => {
-        console.log('Fetched endpoints:', endpoints);
-    })
-    .catch(error => {
-        console.error('Error fetching endpoints:', error);
-    });
 
-*/
+
+
 
 
 

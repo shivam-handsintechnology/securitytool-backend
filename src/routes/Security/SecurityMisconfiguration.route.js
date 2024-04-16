@@ -1,7 +1,7 @@
 const
     router = require("express").Router()
 const verifyToken = require('../../middlewares/VerifyUser')
-const { ValidationMiddlewareQuery } = require("../../middlewares/ValidationMiddleware");
+const { ValidationMiddlewareQuery,AuthDomainMiddleware } = require("../../middlewares/ValidationMiddleware");
 const SecurityMisconfiguration = require("../../controllers/Security/SecurityMisconfiguration.controller");
 const { DomainValidationSchema } = require("../../helpers/Validators");
 
@@ -12,6 +12,9 @@ router.get("/arbitrary-methods", verifyToken,
 router.get("/passwords-insecure", verifyToken,
     // ValidationMiddlewareQuery(DomainValidationSchema),
     SecurityMisconfiguration.passwordsInsecure)
+router.get("/week-passwords-insecure", verifyToken,
+    // ValidationMiddlewareQuery(DomainValidationSchema),
+    SecurityMisconfiguration.WealALgorithmPassword)
 router.get("/support-oldnodejs-version", verifyToken,
     // ValidationMiddlewareQuery(DomainValidationSchema),
     SecurityMisconfiguration.supportoldnodejsversion)
@@ -22,6 +25,7 @@ router.get("/option-methods-enabled", verifyToken,
     // ValidationMiddlewareQuery(DomainValidationSchema),
     SecurityMisconfiguration.OptionsMethodsEnabled)
 router.post("/endpoints",
-    // ValidationMiddlewareQuery(DomainValidationSchema),
+    ValidationMiddlewareQuery(DomainValidationSchema),
+    AuthDomainMiddleware,
     SecurityMisconfiguration.endpoints)
 module.exports = router

@@ -3,23 +3,12 @@ import Footer from "../../../components/Layout/Footer";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+import useDataFetch from "../../../hooks/DataFetchHook";
+import LoadingSpinner from "../../../components/LoaderAndError/loader";
 const Visitordetails = () => {
-    const [data, setData] = useState({})
     const { ip } = useParams()
-    async function getSingleSqllLogs(body) {
-        const response = await axios.post(`security/sqllogs/single`, body);
-        console.log(response)
-        return response
-    }
-
-    console.log(data)
-    useEffect(() => {
-        getSingleSqllLogs({ ip }).then((res) => {
-            const { data } = res
-            setData(data)
-        })
-    }, [ip])
-    console.log("data0", data)
+    const getAlLLogs = useDataFetch(`injections/${ip}`, [ip])
+ console.log("getAlLLogs",getAlLLogs)
     return (
         <div>
             {/* <Headers />
@@ -52,11 +41,19 @@ const Visitordetails = () => {
                 {/*===================================================*/}
                 <div className="content">
                     <div className="container-fluid">
+                        {
+                             getAlLLogs.errors.loading ?(
+                                <LoadingSpinner/>
+                              ):getAlLLogs.errors.error ? (
+                                <span className="error">{getAlLLogs.errors.message}</span>
+                              ):<></>
+                            
+                        }
                         <div className="row">
                             <div className="col-md-12">
                                 <div className="card card-primary card-outline">
                                     <div className="card-header">
-                                        <h3 className="card-title">Details for Ip Address: {data ? data?.ip : "Ip is not available"}</h3>
+                                        <h3 className="card-title">Details for Ip Address: {getAlLLogs.data ? getAlLLogs?.data?.ip : "Ip is not available"}</h3>
 
                                     </div>
                                     <div className="card-body">
@@ -69,7 +66,7 @@ const Visitordetails = () => {
                                                     <input
                                                         type="text"
                                                         className="form-control"
-                                                        value={data?.ip}
+                                                        value={getAlLLogs?.data?.ip}
                                                         readOnly=""
                                                     />
                                                 </div>
@@ -82,7 +79,7 @@ const Visitordetails = () => {
                                                     <input
                                                         type="text"
                                                         className="form-control"
-                                                        value={data?.date + "at " + data?.time}
+                                                        value={getAlLLogs?.data?.date + "at " + getAlLLogs?.data?.time}
                                                         readOnly=""
                                                     />
                                                 </div>
@@ -96,12 +93,12 @@ const Visitordetails = () => {
                                                     </label>
                                                     <div className="input-group mar-btm">
                                                         <span className="input-group-addon">
-                                                            {data?.browser}
+                                                            {getAlLLogs?.data?.browser}
                                                         </span>
                                                         <input
                                                             type="text"
                                                             className="form-control"
-                                                            value={data?.browser}
+                                                            value={getAlLLogs?.data?.browser}
                                                             readOnly=""
                                                         />
                                                     </div>
@@ -114,12 +111,12 @@ const Visitordetails = () => {
                                                     </label>
                                                     <div className="input-group mar-btm">
                                                         <span className="input-group-addon">
-                                                            {data?.os}
+                                                            {getAlLLogs?.data?.os}
                                                         </span>
                                                         <input
                                                             type="text"
                                                             className="form-control"
-                                                            value={data?.os}
+                                                            value={getAlLLogs?.data?.os}
                                                             readOnly=""
                                                         />
                                                     </div>
@@ -136,7 +133,7 @@ const Visitordetails = () => {
                                                         <input
                                                             type="text"
                                                             className="form-control"
-                                                            value={data?.country}
+                                                            value={getAlLLogs?.data?.country}
                                                             readOnly=""
                                                         />
                                                     </div>
@@ -150,7 +147,7 @@ const Visitordetails = () => {
                                                     <input
                                                         type="text"
                                                         className="form-control"
-                                                        value={data?.country}
+                                                        value={getAlLLogs?.data?.country}
                                                         readOnly=""
                                                     />
                                                 </div>
@@ -165,7 +162,7 @@ const Visitordetails = () => {
                                                     <input
                                                         type="text"
                                                         className="form-control"
-                                                        value={data?.device}
+                                                        value={getAlLLogs?.data?.device}
                                                         readOnly=""
                                                     />
                                                 </div>
@@ -178,7 +175,7 @@ const Visitordetails = () => {
                                                     <input
                                                         type="text"
                                                         className="form-control"
-                                                        value={data?.domain}
+                                                        value={getAlLLogs?.data?.domain}
                                                         readOnly=""
                                                     />
                                                 </div>
@@ -192,7 +189,7 @@ const Visitordetails = () => {
                                                 <input
                                                     type="text"
                                                     className="form-control"
-                                                    value={data?.page}
+                                                    value={getAlLLogs?.data?.page}
                                                     readOnly=""
                                                 />
                                             </div>
@@ -207,7 +204,7 @@ const Visitordetails = () => {
                                                     <input
                                                         type="text"
                                                         className="form-control"
-                                                        value={data?.bot}
+                                                        value={getAlLLogs?.data?.bot}
                                                         readOnly=""
                                                     />
                                                 </div>
@@ -222,7 +219,7 @@ const Visitordetails = () => {
                                                         rows={2}
                                                         className="form-control"
                                                         readOnly=""
-                                                        value={data?.useragent}
+                                                        value={getAlLLogs?.data?.useragent}
                                                     />
                                                 </div>
                                             </div>
@@ -235,7 +232,7 @@ const Visitordetails = () => {
                                                 <input
                                                     type="text"
                                                     className="form-control"
-                                                    value={data?.referurl}
+                                                    value={getAlLLogs?.data?.referurl}
                                                     readOnly=""
                                                 />
                                             </div>

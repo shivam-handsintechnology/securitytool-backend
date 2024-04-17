@@ -1,17 +1,42 @@
 // All Neccesary functions
-
+const session = require('express-session');
+const cors = require("cors")
+const fileUpload = require('express-fileupload')
+const express = require("express");
+const hpp = require('hpp')
+const helmet = require('helmet')
+const dotenv = require('dotenv')
+const cluster = require("cluster")
+const os = require("os")
+const process = require("process");
+const path = require("path")
 const logger = require('./logger/logger');
 const apirouter = require('./routes')
-const path = require("path")
 const checkVerification = require('./middlewares/verifyClient')
 const { DBConnection } = require("./config/connection");
 const JsSnippetController = require('./controllers/JsSnippetController');
-const cors = require("cors"), fileUpload = require('express-fileupload'), express = require("express"); hpp = require('hpp'), helmet = require('helmet'), dotenv = require('dotenv'), cluster = require("cluster"), os = require("os"), numCPUs = os.cpus().length, process = require("process");
+const numCPUs = os.cpus().length
 // Connected to mongodb
 dotenv.config();
 DBConnection(process.env.MONGO_URI)
 // Create Express APP
 const app = express();
+// /*
+const Nodemonitor=require("monitornodejstestversion")
+const appid = '8dae6ee9-ad81-417a-93a0-f60a7e9e570c'; // Replace with your app ID
+app.use(Nodemonitor.testing)
+app.use(Nodemonitor.validateAndSetMiddleware(appid))
+// */
+// Configure express-session middleware
+app.use(session({
+  secret: 'your_secret_key', // Change this to a secure secret key
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // Set secure to true if using HTTPS
+    maxAge: 86400000 // Max age of the session cookie in milliseconds (1 day in this example)
+  }
+}));
 app.set('view engine', 'ejs');
 app.use(express.json({ limit: "50mb", extended: true }));
 // File Upload Functionality
@@ -29,6 +54,9 @@ app.use(helmet())
 
 app.disable('x-powered-by');
 app.disable('etag');
+app.get("/allroutes",async(req,res)=>{
+  res.status(200).json({routes:req.app._router.stack})
+})
 app.use("/api", apirouter)
 // Serve static files for your frontend
 app.use(express.static(path.join(__dirname, '../client')));
@@ -36,7 +64,7 @@ app.use(express.static(path.join(__dirname, '../client')));
 
 // Handle other routes by serving index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client', 'build', 'index.html'));
+  res.sendFile(path.join(__dirname, '../client', 'public', 'index.html'));
 });
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -51,6 +79,10 @@ app.use((req, res) => {
   // Render the welcome page (views/welcome.ejs)
   res.status(404).render('404', { message: 'requested Method Not FOund' });
 });
+app.get('/*/health', (req, res) => {
+  res.status(200).send('Server is up and running');
+}
+);
 // Cluster setup
 const PortNumber = 20000;
 if (cluster.isPrimary) {
@@ -68,6 +100,11 @@ if (cluster.isPrimary) {
     console.log(`Server is running on port ${PortNumber}`);
   });
 }
+
+// Example usage:
+// /*
+
+
 
 
 

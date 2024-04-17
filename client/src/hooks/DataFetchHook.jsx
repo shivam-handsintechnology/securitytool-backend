@@ -145,10 +145,11 @@ const useDeleteData = () => {
     const handleSubmit = async (url) => {
         try {
             setErrors({ loading: true, error: false });
-            const response = await axios.delete(url).then((response) => {
+                 await axios.delete(url).then((response) => {
                 const { data, statusCode } = response;
                 if (statusCode === 200) {
-                    setData(data);
+                    setData(Date.now());
+                    toast.success("Deleted Successfully")
                 }
             });
 

@@ -8,6 +8,7 @@ const SecurityMisconfiguration=require("./Security/SecurityMisconfiguration.rout
 const SensitiveDataExposure=require("./Security/SensitiveDataExposure.route")
 const AuthSessionGuardian=require("./Security/AuthSessionGuardian.route")
 const InsecureObjectRefGuard=require("./Security/Insecure_Direct_Object_References.route")
+const InjectionsRoute=require("./Security/Injection.routes")
 const Authrouter = require('./UserRoutes');
 const { ValidationMiddleware,ValidationMiddlewareQuery,AuthDomainMiddleware } = require('../middlewares/ValidationMiddleware');
 const { DomainValidationSchema } = require('../helpers/Validators');
@@ -25,6 +26,10 @@ router.use("/auth", Authrouter)
 // Broken Authentication and Session Management
 router.use("/AuthSessionGuardian",AuthSessionGuardian
 )
+// Injections
+router.use("/injections",InjectionsRoute)
+// Error Message
+router.use("/ErrorMessage", require("./Security/ErrorMessage.route"))
 // Insecure Direct Object References
 router.use("/InsecureObjectRefGuard", InsecureObjectRefGuard)
 // SecurityMisconfiguration

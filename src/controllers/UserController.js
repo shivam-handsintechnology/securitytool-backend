@@ -2,7 +2,6 @@ const User = require("../models/User")
 const jwt = require("jsonwebtoken");
 const { sendResponse } = require("../utils/dataHandler");
 const { errorHandler } = require("../utils/errorHandler");
-const { checkDomainAvailability, validatePassword } = require("../utilities/functions/functions");
 const CryptoJS = require("crypto-js");
 const { middlewareModel } = require("../models/midlwaresModel");
 const { v4: uuidv4 } = require('uuid');

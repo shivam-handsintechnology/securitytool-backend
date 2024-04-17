@@ -1,28 +1,29 @@
  const data=[
   {
     "Category": "Broken Authentication and Session Management",
+    "link": "/Sessionnotexpire",
     "UseCases": [
-      {
-        "label": "Session does not expire on closing the browser",
-        "link":  "/Sessionnotexpire"
-      },
+      // {
+      //   "label": "Session does not expire on closing the browser",
+      //   "link":  "/Sessionnotexpire"
+      // },
     
-      {
-        "label": "Session time-out is high (or) not implemented.",
-        "link":  "/Sessiontimeout"
-      },
-      {
-        "label": "Session token being passed in other areas apart from cookie",
-        "link":  "/Sessiontoken"
-      },
-      {
-        "label": "An adversary can hijack user sessions by session fixation",
-        "link":  "/Adversaryhijack"
-      },
-      {
-        "label": "Application is vulnerable to session hijacking attack",
-        "link":  "/Sessionhijackattack"
-      },
+      // {
+      //   "label": "Session time-out is high (or) not implemented.",
+      //   "link":  "/Sessiontimeout"
+      // },
+      // {
+      //   "label": "Session token being passed in other areas apart from cookie",
+      //   "link":  "/Sessiontoken"
+      // },
+      // {
+      //   "label": "An adversary can hijack user sessions by session fixation",
+      //   "link":  "/Adversaryhijack"
+      // },
+      // {
+      //   "label": "Application is vulnerable to session hijacking attack",
+      //   "link":  "/Sessionhijackattack"
+      // },
      
     ]
   },
@@ -30,25 +31,31 @@
     "Category": "Injection",
     "UseCases": [
       {
-        "label": "Application is vulnerable to Command injection attack"
+        "label": "Application is vulnerable to Command injection attack",
+        "link":"/logs/cmd"
       },
       {
-        "label": "Application is vulnerable to HTML injection attack"
+        "label": "Application is vulnerable to HTML injection attack",
+        "link":"/logs/html"
       },
       {
-        "label": "Application is vulnerable to iframe injection attack"
+        "label": "Application is vulnerable to iframe injection attack",
+        "link":"/logs/iframe"
       },
       {
-        "label": "Application is vulnerable to SQL Injection"
+        "label": "Application is vulnerable to SQL Injection",
+        "link":"/logs/SQLI"
       },
       {
-        "label": "Application is vulnerable to XML injection"
+        "label": "Application is vulnerable to XML injection",
+        "link":"/logs/XML-Injection"
+
       },
     ]
   },
   {
     "Category": "SSL",
-    "link": "/SSL",
+    "link": "/SSLInformation",
     "UseCases": [
     ]
   },
@@ -86,19 +93,20 @@
   // },
   {
     "Category": "Error Message",
+    "link": "/ServerErrorMessage",
     "UseCases": [
-      {
-        "label": "Server returns HTTP 403 error message",
-        "link" : "/Serverreturnserror"
-      },
-      {
-        "label": "Server returns HTTP error message",
-        "link" : "/Serverhttperror"
-      },
-      {
-        "label": "Helpful error message displayed at login page",
-        "link" : "/Helpfulerrormessage"
-      }
+      // {
+      //   "label": "Server returns HTTP 403 error message",
+      //   "link" : "/Serverreturnserror"
+      // },
+      // {
+      //   "label": "Server returns HTTP error message",
+      //   "link" : "/Serverhttperror"
+      // },
+      // {
+      //   "label": "Helpful error message displayed at login page",
+      //   "link" : "/Helpfulerrormessage"
+      // }
     ]
   },
   {
@@ -148,10 +156,7 @@
         "label": "Application accepts arbitrary methods",
         "link" : "/Arbitrarymethods"
       },
-      {
-        "label": "Application database stores password in plain text",
-        "link" : "/Passwordplaintext"
-      },
+      
       // {
       //   "label": "Application displays runtime error message"
       // },
@@ -164,10 +169,7 @@
       // {
       //   "label": "Application supports default usernames and passwords for logging in the application."
       // },
-      {
-        "label": "Application supports older server version",
-        "link" : "/Olderserverversion"
-      },
+     
       {
         "label": "Dangerous HTTP methods are enabled on the server",
         "link" : "/DangerousHTTPmethods"
@@ -177,9 +179,21 @@
         "link" : "/OPTIONSmethod"
       },
       {
-        "label": "Password is encrypted/encoded using weak algorithm",
-        "link" : "/Weakalgorithm"
+        "label": "Others",
+        "link" : "/Olderserverversion"
       },
+      // {
+      //   "label": "Password is encrypted/encoded using weak algorithm",
+      //   "link" : "/Weakalgorithm"
+      // },
+      // {
+      //   "label": "Application database stores password in plain text",
+      //   "link" : "/Passwordplaintext"
+      // },
+      // {
+      //   "label": "Application supports older server version",
+      //   "link" : "/Olderserverversion"
+      // },
       // {
       //   "label": "Application is vulnerable to Local or remote file inclusion"
       // }
@@ -191,9 +205,10 @@
       // {
       //   "label": "An adversary can fingerprint the mail server version"
       // },
-      // {
-      //   "label": "An adversary can fingerprint the web server from the HTTP responses"
-      // },
+      {
+        "label": "An adversary can fingerprint the web server from the HTTP responses",
+        "link": "/Adversaryfingerprint"
+      },
       {
         "label": "An adversary can harvest email ids for spamming",
         "link" : "/Adversaryemailidsspaming"

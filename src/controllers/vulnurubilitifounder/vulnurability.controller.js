@@ -79,15 +79,12 @@ module.exports = {
     },
     errorMessages: async (req, res) => {
         try {
-            let { data, hostname, url, appid } = req.body;
+            let { data, domain, url, appid } = req.body;
             const { _id } = req.user;
             if (data.resoponsecodedata.code) {
                 await CreatStatusCodesDetails(
                     data.resoponsecodedata.code,
-                    data.resoponsecodedata.phrase,
-                    url,
-                    hostname,
-                    _id
+                    data.resoponsecodedata.phrase,url,domain,_id,appid
                 );
             }
             return sendResponse(res, 200, "fetch", "ok")
@@ -110,6 +107,7 @@ module.exports = {
                 }
 
             }
+            console.log("isVerifyEmail", isVerifyEmail)
             return sendResponse(res, 200, "fetch", isVerifyEmail)
         } catch (error) {
             return res.status(500).json({ message: error.message });

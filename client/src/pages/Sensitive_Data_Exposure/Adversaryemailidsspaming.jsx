@@ -5,8 +5,8 @@ import { useSelector } from 'react-redux'
 const Adversaryemailidsspaming = () => {
   const UserData = useSelector((state) => state.UserReducer)
 
-  const postSessionData=useDataFetch(`AuthSessionGuardian/session-vulnurability?domain=${UserData.domain}&type=nodejs`,[UserData.domain])
-    console.log("postSessionData", postSessionData)
+  const emailHarvesting = useDataFetch(`SensitiveDataExposure/email-harvesting?domain=${UserData.domain}&type=nodejs`, [UserData.domain]);
+  console.log("emailHarvesting", emailHarvesting)
   return (
     <div>Adversaryemailidsspaming</div>
   )

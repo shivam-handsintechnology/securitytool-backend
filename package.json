@@ -25,6 +25,7 @@
         "email-verify-security": "^0.2.1",
         "express": "^4.18.2",
         "express-fileupload": "^1.5.0",
+        "express-session": "^1.18.0",
         "helmet": "^7.0.0",
         "hpp": "^0.2.3",
         "https": "^1.0.0",
@@ -32,7 +33,7 @@
         "jsonwebtoken": "^9.0.0",
         "moment": "^2.29.4",
         "mongoose": "^6.11.1",
-        "monitornodejstestversion": "^0.2.3",
+        "ping": "^0.4.4",
         "uuid": "^9.0.1",
         "winston": "^3.12.0"
     },

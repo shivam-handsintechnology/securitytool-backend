@@ -88,30 +88,29 @@ const CreateuserDetails = async (req, res, message, type) => {
     console.error(error)
   }
 }
-const CreatStatusCodesDetails = async (ErrorStatuscode, message, url, hostname, id) => {
+const CreatStatusCodesDetails = async (ErrorStatuscode, message, url, domain, id,appid) => {
   try {
     const StatusCodeModels = require('../models/ServerErrorResponseCodes')
     const ResponseCodesLoginPageModels = require('../models/ResponseCodesLoginPageModels')
     const UserRawData = {
       ErrorStatuscode,
       message,
-      hostname
+      domain,appid,user: mongoose.Types.ObjectId(id)
     }
-    //console.log("UserRawData", UserRawData)
-    const filter = { user: id, ErrorStatuscode };
-    if (url.includes('/login')) {
-      const finduser = await ResponseCodesLoginPageModels.findOne(filter)
+console.log("UserRawData",UserRawData)
+    if (url.includes('/login') || url.includes('/signin')) {
+      const finduser = await ResponseCodesLoginPageModels.findOne({ErrorStatuscode,domain,user: mongoose.Types.ObjectId(id)})
       if (finduser) {
-        //console.log("already exist")
+        console.log("already exist")
       } else {
-        await ResponseCodesLoginPageModels.create({ user: id, UserRawData })
+        await ResponseCodesLoginPageModels.create(UserRawData)
       }
     } else {
-      const finduser = await StatusCodeModels.findOne(filter)
+      const finduser = await StatusCodeModels.findOne({ErrorStatuscode,domain,user: mongoose.Types.ObjectId(id)})
       if (finduser) {
-        //console.log("already exist")
+        console.log("already exist")
       } else {
-        await StatusCodeModels.create({ user: id, UserRawData })
+        await StatusCodeModels.create(UserRawData)
       }
     }
 
@@ -120,16 +119,16 @@ const CreatStatusCodesDetails = async (ErrorStatuscode, message, url, hostname, 
   }
 }
 
-async function hasRobotsTxt(hostname) {
-  // Check if the hostname is localhost, if so, reject with an error
-  if (hostname.includes('localhost')) {
+async function hasRobotsTxt(domain) {
+  // Check if the domain is localhost, if so, reject with an error
+  if (domain.includes('localhost')) {
    reject(new Error('localhost not allowed'));
   }
 
   // Construct the options for the HTTPS request
   const options = {
     method: 'HEAD',
-    hostname: hostname,
+    domain: domain,
     port: 443,
     path: '/robots.txt',
   };
@@ -153,7 +152,7 @@ async function hasRobotsTxt(hostname) {
       // Handle errors with the request
       req.on('error', err => {
         if (err.code === 'ENOTFOUND') {
-         reject(new Error('Hostname not found'));
+         reject(new Error('domain not found'));
         } else {
           reject(new Error(`Unexpected error: ${err.message}`));
         }

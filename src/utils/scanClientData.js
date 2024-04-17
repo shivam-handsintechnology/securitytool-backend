@@ -1,164 +1,112 @@
-const crypto = require("crypto");
-const axios = require('axios');
+
 const {
-  passwordkeys,
   sensitivedata,
 } = require("../sensitive/availableapikeys");
+const staticFolders = require("../data/json/staticFolders.json")
 // regular expression paterns
 // OPTIONS method
-async function checkDirectoryListing(url) {
-  try {
-    const response = await axios.get(url);
-    //console.log(response.status);
-    if (response.status === 200 && response.data.includes('Index of')) {
-      //console.log('Directory listing is enabled.');
-      return 'Directory listing is enabled.';
-    } else {
-      //console.log('Directory listing is disabled.');
-      return 'Directory listing is disabled.';
-    }
-  } catch (error) {
-
-    if (error?.response?.status >= 400) {
-      if (error?.response?.status === 404) {
-        //console.log('Page not found.');
-        return 'Page not found.';
-      } else if (error?.response?.status === 403) {
-        //console.log('Access forbidden.');
-        return 'Access forbidden.';
-      } else {
-        //console.log('Directory listing is disabled.');
-        return 'Directory listing is disabled.';
-      }
-    }
-  }
-}
-async function scanDirectoryOptionMethod(routes) {
-  const results = [];
-  let optionsCount = 0; // Variable to store the count of OPTIONS methods
-  return new Promise((resolve, reject) => {
+async function scanDirectoryOptionMethod(response) {
+  let results = [];
+  return new Promise(async (resolve, reject) => {
     try {
-      routes.forEach((item) => {
-        if (item.methods.includes("OPTIONS")) {
-          optionsCount++; // Increment count for OPTIONS method
-          results.push({labels:item.path,values:"yes"});
+
+      // Iterate through the data and process each item
+      response.data.data.forEach(async (item) => {
+        try {
+          let modifiedContent = item.content.replace(/"/g, "'");
+          // Check if OPTIONS method is available in the content
+          if (modifiedContent.includes('.options(')) {
+            results.push({ filename: item.name, method: "OPTIONS" });
+          }
+
+        } catch (error) {
+          console.error("Error processing file content:", error);
+          reject(error);
+          // Handle error if necessary
         }
       });
-      resolve(results)
+
+      // Resolve results along with optionsAvailable flag
+      resolve(results);
     } catch (error) {
       reject(error);
     }
   });
 }
-// Sample endpoints data
-
-// application_accepts_arbitrary_methods
-async function ScanArbitaryMethods(endpoints) {
-  function isStandardMethod(method) {
-    const standardMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE"];
-    return standardMethods.includes(method.toUpperCase());
+async function ScanDangerousMethods(response) {
+  console.log("response", response)
+  const isDangerousMethod = (method) => {
+    const dangerousMethods = ["eval", "exec", "setTimeout", "setInterval", "Function", "XMLHttpRequest", "fetch"];
+    return dangerousMethods.includes(method);
   }
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
-      let endpointsWithArbitraryMethods = {};
+      let results = []
+      // Iterate through the data and process each item
+      response.data.data.forEach(async (item) => {
+        try {
+          const regex = /\.(eval|exec|setTimeout|setInterval|Function|XMLHttpRequest|fetch)\(/ig; // Regex pattern
+          let modifiedContent = item.content.replace(/"/g, "'");
+          const matches = modifiedContent.match(regex);
+          if (matches && matches.length > 0) {
+            matches.forEach(match => {
+              const dangerousMethod = match.replace(/\(|\./g, ''); // Remove "(" and "."
 
-      endpoints.forEach(endpoint => {
-          endpoint.methods.forEach(method => {
-              if (!isStandardMethod(method)) {
-                  if (!endpointsWithArbitraryMethods[endpoint.path]) {
-                      endpointsWithArbitraryMethods[endpoint.path] = [method];
-                  } else {
-                      endpointsWithArbitraryMethods[endpoint.path].push(method);
-                  }
+              if (isDangerousMethod(dangerousMethod)) {
+                results.push({ method: match.replace(/\(|\./g, ''), filename: item.name });
               }
-          });
-      });
-      const formattedData = Object.entries(endpointsWithArbitraryMethods).map(([label, value]) => ({
-        labels: label,
-        values: value
-      }));
-        resolve(formattedData)
-    
-      } catch (error) {
-      reject(error);
-    }
-  });
-}
-
-// application is use dangerous methods
-// application is use dangerous methods
-async function ScanDangerousMethods(endpoints) {
-  function isDangerousMethod(method) {
-    const dangerousMethods = ["DELETE", "PUT", "PATCH"];
-    return dangerousMethods.includes(method.toUpperCase());
-  }
-  return new Promise((resolve, reject) => {
-    const endpointsWithDangerousMethods = {};
-
-    endpoints.forEach(endpoint => {
-        endpoint.methods.forEach(method => {
-            if (isDangerousMethod(method)) {
-                if (!endpointsWithDangerousMethods[endpoint.path]) {
-                    endpointsWithDangerousMethods[endpoint.path] = [method];
-                } else {
-                    endpointsWithDangerousMethods[endpoint.path].push(method);
-                }
-            }
-        });
-    });
-
-    // Convert values to strings
-    for (const key in endpointsWithDangerousMethods) {
-      if (Object.hasOwnProperty.call(endpointsWithDangerousMethods, key)) {
-        endpointsWithDangerousMethods[key] = endpointsWithDangerousMethods[key].join(', ');
-      }
-    }
-
-
-   let data= Object.entries(endpointsWithDangerousMethods).map(([label, value]) => ({
-      labels: label,
-      values: value
-  }))
-    resolve(data);
-  });
-}
-async function combineAndCountMethods(routes) {
-  try {
-      const optionMethods = await scanDirectoryOptionMethod(routes);
-      const arbitraryMethods = await ScanArbitaryMethods(routes);
-      const dangerousMethods = await ScanDangerousMethods(routes);
-
-      // Combine all results into one array
-      const combinedResults = [...optionMethods, ...arbitraryMethods, ...dangerousMethods];
-
-      // Count occurrences of each label
-      const labelCounts = {};
-      combinedResults.forEach(({ labels }) => {
-          if (labelCounts[labels]) {
-              labelCounts[labels]++;
-          } else {
-              labelCounts[labels] = 1;
+            });
           }
+        } catch (error) {
+          console.error("Error processing file content:", error);
+          reject(error)
+          // Handle error if necessary
+        }
       });
-
-      // Convert labelCounts object to array of objects
-      const result = Object.keys(labelCounts).map(label => ({ label, value: labelCounts[label] }));
-      
-      return result;
-  } catch (error) {
-      console.error("Error:", error);
-      throw error;
-  }
+      // Resolve results
+      resolve(results);
+    } catch (error) {
+      reject(error)
+    }
+  })
 }
+const ScanArbitaryMethods = async (response) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      function isStandardMethod(method) {
+        const standardMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE"];
+        return standardMethods.includes(method.toUpperCase());
+      }
+      let results = []
+      // Iterate through the data and process each item
+      response.data.data.forEach(async (item) => {
+        try {
+          const regex = /\.(get|post|put|delete|patch|head|options|trace)\(/ig; // Regex pattern
+          let modifiedContent = item.content.replace(/"/g, "'");
+          const matches = modifiedContent.match(regex);
+          if (matches && matches.length > 0) {
+            matches.forEach(match => {
+              const arbitraryMethod = match.replace(/\(|\./g, ''); // Remove "(" and "."
+              if (!isStandardMethod(arbitraryMethod)) {
+                results.push({ method: match.replace(/\(|\./g, ''), filename: item.name });
+              }
+            });
+          }
 
-// Sample usage
 
-
-
-// Sample usage
-
-
-
+        } catch (error) {
+          console.error("Error processing file content:", error);
+          reject(error)
+          // Handle error if necessary
+        }
+      });
+      // Resolve results
+      resolve(results);
+    } catch (error) {
+      reject(error)
+    }
+  })
+};
 function containsSequelizeCode(fileContent) {
   // Check if the file content contains Sequelize-related code
   // You can implement your own logic based on your project's coding patterns
@@ -192,28 +140,6 @@ function containsMySQLCode(fileContent) {
 
   return false;
 }
-
-function missingSecurityHeaders(content) {
-  // Example: Check for missing security headers
-  const securityHeaders = ["Content-Security-Policy", "X-XSS-Protection"];
-  return !securityHeaders.every((header) => content.includes(header));
-}
-function AccessControlAllowOriginisSetToStar(content) {
-  // Example: Check for missing security headers
-  const securityHeaders = ["Access-Control-Allow-Origin", "*"];
-  return securityHeaders.every((header) => content.includes(header));
-}
-
-function isUnsafeRegexEvaluation(content) {
-  // Example: Check for unsafe regex patterns
-  const unsafePatterns = ["\\b(eval|Function)\\b"];
-  return unsafePatterns.some((pattern) => content.match(pattern));
-}
-function InformationExposure(content) {
-  // Example: Check for unsafe regex patterns
-  const expressPatterns = ["\\b(express)\\b"];
-  return expressPatterns.some((pattern) => content.match(pattern));
-}
 async function scanHardCodedData(content, file) {
   const results = ["Hard Coded Data Not Found in the Project"];
   content = content.replace(/"/g, "'"); // Replace double quotes with single quotes
@@ -242,59 +168,6 @@ async function scanHardCodedData(content, file) {
 
 }
 
-async function scanHardPasswordHashing(content, file) {
-  const listOfSupportedHashes = crypto.getHashes();
-  const results = ["Password Hashing Not Found in the Project"];
-  content = content.toLowerCase();
-  const crypto_createHashRegex = /createhash\('([^']*)'/g;
-  const CryptoJsRegx = /(md5|sha256)\(/g;
-  // cryptojs module
-  let CryptoJsRegxmatch;
-  if ((CryptoJsRegxmatch = CryptoJsRegx.exec(content)) !== null) {
-    const keyword = CryptoJsRegxmatch[1];
-    results.splice(0, 1);
-    results.push(`found a file where ${keyword} password hashing is used in ${file}`);
-  }
-  // crypto module
-  let crypto_createHashRegexmatch;
-  if (
-    (crypto_createHashRegexmatch = crypto_createHashRegex.exec(content)) !==
-    null
-  ) {
-    const keyword = crypto_createHashRegexmatch[1];
-    if (listOfSupportedHashes.includes(keyword)) {
-      //console.log({ keyword });
-      results.splice(0, 1);
-      results.push(`found a file where ${keyword} password hashing is used in ${file}`);
-    }
-  }
-  return results;
-}
-async function scanXSSvulnerability(content, file) {
-  const results = ["XSS Vulnerability Not Found in the Project"];
-  // Check for potential XSS vulnerabilities
-  // 4. Security Headers
-  if (missingSecurityHeaders(content)) {
-    results.splice(0, 1);
-    results.push(`Potential XSS vulnerability: Missing security headers at ${file}`
-    );
-  }
-  if (InformationExposure(content)) {
-    results.splice(0, 1);
-    results.push(`Disable X-Powered-By header for your Express app (consider using Helmet middleware),because it exposes information about the used framework to potential attackers.`);
-  }
-  // 5. Regular Expression Evaluation
-
-  // 5. Server Side Evaluation
-  const serversideinjex = /(eval|setTimeout|setInterval)\s*\(/gi;
-  let serversideinjexmatch;
-  if ((serversideinjexmatch = serversideinjex.exec(content)) !== null) {
-    const matchedKeyword = serversideinjexmatch[0];
-    results.splice(0, 1);
-    results.push(`Potential Server Side Injection Code: ${matchedKeyword.replace("(", "")}\n`);
-  }
-  return results;
-}
 async function scanRedirectvulnerability(content, file) {
   const results = ["Redirect Vulnerability Not Found in the file"];
   content = content.toLowerCase();
@@ -323,7 +196,7 @@ async function scanRedirectvulnerability(content, file) {
   return results;
 }
 async function scanSessionvulnerability(content, file, middlewares) {
-  
+
   const results = {
     jsonwebtoken: false,
     session: false,
@@ -428,64 +301,152 @@ function getLineNumber(content, index) {
 }
 
 
-async function DefaultWebPage(routes, hostname) {
-  return new Promise((resolve, reject) => {
-    try {
-      let results = "Not Available";
-
-      let defaultWebpage = routes.filter((val) => {
-        return val.path === "/" && val.methods.includes("GET");
-      });
-      if (defaultWebpage.length > 0) {
-        // consoleColorText("Default web page present in the server", "blue");
-        results = "Available"
-      } else {
-        // consoleColorText("Default web page not present in the server", "red");
-        results = "Not Avaialble"
-      }
-      resolve(results);
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-
-
 async function getLatestNodeVersion(version) {
   try {
-    version=version.replace(/v/g,"")
-    version=parseInt(version)
-    if(version<20){
-      return {older_version_support:true}
-    }else{
-      return {older_version_support:false}
+    version = version.replace(/v/g, "")
+    version = parseInt(version)
+    if (version < 20) {
+      return { older_version_support: true }
+    } else {
+      return { older_version_support: false }
     }
   } catch (error) {
     console.error('Error:', error);
     return null;
   }
 }
+const get403ErrorMessage = async (response) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const staticDirectories = [...staticFolders.staticFiles, ...staticFolders.staticFolders] // Add other static directories as needed
+      let results = [];
+      console.log("staticDirectories", staticDirectories)
+      // Iterate through the data and process each item
+      for (const item of response.data.data) {
+        try {
+          // Ignore static files based on directory path
+          if (item.directoryPath && staticDirectories.some(dir => item.directoryPath.includes(dir))) {
+            continue;
+          }
 
+          let modifiedContent = item.content.replace(/"/g, "'");
 
-// Scan package.json file
+          // Check for 404 and 403 status codes
+          if (modifiedContent.includes('403')) {
+            results.push(
+              {
+                name: item.name,
+              }
+            );
+          }
+        } catch (error) {
+          console.error("Error processing file content:", error);
+        }
+      }
 
+      // Resolve results
+      // remove duplicates
+      results = results.length > 0 ? results.filter((v, i, a) => a.findIndex(t => (t.name === v.name)) === i) : []
+      resolve(results);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+const getHttpErrorMessages = async (response) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const staticDirectories = [...staticFolders.staticFiles, ...staticFolders.staticFolders]; // Add other static directories as needed
+      let results = [];
+       let codes = ['400', '401', '403', '404', '500'];
+      // Iterate through the data and process each item
+      for (const item of response.data.data) {
+        try {
+          // Ignore static files based on directory path
+          if (item.directoryPath && staticDirectories.some(dir => item.directoryPath.includes(dir))) {
+            continue;
+          }
 
-// Usage example
-const ScanAllContentAndroutes = async (content, file, routes, hostname, middlewares) => {
-  const results = {};
-  results["optionmethodvulnerability"] = await scanDirectoryOptionMethod(routes, hostname);
-  results["dangerousemethodvulnerability"] = await ScanDangerousMethods(routes, hostname);
-  results["hardcodedata"] = await scanHardCodedData(content, file);
-  results["passwordhashing"] = await scanHardPasswordHashing(content, file);
-  results["xssvulnerability"] = await scanXSSvulnerability(content, file);
-  results["redirectvulnerability"] = await scanRedirectvulnerability(content, file);
-  results["sessionvulnerability"] = await scanSessionvulnerability(content, file, middlewares);
-  results["sqlvulnerability"] = await scanSQLvulnerability(content, file);
-  results["defaultwebpagevulnerability"] = await DefaultWebPage(routes, hostname);
-  return results;
+          let modifiedContent = item.content.replace(/"/g, "'");
+
+          // Check for 400, 401, 403, 404, and 500 status codes
+          if (modifiedContent.match(/400|401|403|404|500/g)) {
+            const matchedCodes = modifiedContent.match(/400|401|403|404|500/g);
+            
+            let uniqureCodes=matchedCodes.filter((v, i, a) => a.indexOf(v) === i)
+            uniqureCodes=uniqureCodes.length>0?uniqureCodes.toString():"No Error Codes Found"
+              results.push({
+                name: item.name,
+                code: uniqureCodes
+              });
+          
+          }
+        } catch (error) {
+          console.error("Error processing file content:", error);
+        }
+      }
+
+      // Resolve results
+      results = results.length > 0 ? results.filter((v, i, a) => a.findIndex(t => (t.name === v.name)) === i) : []
+      resolve(results);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const getLoginErrorMessages = async (response) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const staticDirectories = [...staticFolders.staticFiles, ...staticFolders.staticFolders] // Add other static directories as needed
+      const baseLoginTerms = [
+        'login', 'auth', 'authentication', 'signin', 'signup', 'user', 'account',
+        'session', 'token', 'password', 'forgot', 'reset', 'verify', 'confirm', 'authorize',
+        'credentials'
+      ];
+      let results = [];
+      console.log("staticDirectories", staticDirectories)
+      // Iterate through the data and process each item
+      for (const item of response.data.data) {
+        try {
+          let filename = item.name.toLowerCase()
+          let extension = item.extension.toLowerCase()
+          let filenameswithloginbasedterms = baseLoginTerms.some(term => filename.includes(term))
+          console.log("filenameswithloginbasedterms", filenameswithloginbasedterms)
+          // Ignore static files based on directory path
+          if (!filenameswithloginbasedterms) {
+            continue;
+          }
+
+          let modifiedContent = item.content.replace(/"/g, "'");
+
+          // Check for 404 and 403 status codes
+          if (filenameswithloginbasedterms && extension.includes('js')) {
+            // Check for 400, 401, 403, 404, and 500 status codes
+            if (modifiedContent.match(/400|401|403|404|500/g)) {
+              const matchedCodes = modifiedContent.match(/400|401|403|404|500/g);
+              let uniqureCodes=matchedCodes.filter((v, i, a) => a.indexOf(v) === i)
+              uniqureCodes=uniqureCodes.length>0?uniqureCodes.toString():"No Error Codes Found"
+                results.push({
+                  name: item.name,
+                  code: uniqureCodes
+                });
+            }
+          }
+        } catch (error) {
+          console.error("Error processing file content:", error);
+        }
+      }
+
+      resolve(results);
+    } catch (error) {
+      reject(error);
+    }
+  }
+  )
 }
+
 module.exports = {
-  ScanAllContentAndroutes,
-  checkDirectoryListing,scanDirectoryOptionMethod,scanSessionvulnerability,
-  ScanDangerousMethods,getLatestNodeVersion,ScanArbitaryMethods,combineAndCountMethods
+  scanDirectoryOptionMethod, scanSessionvulnerability,
+  ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanHardCodedData, scanRedirectvulnerability, scanSQLvulnerability, get403ErrorMessage, getHttpErrorMessages, getLoginErrorMessages
 };

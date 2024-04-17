@@ -7,7 +7,7 @@ const ErrorCodesModelSchema = new Schema({
   message: {
     type: String
   },
-  hostname: {
+  domain: {
     type: String
   },
   user: {

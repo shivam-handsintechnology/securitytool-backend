@@ -28,6 +28,8 @@ router.use("/AuthSessionGuardian",AuthSessionGuardian
 )
 // Injections
 router.use("/injections",InjectionsRoute)
+// Error Message
+router.use("/ErrorMessage", require("./Security/ErrorMessage.route"))
 // Insecure Direct Object References
 router.use("/InsecureObjectRefGuard", InsecureObjectRefGuard)
 // SecurityMisconfiguration

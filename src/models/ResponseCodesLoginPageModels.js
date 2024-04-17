@@ -7,12 +7,15 @@ const ErrorCodesLoginSchema = new Schema({
   message: {
     type: String
   },
-  hostname: {
+  domain: {
     type: String
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User"
+  },
+  appid: {
+    type: String
   },
 }, {
   timestamps: true,

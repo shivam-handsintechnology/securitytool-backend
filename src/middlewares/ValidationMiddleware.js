@@ -62,6 +62,7 @@ const AuthDomainMiddleware = async (req, res, next) => {
 }
 const AuthDomainMiddlewarePackage = async (req, res, next) => {
     try {
+        let data
         if (!req.body.appid) {
             throw new Error("Plese Provide Appid")
         }
@@ -75,16 +76,15 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
             // else if (domain.includes("localhost")) {
             //     throw new Error("Domain should not be localhost")
             // }
-            const result = await checkDomainAvailability(domain);
-            if (result) {
+            // const result = await checkDomainAvailability(domain);
+            // if (result) {
                 let obj = { user: user._id, domain: domain, appid: req.body.appid }
                 let existdomain = await AllowedDomainsModel.findOne(obj);
                 if (!existdomain) {
-                    await AllowedDomainsModel.create(obj);
+                    data= await AllowedDomainsModel.create(obj);
                     return sendResponse(res, 200, "Domain added successfully");
                 }
-
-            }
+            // }
             next()
         } else {
             throw new Error("You Are Not Allowed")

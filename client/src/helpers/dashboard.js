@@ -93,19 +93,20 @@
   // },
   {
     "Category": "Error Message",
+    "link": "/ServerErrorMessage",
     "UseCases": [
-      {
-        "label": "Server returns HTTP 403 error message",
-        "link" : "/Serverreturnserror"
-      },
-      {
-        "label": "Server returns HTTP error message",
-        "link" : "/Serverhttperror"
-      },
-      {
-        "label": "Helpful error message displayed at login page",
-        "link" : "/Helpfulerrormessage"
-      }
+      // {
+      //   "label": "Server returns HTTP 403 error message",
+      //   "link" : "/Serverreturnserror"
+      // },
+      // {
+      //   "label": "Server returns HTTP error message",
+      //   "link" : "/Serverhttperror"
+      // },
+      // {
+      //   "label": "Helpful error message displayed at login page",
+      //   "link" : "/Helpfulerrormessage"
+      // }
     ]
   },
   {

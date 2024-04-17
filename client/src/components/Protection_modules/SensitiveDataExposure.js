@@ -9,9 +9,9 @@ const SensitiveDataExposure = () => {
     const [completeed, setCompleted] = useState(0);
     const [responseData, setResponseData] = useState([]);
     const UserData = useSelector((state) => state.UserReducer);
-    const sourcecodeDisclosoure = useDataFetch(`SensitiveDataExposure/sourcecode-disclosoure?domain=${UserData.domain}&type=nodejs`, [UserData.domain]);
-    const DefaultWebPage = useDataFetch(`SensitiveDataExposure/DefaultWebPage?domain=${UserData.domain}&type=nodejs`, [UserData.domain]);
-    const emailHarvesting = useDataFetch(`SensitiveDataExposure/email-harvesting?domain=${UserData.domain}&type=nodejs`, [UserData.domain]);
+    const sourcecodeDisclosoure = useDataFetch(`SensitiveDataExposure/sourcecode-disclosoure?domain=${UserData.domain}`, [UserData.domain]);
+    const DefaultWebPage = useDataFetch(`SensitiveDataExposure/DefaultWebPage?domain=${UserData.domain}`, [UserData.domain]);
+    const emailHarvesting = useDataFetch(`SensitiveDataExposure/email-harvesting?domain=${UserData.domain}`, [UserData.domain]);
     const SensitiveKeysinUrl = useDataFetch(`SensitiveDataExposure/sensitive-data?type=url&domain=${UserData.domain}`, [UserData.domain]);
     const SensitiveKeysinBody = useDataFetch(`SensitiveDataExposure/sensitive-data?type=response&domain=${UserData.domain}`, [UserData.domain]);
     console.log("SensitiveKeysinUrl",sourcecodeDisclosoure)

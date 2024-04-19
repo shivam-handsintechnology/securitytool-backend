@@ -96,15 +96,19 @@ const SSLverifier = async (hostname) => {
         const valid = moment(validTo, 'MMM DD HH:mm:ss YYYY GMT');
         const currentDate = moment();
 
+       try{
         // Check for self-signed certificate
-        var s = JSON.stringify(certificate.subject);
-        var i = JSON.stringify(certificate.issuer);
+        let s = JSON.stringify(certificate.subject);
+        let i = JSON.stringify(certificate.issuer);
         s = JSON.parse(s);
         i = JSON.parse(i);
         if (_.isEqual(s, i)) {
           result.self = 'Self-signed certificate detected';
         } else {
           result.self = 'Certificate is not self-signed';
+        }}
+        catch(error){
+        reject({ message: "Something is Wrong" });
         }
 
         // Check for expired certificate

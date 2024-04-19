@@ -52,12 +52,12 @@ app.get('/protected', JsSnippetController.JsSnippet);
 app.post('/protected', JsSnippetController.getALlDataFromSnippet);
 app.use("/api", apirouter)
 // Serve static files for your frontend
-app.use(express.static(path.join(__dirname, '../client')));
+app.use(express.static(path.join(__dirname, '../client/build')));
 
 
 // Handle other routes by serving index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client', 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, '../client', 'build', 'index.html'));
 });
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -97,7 +97,6 @@ const CreatStatusCodesDetails = async (ErrorStatuscode, message, url, domain, id
       message,
       domain,appid,user: mongoose.Types.ObjectId(id)
     }
-console.log("UserRawData",UserRawData)
     if (url.includes('/login') || url.includes('/signin')) {
       const finduser = await ResponseCodesLoginPageModels.findOne({ErrorStatuscode,domain,user: mongoose.Types.ObjectId(id)})
       if (finduser) {
@@ -119,54 +118,7 @@ console.log("UserRawData",UserRawData)
   }
 }
 
-async function hasRobotsTxt(domain) {
-  // Check if the domain is localhost, if so, reject with an error
-  if (domain.includes('localhost')) {
-   reject(new Error('localhost not allowed'));
-  }
 
-  // Construct the options for the HTTPS request
-  const options = {
-    method: 'HEAD',
-    domain: domain,
-    port: 443,
-    path: '/robots.txt',
-  };
-
-  // Return a promise to handle the asynchronous operation
-  return new Promise((resolve, reject) => {
-    try {
-      // Send the HTTPS request
-      const req = https.request(options, res => {
-        if (res.statusCode === 200) {
-          resolve('robots.txt file available');
-        } else if (res.statusCode === 404) {
-          resolve('robots.txt file not available');
-        } else {
-          // Handle other status codes
-     reject(new Error(`Unexpected status code: ${res.statusCode}`));
-         
-        }
-      });
-
-      // Handle errors with the request
-      req.on('error', err => {
-        if (err.code === 'ENOTFOUND') {
-         reject(new Error('domain not found'));
-        } else {
-          reject(new Error(`Unexpected error: ${err.message}`));
-        }
-      });
-
-      // End the request
-      req.end();
-    } catch (error) {
-      console.log(error)
-      // Catch synchronous errors
-     reject(error);
-    }
-  });
-}
 // Sql Injection Function
 function hasSqlInjection(value) {
   const sqlMeta = new RegExp('(%27)|(--)|(1=1)|(1 and 1=1)|(1 AND 1=1)|(or 1=1)|(OR 1=1)|(%23)|(#)', 'i');
@@ -285,7 +237,6 @@ async function InjectionChecker(req) {
   let containsSql = false
     , validateXss = false, validatehtml = false, containCommand = false;
   value = JSON.stringify(entries)
-  // //console.log({value})
   if (hasSqlInjection(value) === true) {
     containsSql = true;
   }
@@ -323,7 +274,7 @@ async function checkForSensitiveInfoInBody(data, keysToMatch) {
 
     return matchedData;
   } catch (error) {
-    //console.log(error);
+     throw new Error(error.message);
   }
 }
 
@@ -405,13 +356,12 @@ async function CheckPasswordKeyText(data, keysToMatch) {
 
     return matchedData;
   } catch (error) {
-    //console.log(error);
+    throw new Error(error.message);
   }
 }
 module.exports = {
   CreatStatusCodesDetails,
   hasSqlInjection,
-  hasRobotsTxt,
   CreateuserDetails,
   checkForXMLInjection,
   isHashedPassword,

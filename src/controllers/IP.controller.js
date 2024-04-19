@@ -77,13 +77,7 @@ module.exports = {
           let data=  await BlacklistModel.create({ ip })
             return sendResponse(res, 200, "Added Successfully",data)
         }
-        // switch(true){
-        //     case exist:
-        //         return sendResponse(res,401,"Enter Ip is Already Exist")
-        //         break;
-
-        // }
-        //console.log()
+     
     },
     BlackList: async (req, res) => {
         try {
@@ -101,16 +95,14 @@ module.exports = {
             ])
             return sendResponse(res, 200, "Fetch all BlackList", { data, totalPages })
         } catch (error) {
-            //console.log(error)
+      
             return sendResponse(res, 500, error.message)
         }
 
     },
     DeleteBlackListip: async (req, res) => {
         try {
-            //console.log(req.query)
             const { ip } = req.query
-            //console.log({ delete: ip })
             const deleteselectedip = await BlacklistModel.findOneAndDelete({ ip })
             if (deleteselectedip) {
                 return sendResponse(res, 200, "Deleted Ip Address", { ip: deleteselectedip.ip })

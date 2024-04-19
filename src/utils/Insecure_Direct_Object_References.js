@@ -4,13 +4,10 @@ const axios = require('axios');
 // Function to test directory listing for a given path
 async function testDirectoryListing(url, path) {
     url = `${url}/${path}`;
-    //console.log("url", url)
-
     try {
         const response = await axios.get(url).then((response) => response).catch((error) => error.response || error);
 
         if (response.status === 200 && response.data.includes('Index of')) {
-            //console.log(`Directory listing enabled for ${url}`);
             return `Directory listing enabled for ${url}`;
         }
     } catch (err) {

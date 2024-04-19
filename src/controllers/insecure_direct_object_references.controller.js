@@ -32,7 +32,7 @@ exports.directory_listing_is_enabled_on_the_server = async (req, res) => {
         }
 
     } catch (error) {
-        // //console.log(error)
+  
         return errorHandler(res, 500, error.message)
 
     }
@@ -62,7 +62,7 @@ exports.PathTraversal = async (req, res) => {
         }
 
     } catch (error) {
-        // //console.log(error)
+   
         return errorHandler(res, 500, error.message)
 
     }

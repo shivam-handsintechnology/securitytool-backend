@@ -10,7 +10,7 @@ const SessionManagement = () => {
   const UserData = useSelector((state) => state.UserReducer)
   let validation = null
   const showErrorToast = true
-  const postSessionData = useDataFetch(`AuthSessionGuardian/session-vulnurability?domain=${UserData.domain}&type=nodejs`, [UserData.domain], validation, showErrorToast)
+  const postSessionData = useDataFetch(`AuthSessionGuardian/session-vulnurability?domain=${UserData.domain}`, [UserData.domain], validation, showErrorToast)
   console.log("postSessionData", postSessionData)
 
   return (

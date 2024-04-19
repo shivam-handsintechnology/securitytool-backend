@@ -2,7 +2,8 @@
 const {
   sensitivedata,
 } = require("../sensitive/availableapikeys");
-const staticFolders = require("../data/json/staticFolders.json")
+const staticFolders = require("../data/json/staticFolders.json");
+const { SessionVulnurability } = require("../helpers/SessionVulnurabiltyChecker");
 // regular expression paterns
 // OPTIONS method
 async function scanDirectoryOptionMethod(response) {
@@ -11,7 +12,7 @@ async function scanDirectoryOptionMethod(response) {
     try {
 
       // Iterate through the data and process each item
-      response.data.data.forEach(async (item) => {
+      response.forEach(async (item) => {
         try {
           let modifiedContent = item.content.replace(/"/g, "'");
           // Check if OPTIONS method is available in the content
@@ -34,7 +35,7 @@ async function scanDirectoryOptionMethod(response) {
   });
 }
 async function ScanDangerousMethods(response) {
-  console.log("response", response)
+ 
   const isDangerousMethod = (method) => {
     const dangerousMethods = ["eval", "exec", "setTimeout", "setInterval", "Function", "XMLHttpRequest", "fetch"];
     return dangerousMethods.includes(method);
@@ -43,7 +44,7 @@ async function ScanDangerousMethods(response) {
     try {
       let results = []
       // Iterate through the data and process each item
-      response.data.data.forEach(async (item) => {
+      response.forEach(async (item) => {
         try {
           const regex = /\.(eval|exec|setTimeout|setInterval|Function|XMLHttpRequest|fetch)\(/ig; // Regex pattern
           let modifiedContent = item.content.replace(/"/g, "'");
@@ -79,7 +80,7 @@ const ScanArbitaryMethods = async (response) => {
       }
       let results = []
       // Iterate through the data and process each item
-      response.data.data.forEach(async (item) => {
+      response.forEach(async (item) => {
         try {
           const regex = /\.(get|post|put|delete|patch|head|options|trace)\(/ig; // Regex pattern
           let modifiedContent = item.content.replace(/"/g, "'");
@@ -320,9 +321,8 @@ const get403ErrorMessage = async (response) => {
     try {
       const staticDirectories = [...staticFolders.staticFiles, ...staticFolders.staticFolders] // Add other static directories as needed
       let results = [];
-      console.log("staticDirectories", staticDirectories)
       // Iterate through the data and process each item
-      for (const item of response.data.data) {
+      for (const item of response) {
         try {
           // Ignore static files based on directory path
           if (item.directoryPath && staticDirectories.some(dir => item.directoryPath.includes(dir))) {
@@ -358,9 +358,8 @@ const getHttpErrorMessages = async (response) => {
     try {
       const staticDirectories = [...staticFolders.staticFiles, ...staticFolders.staticFolders]; // Add other static directories as needed
       let results = [];
-       let codes = ['400', '401', '403', '404', '500'];
       // Iterate through the data and process each item
-      for (const item of response.data.data) {
+      for (const item of response) {
         try {
           // Ignore static files based on directory path
           if (item.directoryPath && staticDirectories.some(dir => item.directoryPath.includes(dir))) {
@@ -405,14 +404,13 @@ const getLoginErrorMessages = async (response) => {
         'credentials'
       ];
       let results = [];
-      console.log("staticDirectories", staticDirectories)
       // Iterate through the data and process each item
-      for (const item of response.data.data) {
+      for (const item of response) {
         try {
           let filename = item.name.toLowerCase()
           let extension = item.extension.toLowerCase()
           let filenameswithloginbasedterms = baseLoginTerms.some(term => filename.includes(term))
-          console.log("filenameswithloginbasedterms", filenameswithloginbasedterms)
+         
           // Ignore static files based on directory path
           if (!filenameswithloginbasedterms) {
             continue;
@@ -445,8 +443,70 @@ const getLoginErrorMessages = async (response) => {
   }
   )
 }
+let robottxtIsExist=async (response)=>{
+  return new Promise(async (resolve, reject) => {
+    try {
+      let isRobotsTxt=false
+      let filecontent=response
+       if(filecontent.length>0 && filecontent.find((item)=>item.name==="robots")){
+        isRobotsTxt=true
+       }
+        
+        resolve(isRobotsTxt)
+     } catch (error) {
+      console.log(error)
+      reject(error)
+     }
+    }
+  )
+}
+// All the function data in one function
+async function getDashboardData(response){
+  const data = await SessionVulnurability(response);
+  // Initialize an object to store all possibilities
+  const possibilities = {};
 
+  // Check if session expires on closing the browser
+  possibilities["Session Does Not Expire On Closing The Browser"] = data.sessionExpireOnClose_data.length > 0 ? "Yes" : "No";
+
+  // Check if session timeout is high or not implemented
+  const sessionTimeoutImplemented = data.sessionTimeout_data.length > 0;
+  possibilities["Session Time-Out Is High (Or) Not Implemented"] = !sessionTimeoutImplemented ? "Not IMplemented" :data.sessionTimeout_data.toString();
+
+  // Check if session token is passed in areas other than cookies
+  possibilities["Session Token Being Passed In Other Areas Apart From Cookies"] = data.sessionToken_data.length > 0 ?data.sessionToken_data.toString() : "No";
+
+  // Check if an adversary can hijack user sessions by session fixation
+  const sessionFixationPossible = data.sessionFixation_data.length>0
+  possibilities["An Adversary Can Hijack User Sessions By Session Fixation"] = sessionFixationPossible ? data.sessionFixation_data.toString() : "No";
+
+  // Check if the application is vulnerable to session hijacking attack
+  const sessionHijackingPossible = data.sessionHijacking_data.length>0
+  possibilities["Application Is Vulnerable To Session Hijacking Attack"] = sessionHijackingPossible ? data.sessionHijacking_data.toString() : "No";
+
+  let results=[]
+  if(Object.keys(possibilities).length>0){
+     results= Object.keys(possibilities).map((key) => {
+      return {
+          [key]: possibilities[key]
+      }
+     })
+  }
+
+  let data2 = {
+    directoryOptionMethod: await scanDirectoryOptionMethod(response),
+    dangerousMethods: await ScanDangerousMethods(response),
+    arbitaryMethods: await ScanArbitaryMethods(response),
+    sessionVulnerability:results,
+    httpErrorMessages: await getHttpErrorMessages(response),
+    loginErrorMessages: await getLoginErrorMessages(response),
+    robotsTxt:await robottxtIsExist(response),
+
+  };
+  return data2;
+
+}
 module.exports = {
-  scanDirectoryOptionMethod, scanSessionvulnerability,
+  scanDirectoryOptionMethod, scanSessionvulnerability,getDashboardData,
   ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanHardCodedData, scanRedirectvulnerability, scanSQLvulnerability, get403ErrorMessage, getHttpErrorMessages, getLoginErrorMessages
 };

@@ -6,7 +6,7 @@ const sessionExpireOnClose = async (response) => {
         try {
             let results = []
             // Iterate through the data and process each item
-            response.data.data.forEach(async (item) => {
+            response.forEach(async (item) => {
                 try {
                     // Replace double quotes with single quotes for consistency
                     let modifiedContent = item.content.replace(/"/g, "'");
@@ -54,7 +54,7 @@ const sessionExpireOnClose = async (response) => {
                     } 
 
                 } catch (error) {
-                    console.error("Error processing file content:", error);
+                    
                     reject(error)
                     // Handle error if necessary
                 }
@@ -79,7 +79,7 @@ const sessionTimeout = async (response) => {
             let results = []
 
             // Iterate through the data and process each item
-            response.data.data.forEach(async (item) => {
+            response.forEach(async (item) => {
                 try {
                     const sevenDays = 86400000 * 7;
                     const oneMinute = 60000;
@@ -195,7 +195,7 @@ const sessionTimeout = async (response) => {
                         results.push(`Session timout set ${sessionTimeout} in ${item.name}`);
                     }
                 } catch (error) {
-                    console.error("Error processing file content:", error);
+                    
                     reject(error)
                     // Handle error if necessary
                 }
@@ -217,7 +217,7 @@ const sessionTimeoutWithObject = async (response) => {
             let string='Session timout in' 
             results.push({[string]:"High"});
             // Iterate through the data and process each item
-            response.data.data.forEach(async (item) => {
+            response.forEach(async (item) => {
                 try {
                     const sevenDays = 86400000 * 7;
                     const oneMinute = 60000;
@@ -337,7 +337,7 @@ const sessionTimeoutWithObject = async (response) => {
                         results.push({[string]:sessionTimeout});
                     }
                 } catch (error) {
-                    console.error("Error processing file content:", error);
+                    
                     reject(error)
                     // Handle error if necessary
                 }
@@ -358,7 +358,7 @@ const sessionToken = async (response) => {
     return new Promise(async (resolve, reject) => {
         try {
             let results = []
-            response.data.data.forEach(async (item) => {
+            response.forEach(async (item) => {
                 let modifiedcontent = item.content.replace(/"/g, "'")
                 // Regular expression to match patterns indicative of jwt.verify and jwt.sign usage
                 const jwtFunctionsRegex = /jwt\.(verify|sign)\s*\(/g;
@@ -377,7 +377,7 @@ const sessionTokenWithObject = async (response) => {
     return new Promise(async (resolve, reject) => {
         try {
             let results = []
-            response.data.data.forEach(async (item) => {
+            response.forEach(async (item) => {
                 let modifiedcontent = item.content.replace(/"/g, "'")
                 // Regular expression to match patterns indicative of jwt.verify and jwt.sign usage
                 const jwtFunctionsRegex = /jwt\.(verify|sign)\s*\(/g;
@@ -400,7 +400,7 @@ const sessionFixation = async (response) => {
         try {
             let results = []
             // Iterate through the data and process each item
-            response.data.data.forEach(async (item) => {
+            response.forEach(async (item) => {
                 try {
                     // Replace double quotes with single quotes for consistency
                     let modifiedContent = item.content.replace(/"/g, "'");
@@ -440,7 +440,7 @@ const sessionFixation = async (response) => {
                         }
                     }
                 } catch (error) {
-                    console.error("Error processing file content:", error);
+                    
                     // Handle error if necessary
                 }
             });
@@ -459,7 +459,7 @@ const sessionFixationWithobject = async (response) => {
         try {
             let results = []
             // Iterate through the data and process each item
-            response.data.data.forEach(async (item) => {
+            response.forEach(async (item) => {
                 try {
                     // Replace double quotes with single quotes for consistency
                     let modifiedContent = item.content.replace(/"/g, "'");
@@ -499,7 +499,7 @@ const sessionFixationWithobject = async (response) => {
                         }
                     }
                 } catch (error) {
-                    console.error("Error processing file content:", error);
+                    
                     // Handle error if necessary
                 }
             });
@@ -521,7 +521,7 @@ const sessionHijacking = async (response) => {
         try {
             let results = []
             // Iterate through the data and process each item
-            response.data.data.forEach(async (item) => {
+            response.forEach(async (item) => {
                 try {
                     // Replace double quotes with single quotes for consistency
                     let modifiedContent = item.content.replace(/"/g, "'");
@@ -557,7 +557,7 @@ const sessionHijacking = async (response) => {
                         }
                     }
                 } catch (error) {
-                    console.error("Error processing file content:", error);
+                    
                     // Handle error if necessary
                 }
             });
@@ -576,7 +576,7 @@ const sessionHijackingWithObject = async (response) => {
         try {
             let results = []
             // Iterate through the data and process each item
-            response.data.data.forEach(async (item) => {
+            response.forEach(async (item) => {
                 try {
                     // Replace double quotes with single quotes for consistency
                     let modifiedContent = item.content.replace(/"/g, "'");
@@ -612,7 +612,7 @@ const sessionHijackingWithObject = async (response) => {
                         }
                     }
                 } catch (error) {
-                    console.error("Error processing file content:", error);
+                    
                     // Handle error if necessary
                 }
             });

@@ -5,6 +5,7 @@ import { Button } from "react-bootstrap";
 import { usePostData, useDataFetch ,useDeleteData} from "../../../hooks/DataFetchHook";
 import { PaginationComponent } from "../../../hooks/PaginationComponent";
 import LoadingSpinner from "../../../components/LoaderAndError/loader";
+import { useSelector } from "react-redux";
 const AllLogs = () => {
   const [limit, setLimit] = useState(5)
   const [pageNumber, setPageNumber] = useState(1)
@@ -49,7 +50,8 @@ const AllLogs = () => {
       width: "28%",
     },
   ]
-  const getAlLLogs = useDataFetch(`injections?limit=${limit}&&type=${type}&page=${pageNumber}`, [pageNumber, type, PostDomain.Data,Data])
+  const {domain}=useSelector((state)=>state.UserReducer)
+  const getAlLLogs = useDataFetch(`injections?limit=${limit}&&type=${type}&page=${pageNumber}`, [pageNumber,domain, type, PostDomain.Data,Data])
  console.log("getAlLLogs",getAlLLogs)
   return (
     <div>

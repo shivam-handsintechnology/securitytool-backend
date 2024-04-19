@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 const Adversaryhijack = () => {
   const UserData = useSelector((state) => state.UserReducer)
 
-  const postSessionData=useDataFetch(`AuthSessionGuardian/session-fixation?domain=${UserData.domain}&type=nodejs`,[UserData.domain])
+  const postSessionData=useDataFetch(`AuthSessionGuardian/session-fixation?domain=${UserData.domain}`,[UserData.domain])
     console.log("postSessionData", postSessionData)
   return (
     <div>

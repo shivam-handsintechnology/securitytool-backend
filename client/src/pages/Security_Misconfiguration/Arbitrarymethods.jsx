@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 const Arbitrarymethods = () => {
   const UserData = useSelector((state) => state.UserReducer)
 
-  const postSessionData=useDataFetch(`SecurityMisconfiguration/arbitrary-methods?domain=${UserData.domain}&type=nodejs`,[UserData.domain])
+  const postSessionData=useDataFetch(`SecurityMisconfiguration/arbitrary-methods?domain=${UserData.domain}`,[UserData.domain])
     console.log("postSessionData", postSessionData)
   return (
     <div>

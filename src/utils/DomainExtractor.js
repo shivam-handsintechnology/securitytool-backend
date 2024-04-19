@@ -88,7 +88,6 @@ const invalidExtensions = [
         const parts = domain.split('.');
         return parts.length>0 && parts.map((part) => part.length).reduce((a, b) => a + b) > 0;
      });
-      console.log(uniqueDomains);
       resolve(uniqueDomains)
     } else {
         reject('No domains found');

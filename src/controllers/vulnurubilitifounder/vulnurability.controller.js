@@ -23,7 +23,6 @@ module.exports = {
             if (isExistDomain) {
                 let response = await axios.get(url)
                 if (response.status === 200) {
-                    console.log("data", response.data)
                     let isHttp = await hashttpParametersPollutionavailable(response.data)
                     let data = { succces: false, data: isHttp, message: isHttp }
                     return sendResponse(res, 200, "success", data)
@@ -47,7 +46,7 @@ module.exports = {
             const response = await SSLverifier(domain).then(data => data)
             return sendResponse(res, 200, "SSL verified successfully", response)
         } catch (error) {
-            console.log("error", error)
+        
             return errorHandler(res, 500, error.message)
         }
     },
@@ -107,7 +106,7 @@ module.exports = {
                 }
 
             }
-            console.log("isVerifyEmail", isVerifyEmail)
+        
             return sendResponse(res, 200, "fetch", isVerifyEmail)
         } catch (error) {
             return res.status(500).json({ message: error.message });
@@ -120,7 +119,7 @@ module.exports = {
             ]);
             const { data, url, domain, appid, type } = req.body;
             const { _id } = req.user;
-            console.log(_id)
+         
             const sensitivekey = await checkForSensitiveInfoInBody(data, sensitivedata);
             const passworddata = await CheckPasswordKeyText(data, passwordkeys); // Check for password keys in the data
             let found = false; // Flag to track if a match is found
@@ -186,7 +185,6 @@ module.exports = {
                         sensitivekeys: sensitivekey,
                         appid, type
                     });
-                    console.log("data>>>>", data)
                     successMessage = "New sensitive key added to the URL.";
                 }
             } else {
@@ -195,7 +193,7 @@ module.exports = {
 
             return res.status(200).json({ success: true, message: successMessage });
         } catch (error) {
-            console.log({ sensitivekeysinurlerror: error });
+         
             return res.status(500).json({ error: "Internal Server Error" });
         }
     },
@@ -203,68 +201,7 @@ module.exports = {
     sessionstoragedata: async (req, res) => {
         try {
             const { filteredRequests, localStorageData, sessionStorageData } = req.body
-            if (filteredRequests) {
-                const d = filteredRequests.forEach(async (x) => {
-                    if (x.response.startsWith("{")) {
-                        if (x.url == 'http://localhost:8080/api/security/test/sensitiveinfoinurl') {
-                            return
-                        } else {
-                            const responsedata = JSON.parse(x.response)
-                            const sensitivekey = await checkForSensitiveInfoInBody(
-                                responsedata,
-                                sensitivedata
-                            );
-                            if (sensitivekey) {
-                                return { sensitivekey, res: x.response }
-                            }
-                        }
-
-                    }
-                })
-                Promise.all([d]).then((result) => { });
-            }
-            if (localStorageData) {
-
-                // // //console.log(localStorageData)
-
-            }
-            if (sessionStorageData) {
-                // // //console.log(sessionStorageData)
-            }
-            return res.json("hello")
-            return false
-            const sensitivekey = await checkForSensitiveInfoInBody(
-                data,
-                sensitivedata
-            );
-            if (sensitivekey) {
-                const existingMessage = await CrticalInformationInurl.findOne(
-                    {
-                        hostname,
-                        sensitivekeys: sensitivekey,
-                    },
-                    { _id: 0 }
-                );
-                // //console.log(existingMessage);
-                if (existingMessage) {
-                    // //console.log("Found existing sensitive key in URL");
-                } else {
-                    // //console.log("Creating new sensitive key in URL");
-                    const d = await CrticalInformationInurl.create({
-                        hostname,
-                        url,
-                        sensitivekeys: sensitivekey,
-                    });
-                    // //console.log(d);
-                    // Return success response for creating new data
-                    return res.status(201).json({ success: true });
-                }
-            } else {
-                // Return response indicating that no sensitive key was found
-                return res.status(200).json({ sensitivekey: false });
-            }
-
-            return res.json("hello")
+           return sendResponse(res, 200, "fetch", { filteredRequests, localStorageData, sessionStorageData })
         } catch (error) {
             return res.status(500).json({ message: "Internal Server Error" });
         }
@@ -311,7 +248,7 @@ module.exports = {
 
 
         } catch (error) {
-            // //console.log({error})
+         
             errorHandler(res, 500, error.message)
         }
 

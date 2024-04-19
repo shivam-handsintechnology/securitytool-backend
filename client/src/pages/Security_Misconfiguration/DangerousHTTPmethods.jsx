@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 const DangerousHTTPmethods = () => {
   const UserData = useSelector((state) => state.UserReducer)
 
-  const postSessionData=useDataFetch(`SecurityMisconfiguration/dangerous-http-methods-enabled?domain=${UserData.domain}&type=nodejs`,[UserData.domain])
+  const postSessionData=useDataFetch(`SecurityMisconfiguration/dangerous-http-methods-enabled?domain=${UserData.domain}`,[UserData.domain])
   console.log("postSessionData", postSessionData)
 return (
   <div>

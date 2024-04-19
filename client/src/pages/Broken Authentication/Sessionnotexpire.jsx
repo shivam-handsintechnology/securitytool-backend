@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 const Sessionnotexpire = () => {
   const UserData = useSelector((state) => state.UserReducer)
 
-  const postSessionData = useDataFetch(`AuthSessionGuardian/session-vulnurability?domain=${UserData.domain}&type=nodejs`, [UserData.domain])
+  const postSessionData = useDataFetch(`AuthSessionGuardian/session-vulnurability?domain=${UserData.domain}`, [UserData.domain])
   console.log("postSessionData", postSessionData.data)
   return (
     <div>

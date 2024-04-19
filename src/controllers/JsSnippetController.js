@@ -8,7 +8,7 @@ module.exports = {
   },
   getALlDataFromSnippet: (req, res) => {
     const { data } = req.body;
-    //console.log(data);
+
 
   }
 }

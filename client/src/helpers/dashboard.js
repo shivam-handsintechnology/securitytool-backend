@@ -40,7 +40,7 @@
       },
       {
         "label": "Application is vulnerable to iframe injection attack",
-        "link":"/logs/iframe"
+        "link":"/logs/IFrame"
       },
       {
         "label": "Application is vulnerable to SQL Injection",

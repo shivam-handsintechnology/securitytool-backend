@@ -53,7 +53,7 @@ const getMiddlewareControllerForClient = async (req, res) => {
   }
 }
 const findAndUpdateMiddlewareController = async (req, res) => {
-  //console.log(req.body)
+
   const body = req.body
   try {
     const data = await middlewareModel.findOneAndUpdate({ user: req.user.id }, body, { new: true }).select("-__v -appid -_id -user -createdAt -updatedAt -BlockUserMiddlware -ldapInjectionDetectorMiddlware")

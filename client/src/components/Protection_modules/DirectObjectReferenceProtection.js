@@ -8,10 +8,10 @@ const DirectObjectReferenceProtection = () => {
     const [completeed, setCompleted] = useState(0);
     const [responseData, setResponseData] = useState([]);
     const userData = useSelector((state) => state.UserReducer)
-    const robottxt = useDataFetch(`security/test/robottxt?domain=${userData.domain}`, [userData.domain], null, false)
+    const robottxt = useDataFetch(`InsecureObjectRefGuard/robottxt?domain=${userData.domain}`, [userData.domain], null, false)
     const httpparameterpollution = useDataFetch(`client/httpparameterpollution?domain=${userData.domain}`, [userData.domain], null, false)
     const DirectoryListingEnable = useDataFetch(`InsecureObjectRefGuard/DirectoryListingEnable?domain=${userData.domain}`, [userData.domain], null, false)
-    console.log("robottxt", DirectoryListingEnable)
+    console.log("robottxt", robottxt)
     // Function to make an API request
     async function fetchData(url, filepath) {
         try {
@@ -92,8 +92,12 @@ const DirectObjectReferenceProtection = () => {
                                 {responseData.map((response, index) => (
                                     <li key={index}><span><b>{response.message}</b></span></li>
                                 ))}
-                                <li><b>The remote server contains a ‘robots.txt’ file</b>:<span className={robottxt.errors.error ? "error" : ""}> {robottxt.errors.error ? robottxt.errors.message : robottxt?.data}</span></li>
-                                <li><b>HTTP parameter pollution</b>:<span className={httpparameterpollution.errors.error ? "error" : ""}> {httpparameterpollution.errors.error ? robottxt.errors.message : httpparameterpollution?.data?.data}</span></li>
+                                {robottxt.errors.loading?<div>...Loading</div>:robottxt.errors.error?<span>{robottxt.errors.message}</span>:robottxt.data && Object.keys(robottxt.data).length>0  && Object.keys(robottxt.data).map((key, index) => (
+                                    <li key={index}><b>{key}</b>{robottxt?.data[key]}</li>    
+                                ))}
+                                
+                               
+                               <li><b>HTTP parameter pollution</b>:<span className={httpparameterpollution.errors.error ? "error" : ""}> {httpparameterpollution.errors.error ? robottxt.errors.message : httpparameterpollution?.data?.data}</span></li>
 
                             </ul>
                         </div>

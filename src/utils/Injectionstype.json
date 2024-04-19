@@ -27,6 +27,10 @@
         {
             "title": "Proxy",
             "slug": "VPN"
+        },
+        {
+            "title": "IFrame",
+            "slug": "IFrame"
         }
     ]
 }

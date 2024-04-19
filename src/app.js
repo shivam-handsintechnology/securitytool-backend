@@ -1,5 +1,4 @@
-// All Neccesary functions
-const session = require('express-session');
+// Import external modules
 const cors = require("cors")
 const fileUpload = require('express-fileupload')
 const express = require("express");
@@ -10,55 +9,31 @@ const cluster = require("cluster")
 const os = require("os")
 const process = require("process");
 const path = require("path")
+// import internal modules
 const logger = require('./logger/logger');
 const apirouter = require('./routes')
-const checkVerification = require('./middlewares/verifyClient')
-const { DBConnection } = require("./config/connection");
-const JsSnippetController = require('./controllers/JsSnippetController');
-const numCPUs = os.cpus().length
+const { DBConnection } = require("./config/connection"); 
+const numCPUs = os.cpus().length // Get the number of CPU cores
 // Connected to mongodb
-dotenv.config();
-DBConnection(process.env.MONGO_URI)
-// Create Express APP
-const app = express();
-// /*
-// const Nodemonitor=require("monitornodejstestversion")
-// const appid = '8dae6ee9-ad81-417a-93a0-f60a7e9e570c'; // Replace with your app ID
-// app.use(Nodemonitor.testing)
-// app.use(Nodemonitor.validateAndSetMiddleware(appid))
-// */
-// Configure express-session middleware
-app.use(session({
-  secret: 'your_secret_key', // Change this to a secure secret key
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: false, // Set secure to true if using HTTPS
-    maxAge: 86400000 // Max age of the session cookie in milliseconds (1 day in this example)
-  }
-}));
-app.set('view engine', 'ejs');
-app.use(express.json({ limit: "50mb", extended: true }));
-// File Upload Functionality
+dotenv.config(); // Load environment variables
+DBConnection(process.env.MONGO_URI) // Connect to MongoDB
+const app = express(); // Create Express APP
+app.set('view engine', 'ejs'); // Set the view engine to ejs
+app.use(express.json({ limit: "50mb", extended: true })); // body parser
 app.use(fileUpload({
-  limits: { fileSize: 50 * 1024 * 1024 },
+  limits: { fileSize: 50 * 1024 * 1024 },   // File Upload Functionality
 }));
-// session and cookie configuration
 app.set('trust proxy', 1) // trust first proxy
-app.use(hpp());
-app.use(cors())
-app.use(helmet())
-app.get('/protected', JsSnippetController.JsSnippet);
-app.post('/protected', JsSnippetController.getALlDataFromSnippet);
-app.use("/api", apirouter)
+app.use(hpp()); // Prevent HTTP Parameter Pollution
+app.use(cors()) // Enable CORS
+app.use(helmet()) // Secure your app by setting various HTTP headers
+app.use(apirouter) // Use the API router
 // Serve static files for your frontend
-app.use(express.static(path.join(__dirname, '../client/build')));
+app.use(express.static(path.join(__dirname, '../client/build'))); // Serve the static files
 
-
-// Handle other routes by serving index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client', 'build', 'index.html'));
-});
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, '../client', 'build', 'index.html')); // Send the index.html file
+// });
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error(err.stack);
@@ -72,10 +47,7 @@ app.use((req, res) => {
   // Render the welcome page (views/welcome.ejs)
   res.status(404).render('404', { message: 'requested Method Not FOund' });
 });
-app.get('/*/health', (req, res) => {
-  res.status(200).send('Server is up and running');
-}
-);
+
 // Cluster setup
 const PortNumber = 20000;
 if (cluster.isPrimary) {

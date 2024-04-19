@@ -14,6 +14,8 @@ const { ValidationMiddleware} = require('../middlewares/ValidationMiddleware');
 const { DomainValidationSchema } = require('../helpers/Validators');
 const verifyToken = require('../middlewares/VerifyUser');
 const GetFileCOntentMiddleware = require('../middlewares/GetFileCOntentMiddleware');
+const JsSnippetController=require("../controllers/JsSnippetController")
+router.route('/protected').get( JsSnippetController.JsSnippet).post(JsSnippetController.getALlDataFromSnippet);
 router.get('/', (req, res) => {
   try {
    return  res.render('index', { title: 'Express.js' });
@@ -21,8 +23,11 @@ router.get('/', (req, res) => {
     return res.status(500).json({ message: 'Something broke!' });
   }
 })
+// Security
 router.use("/security", verifytoken, Security)
+// Get Client Information
 router.use("/client", GetClientInformation)
+// Auth
 router.use("/auth", Authrouter)
 // Broken Authentication and Session Management
 router.use("/AuthSessionGuardian", verifyToken,
@@ -39,4 +44,5 @@ router.use("/InsecureObjectRefGuard", InsecureObjectRefGuard)
 router.use("/SecurityMisconfiguration", SecurityMisconfiguration)
 // SensitiveDataExposure
 router.use("/SensitiveDataExposure", SensitiveDataExposure)
+router.use("/api",router)
 module.exports = router

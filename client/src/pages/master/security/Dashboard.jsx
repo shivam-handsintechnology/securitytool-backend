@@ -56,7 +56,7 @@ export default function Dashboard() {
           <SSLInfo />
           {/* End SSl Info */}
           {/* Error Message */}
-       
+          
           {/* End Error Message */}
           {/* Insecure Direct Object References */}
           <DirectObjectReferenceProtection />

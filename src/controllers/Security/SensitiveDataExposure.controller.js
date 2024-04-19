@@ -6,17 +6,10 @@ const {checkServerFingerprinting, Full_Path_Disclosure} = require("../../utils/A
 module.exports={
     sourcecodeDisclousoure:async(req,res)=>{
         try {
-            let domain = req.query.domain
-            let url = `http://${domain}/fileContent`;
-                let response = await axios.get(url)
-                if (response.status === 200) {
-                    return   sendResponse(res, 200, "success", response.data.data)
-                } else {
-                    return   sendResponse(res, 200, "success", [])
-                }
-          
+           return   sendResponse(res, 200, "success", req.body.fileContent)
+              
            } catch (error) {
-            console.log("error",error)
+         
             return errorHandler(res,200,"No","No")
            }
     },
@@ -32,7 +25,7 @@ module.exports={
                 }
           
            } catch (error) {
-            console.log(error.message)
+         
             return errorHandler(res,200,"No","No")
            }
     },
@@ -40,6 +33,7 @@ module.exports={
     emailHarvesting:async(req,res)=>{
        try {
          let emailHarvest=false
+         console.log("user",req.user)
          let {appid}=req.user
          let domain=req.query.domain
          let data=await EmailVerifyModel.findOne({appid,domain})

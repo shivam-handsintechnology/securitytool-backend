@@ -3,7 +3,6 @@ const sendResponse=(res,statusCode=500,message="Success",data)=>{
    return res.status(statusCode).json(response)
 }
 const handelErrors=(err, req, res, next) => {
-  //console.log({name:error.name})
     if (err instanceof SyntaxError) {
       // handle syntax errors without stack trace
       return  res.status(400).json({ error: 'Bad request' });

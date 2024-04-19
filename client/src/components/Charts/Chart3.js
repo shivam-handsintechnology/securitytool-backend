@@ -1,14 +1,18 @@
 import React from 'react';
 import { PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
 
-const Chart3 = ({data}) => {
-    const coursesData = [
-        { name: 'Python', value: 30, color: '#FF6384' },
-        { name: 'JavaScript', value: 20, color: '#36A2EB' },
-        { name: 'Java', value: 15, color: '#FFCE56' },
-        { name: 'C++', value: 10, color: '#4CAF50' },
-        { name: 'Data Structures', value: 25, color: '#9C27B0' },
-    ];
+const Chart3 = ({ data }) => {
+    // Check if all values are zero
+    const allZero = data.every(entry => entry.value === 0);
+
+    if (allZero) {
+        return (
+            <div className='border'>
+                <div className='bg-primary p-1'> <h3> Doughnut Chart</h3></div>
+                <p>No data available for graph</p>
+            </div>
+        );
+    }
 
     return (
         <div className='border'>
@@ -16,7 +20,7 @@ const Chart3 = ({data}) => {
 
             <PieChart width={500} height={300}>
                 <Pie
-                    data={data }
+                    data={data}
                     dataKey="value"
                     cx="50%"
                     cy="50%"
@@ -27,6 +31,7 @@ const Chart3 = ({data}) => {
                     endAngle={450}
                     paddingAngle={5}
                     label
+                    minAngle={1} // Adjust minAngle to ensure small slices are visible
                 >
                     {data.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -38,5 +43,7 @@ const Chart3 = ({data}) => {
         </div>
     );
 };
+
+
 
 export default Chart3;

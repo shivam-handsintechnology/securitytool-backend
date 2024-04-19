@@ -64,7 +64,6 @@ async function sendToApi(data) {
     },
     body: JSON.stringify({ data }),
   });
-  //console.log('Data sent to API');
 }
 sendToApi(getAllData());
 

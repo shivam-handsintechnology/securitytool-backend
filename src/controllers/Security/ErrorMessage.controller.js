@@ -6,7 +6,8 @@ module.exports = {
     get403ErrorMessage: async (req, res) => {
         try {
             let data=[]
-            let response=await axios.get('http://localhost:20000/fileContent')
+            let response=req.body.fileContent
+       
             data = await get403ErrorMessage(response)
             return sendResponse(res, 200, "success", data)
         } catch (error) {
@@ -16,7 +17,7 @@ module.exports = {
     getHttpErrorMessages: async (req, res) => {
         try {
             let data=[]
-            let response=await axios.get('http://localhost:20000/fileContent')
+            let response=req.body.fileContent
              data = await getHttpErrorMessages(response)
             return sendResponse(res, 200, "success", data)
         } catch (error) {
@@ -26,7 +27,7 @@ module.exports = {
     getLoginErrorMessages: async (req, res) => {
         try {
             let data=[]
-            let response=await axios.get('http://localhost:20000/fileContent')
+            let response=req.body.fileContent
               data = await getLoginErrorMessages(response)
             return sendResponse(res, 200, "success", data)
         } catch (error) {
@@ -36,7 +37,7 @@ module.exports = {
     getAllErrorMessages: async (req, res) => {
         try {
             let obj=[]
-            let response=await axios.get('http://localhost:20000/fileContent')
+            let response=req.body.fileContent
             let data = await get403ErrorMessage(response)
             let data1 = await getHttpErrorMessages(response)
             let data2 = await getLoginErrorMessages(response)

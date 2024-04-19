@@ -6,13 +6,13 @@ import InjectionVulnurabilities from "../../../components/Protection_modules/Inj
 import DirectObjectReferenceProtection from "../../../components/Protection_modules/DirectObjectReferenceProtection";
 import SecurityMisconfiguration from "../../../components/Protection_modules/SecurityMisconfiguration";
 import SensitiveDataExposure from "../../../components/Protection_modules/SensitiveDataExposure";
-import BusinessLogicFlow from "../../../components/Protection_modules/BusinessLogicFlow";
-import ErrorMessages from "../../../components/Protection_modules/ErrorMessages";
+import useDataFetch from "../../../hooks/DataFetchHook";
+import { useSelector } from "react-redux";
 
 
 export default function Dashboard() {
-   
   
+   
   return (
     <React.Fragment>
       <div>
@@ -55,11 +55,8 @@ export default function Dashboard() {
           <h5><i className="fas fa-shield-alt" /> &nbsp;Protection Modules ( SSL Information)</h5>
           <SSLInfo />
           {/* End SSl Info */}
-          {/* Business Logic Flow */}
-          <BusinessLogicFlow />
-          {/* End Business Logic Flow */}
           {/* Error Message */}
-          <ErrorMessages />
+       
           {/* End Error Message */}
           {/* Insecure Direct Object References */}
           <DirectObjectReferenceProtection />

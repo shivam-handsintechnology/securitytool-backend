@@ -22,10 +22,10 @@ DBConnection(process.env.MONGO_URI)
 // Create Express APP
 const app = express();
 // /*
-const Nodemonitor=require("monitornodejstestversion")
-const appid = '8dae6ee9-ad81-417a-93a0-f60a7e9e570c'; // Replace with your app ID
-app.use(Nodemonitor.testing)
-app.use(Nodemonitor.validateAndSetMiddleware(appid))
+// const Nodemonitor=require("monitornodejstestversion")
+// const appid = '8dae6ee9-ad81-417a-93a0-f60a7e9e570c'; // Replace with your app ID
+// app.use(Nodemonitor.testing)
+// app.use(Nodemonitor.validateAndSetMiddleware(appid))
 // */
 // Configure express-session middleware
 app.use(session({
@@ -44,27 +44,20 @@ app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 },
 }));
 // session and cookie configuration
-
-app.get('/protected', JsSnippetController.JsSnippet);
-app.post('/protected', JsSnippetController.getALlDataFromSnippet);
 app.set('trust proxy', 1) // trust first proxy
 app.use(hpp());
 app.use(cors())
 app.use(helmet())
-
-app.disable('x-powered-by');
-app.disable('etag');
-app.get("/allroutes",async(req,res)=>{
-  res.status(200).json({routes:req.app._router.stack})
-})
+app.get('/protected', JsSnippetController.JsSnippet);
+app.post('/protected', JsSnippetController.getALlDataFromSnippet);
 app.use("/api", apirouter)
 // Serve static files for your frontend
-app.use(express.static(path.join(__dirname, '../client')));
+app.use(express.static(path.join(__dirname, '../client/build')));
 
 
 // Handle other routes by serving index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client', 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, '../client', 'build', 'index.html'));
 });
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -101,8 +94,6 @@ if (cluster.isPrimary) {
   });
 }
 
-// Example usage:
-// /*
 
 
 

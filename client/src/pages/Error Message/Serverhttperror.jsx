@@ -5,7 +5,7 @@ import { Table } from 'react-bootstrap';
 
 const ServerHttpError = (props) => {
   const UserData = useSelector((state) => state.UserReducer);
-  const postSessionData = useDataFetch(`ErrorMessage/http-error-messages?domain=${UserData.domain}&type=nodejs`, [UserData.domain]);
+  const postSessionData = useDataFetch(`ErrorMessage/http-error-messages?domain=${UserData.domain}`, [UserData.domain]);
   console.log("postSessionData", postSessionData);
   return (
     <div>

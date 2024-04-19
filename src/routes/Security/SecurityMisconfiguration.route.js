@@ -1,31 +1,28 @@
 const
     router = require("express").Router()
 const verifyToken = require('../../middlewares/VerifyUser')
-const { ValidationMiddlewareQuery,AuthDomainMiddleware } = require("../../middlewares/ValidationMiddleware");
+const { ValidationMiddlewareQuery, AuthDomainMiddleware, ValidationMiddleware } = require("../../middlewares/ValidationMiddleware");
 const SecurityMisconfiguration = require("../../controllers/Security/SecurityMisconfiguration.controller");
 const { DomainValidationSchema } = require("../../helpers/Validators");
+const GetFileCOntentMiddleware = require("../../middlewares/GetFileCOntentMiddleware");
 
-router.get("/arbitrary-methods", verifyToken,
-    // ValidationMiddlewareQuery(DomainValidationSchema),
+router.get("/arbitrary-methods", verifyToken, ValidationMiddleware(DomainValidationSchema), GetFileCOntentMiddleware,
     SecurityMisconfiguration.arbitraryMethods)
 
 router.get("/passwords-insecure", verifyToken,
-    // ValidationMiddlewareQuery(DomainValidationSchema),
+    verifyToken, ValidationMiddleware(DomainValidationSchema),
     SecurityMisconfiguration.passwordsInsecure)
 router.get("/week-passwords-insecure", verifyToken,
-    // ValidationMiddlewareQuery(DomainValidationSchema),
+    verifyToken, ValidationMiddleware(DomainValidationSchema),
     SecurityMisconfiguration.WealALgorithmPassword)
 router.get("/support-oldnodejs-version", verifyToken,
-    // ValidationMiddlewareQuery(DomainValidationSchema),
+    ValidationMiddleware(DomainValidationSchema),
     SecurityMisconfiguration.supportoldnodejsversion)
 router.get("/dangerous-http-methods-enabled", verifyToken,
-    // ValidationMiddlewareQuery(DomainValidationSchema),
+    ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware,
     SecurityMisconfiguration.DangerousHttpMethodsEnabled)
 router.get("/option-methods-enabled", verifyToken,
-    // ValidationMiddlewareQuery(DomainValidationSchema),
+    ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware,
     SecurityMisconfiguration.OptionsMethodsEnabled)
-router.post("/endpoints",
-    ValidationMiddlewareQuery(DomainValidationSchema),
-    AuthDomainMiddleware,
-    SecurityMisconfiguration.endpoints)
+
 module.exports = router

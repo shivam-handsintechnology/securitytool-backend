@@ -122,6 +122,6 @@ out
 .yarn/install-state.gz
 .pnp.*
 
-
+server.txt
 # Contentlayer
 .contentlayer

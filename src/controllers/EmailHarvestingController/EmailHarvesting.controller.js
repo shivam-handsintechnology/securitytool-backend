@@ -13,7 +13,7 @@ exports.EmailHarvestingData = (req, res) => {
 }
 exports.SensitiveInfoInBody = (req, res) => {
    sensitiveinfoinbodyModel.find({}).then((r) => {
-      //console.log(r.length)
+
       if (r.length === 0) return sendResponse(res, 404, "NotFound", r)
       if (r.length > 0) return sendResponse(res, 200, "emasil harveting", r)
    }).catch((e) => {
@@ -22,7 +22,7 @@ exports.SensitiveInfoInBody = (req, res) => {
 }
 exports.SensitiveinfoInUrl = (req, res) => {
    CrticalInformationInurl.find({}).then((r) => {
-      //console.log(r.length)
+   
       if (r.length === 0) return sendResponse(res, 404, "NotFound", r)
       if (r.length > 0) return sendResponse(res, 200, "sensitivekeywordsFoundModel", r)
    }).catch((e) => {
@@ -33,7 +33,7 @@ exports.DefaultWebPage = async (req, res) => {
 
    try {
       const url = `${req.protocol}://${req.hostname}:${req.socket.localPort}`;
-      //console.log({ url });
+  
       await axios.get(url)
          .then((d) => {
             return sendResponse(res, 200, "Default web page present in browser", {

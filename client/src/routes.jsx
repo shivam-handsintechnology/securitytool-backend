@@ -80,7 +80,7 @@ import XXE from './pages/Xml_External_Entity_Attack/XXE';
 import Adversaryfingerprint from './pages/Sensitive_Data_Exposure/Adversaryfingerprint';
 import ServerErrorMessage from './pages/Error Message/ServerErrorMessage';
 import GoBack from './components/GoBack';
-
+import DomainSeletor from './components/DomainSeletor';
 export const ProtectedRoutes = [
 
 
@@ -394,8 +394,10 @@ export const RoutePages = () => {
             <Route
               key={route.path}
               path={route.path}
-              
-              element={userreducerDetails.isAuthenticated ? <Layout>{route.element}</Layout>
+              element={userreducerDetails.isAuthenticated ? <Layout>
+                <DomainSeletor />
+                {userreducerDetails.domain? route.element:<div>Please Select Domain</div>}
+                </Layout>
                 : <Navigate to="/login"  />}
            />
           ))}

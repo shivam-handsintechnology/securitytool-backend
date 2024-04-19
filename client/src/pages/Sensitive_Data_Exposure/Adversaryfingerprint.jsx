@@ -4,7 +4,7 @@ import useDataFetch from '../../hooks/DataFetchHook'
 
 const Adversaryfingerprint = () => {
     const UserData = useSelector((state) => state.UserReducer)
-    const postSessionData=useDataFetch(`SensitiveDataExposure/fingerprint-detection?domain=${UserData.domain}&type=nodejs`,[UserData.domain])
+    const postSessionData=useDataFetch(`SensitiveDataExposure/fingerprint-detection?domain=${UserData.domain}`,[UserData.domain])
     console.log("postSessionData", postSessionData)
   return (
     <div>

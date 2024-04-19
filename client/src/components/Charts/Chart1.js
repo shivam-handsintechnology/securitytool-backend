@@ -6,6 +6,7 @@ const Chart1 = ({ data, title,url }) => {
     const handleToggle = () => {
        navigate(url)
     };
+    
     return (
         <div className='border'>
             <div className='bg-primary p-1'>

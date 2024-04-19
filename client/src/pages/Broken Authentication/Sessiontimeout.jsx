@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 const Sessiontimeout = () => {
   const UserData = useSelector((state) => state.UserReducer)
 
-  const postSessionData=useDataFetch(`AuthSessionGuardian/session-timeout?domain=${UserData.domain}&type=nodejs`,[UserData.domain])
+  const postSessionData=useDataFetch(`AuthSessionGuardian/session-timeout?domain=${UserData.domain}`,[UserData.domain])
     console.log("postSessionData", postSessionData)
 
 

@@ -3,7 +3,6 @@ const { ClientLoagsModel } = require('../../models/ClientLoagsModel');
 module.exports={
     sessionData: async (req, res) => {
         try {
-          console.log("user_id", req.user.id)
           let data = await ClientLoagsModel.aggregate([
             { $match: { user: mongoose.Types.ObjectId(req.user.id) } },
             { $project: { "LogsData": 1 } }

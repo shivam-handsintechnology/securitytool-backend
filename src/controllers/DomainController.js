@@ -6,7 +6,7 @@ const User = require("../models/User");
 module.exports = {
     addDomain: async (req, res) => {
         try {
-            //console.log(req.user)
+      
             const { domain } = req.body;
            
             if(!domain){
@@ -33,45 +33,9 @@ module.exports = {
 
         }
     },
-    addDomainToMiddlware: async (req, res) => {
-        try {
-            //console.log(req.user)
-            const { domain,appid } = req.body;
-           
-            if(!domain){
-                return sendResponse(res, 400, "domain is required");
-            }
-            if(!id){
-                return sendResponse(res, 400, "id is required");
-            }
-            else if(domain.includes("localhost")){
-                return sendResponse(res, 400, "Domain should not be localhost");
-            }
-          
-            const result = await checkDomainAvailability(domain);
-            if (result) {
-                let user=await User.findOne({appid})
-                console.log("User",user)
-                return false
-                let obj={ user: id, domain: domain }
-                let existdomain = await AllowedDomainsModel.findOne(obj);
-                if (existdomain) {
-                    return sendResponse(res, 200, "Domain already exist");
-                } else {
-                    await AllowedDomainsModel.create(obj);
-                    return sendResponse(res, 200, "Domain added successfully");
-                }
-
-            }
-            return sendResponse(res, 404, "Domain not found");
-        } catch (error) {
-            return sendResponse(res, 500, error.message);
-
-        }
-    },
+  
     getAllDomains: async (req, res) => {
         try {
-            console.log(req.user)
             let { page, limit } = req.query;
             page = parseInt(page) || 1;
             limit = parseInt(limit)|| 10;
@@ -83,7 +47,6 @@ module.exports = {
                 { $limit: limit },
             ]);
 
-            //console.log(data)
             if (data.length === 0) {
 
                 return sendResponse(res, 404, "Records are not found", { data, totalPages:0 });
@@ -97,7 +60,7 @@ module.exports = {
     deleteDomain: async (req, res) => {
         try {
             const { domain } = req.query;
-            //console.log("domain",domain)
+       
             const deleteSelectedDomain = await AllowedDomainsModel.findOneAndDelete({ user: mongoose.Types.ObjectId(req.user.id), domain: domain });
 
             if (deleteSelectedDomain) {

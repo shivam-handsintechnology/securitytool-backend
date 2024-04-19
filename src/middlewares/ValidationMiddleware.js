@@ -4,63 +4,76 @@ const { errorHandler } = require('../utils/errorHandler');
 const { AllowedDomainsModel } = require('../models/AllowedDomainsModel');
 const User = require("../models/User");
 const { checkDomainAvailability } = require('../utilities/functions/functions');
-const { query } = require('express');
 const ValidationMiddleware = (schema) => {
     return (req, res, next) => {
-        const { error } = Joi.object(schema).validate(req.body)
-        const valid = error == null;
-
-        if (valid) {
-            next();
-        } else {
+        let statusCode=500
+       try {
+         
+         const payload = {...req.body,...req.query,...req.params}
+        const { error } = Joi.object(schema).validate(payload)
+     
+        if(error){
             const { details } = error;
-            const message = details.map(i => i.message.replace(/"/g, '')).join(',');
-
-            console.log("error", message);
-            return errorHandler(res, 422, { succces: false, data: {}, message: message })
+            const message = details.map(i => i.message).join(',');
+            statusCode=422
+            throw new Error(message)
         }
-    };
+        next()
+    } catch (error) {
+     
+        return errorHandler(res, statusCode, error.message)
+    }
+    }
 };
 const ValidationMiddlewareQuery = (schema) => {
     return async (req, res, next) => {
-        const data= {
+        let statusCode=500
+      try {
+        const payload= {
             ...req.query,
-            ...req.body,
-            ...req.params
+            ...req.params,
         }
-        const { error } = Joi.object(schema).validate(data)
-        const valid = error == null;
-        if (valid) {
-            next();
-        } else {
+      
+        const { error } = Joi.object(schema).validate(payload)
+
+        if(error){
             const { details } = error;
             const message = details.map(i => i.message).join(',');
-
-            return errorHandler(res, 422, message, { succces: false, data: {}, message: message })
+            statusCode=422
+            throw new Error(message)
         }
+   
+            next()
+        
+      } catch (error) {
+        return errorHandler(res, statusCode, error.message)
+      }
     };
 };
 const AuthDomainMiddleware = async (req, res, next) => {
+    let statusCode=500
     try {
-        let body={
-            ...req.query,
-            ...req.body,
-            ...req.params
+        const payload = {...req.body,...req.query,...req.params}
+        let {domain,appid} =payload
+        if(!domain){
+            throw new Error("Domain is required")
         }
-        let {domain,appid} =body
+        if(!appid){
+            throw new Error("Appid is required")
+        }
         let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain,appid:appid });
         if (isExistDomain) {
-            req.body.domain = domain
-            req.body.appid = appid
             next()
         } else {
-            return errorHandler(res, 500, "Domain is Not Allowed")
+            statusCode=403
+            throw new Error("You Are Not Allowed")
         }
     } catch (error) {
-        return errorHandler(res, 500, error.message)
+        return errorHandler(res, statusCode, error.message)
     }
 }
 const AuthDomainMiddlewarePackage = async (req, res, next) => {
+    let statusCode=500
     try {
         let data
         if (!req.body.appid) {
@@ -70,27 +83,22 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
         if (user) {
             req.user = user
             const { domain } = req.body;
-            if (!domain) {
-                throw new Error("domain is required")
-            }
-            // else if (domain.includes("localhost")) {
-            //     throw new Error("Domain should not be localhost")
-            // }
-            // const result = await checkDomainAvailability(domain);
-            // if (result) {
+           
+            const result = await checkDomainAvailability(domain);
+            if (result) {
                 let obj = { user: user._id, domain: domain, appid: req.body.appid }
                 let existdomain = await AllowedDomainsModel.findOne(obj);
                 if (!existdomain) {
                     data= await AllowedDomainsModel.create(obj);
-                    return sendResponse(res, 200, "Domain added successfully");
                 }
-            // }
+            }
             next()
         } else {
+            statusCode=403
             throw new Error("You Are Not Allowed")
         }
     } catch (error) {
-        return errorHandler(res, 500, error.message)
+        return errorHandler(res, statusCode, error.message)
     }
 }
 

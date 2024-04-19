@@ -8,7 +8,7 @@ const { sessionExpireOnClose, sessionTimeoutWithObject, sessionFixationWithobjec
 router.get("/session-vulnurability", async (req, res) => {
     try {
         // Call the respective controller function
-        const response = await axios.get(`http://${req.query.domain}/fileContent`)
+        const response =req.body.fileContent
         const data = await SessionVulnurability(response);
         // Initialize an object to store all possibilities
         const possibilities = {};
@@ -31,7 +31,6 @@ router.get("/session-vulnurability", async (req, res) => {
         const sessionHijackingPossible = data.sessionHijacking_data.length>0
         possibilities["Application Is Vulnerable To Session Hijacking Attack"] = sessionHijackingPossible ? data.sessionHijacking_data.toString() : "No";
 
-        console.log(possibilities);
         let results=[]
         if(Object.keys(possibilities).length>0){
            results= Object.keys(possibilities).map((key) => {
@@ -50,7 +49,7 @@ router.get("/session-vulnurability", async (req, res) => {
 router.get("/session-expire-on-close", async (req, res) => {
     try {
         // Call the respective controller function
-        const response = await axios.get(`http://${req.query.domain}/fileContent`)
+        const response =req.body.fileContent
         const data = await sessionExpireOnClose(response);
         let results=data &&  data.length > 0 ? {"Session does not expire on closing the browser":"Yes" }:{ "Session does not expire on closing the browser":"No"}
         return sendResponse(res,200,"dsad",[results])
@@ -63,7 +62,7 @@ router.get("/session-expire-on-close", async (req, res) => {
 router.get("/session-timeout", async (req, res) => {
     try {
         // Call the respective controller function
-        const response = await axios.get(`http://${req.query.domain}/fileContent`)
+        const response =req.body.fileContent
         const results = await sessionTimeoutWithObject(response);
         return sendResponse(res,200,"dsad",results)
     } catch (error) {
@@ -75,7 +74,7 @@ router.get("/session-timeout", async (req, res) => {
 router.get("/session-token", async (req, res) => {
     try {
         // Call the respective controller function
-        const response = await axios.get(`http://${req.query.domain}/fileContent`)
+        const response =req.body.fileContent
         const results = await sessionTokenWithObject(response);
         return sendResponse(res,200,"dsad",results)
     } catch (error) {
@@ -87,7 +86,7 @@ router.get("/session-token", async (req, res) => {
 router.get("/session-fixation", async (req, res) => {
     try {
         // Call the respective controller function
-        const response = await axios.get(`http://${req.query.domain}/fileContent`)
+        const response =req.body.fileContent
         const results = await sessionFixationWithobject(response);
         return sendResponse(res,200,"dsad",results)
     } catch (error) {
@@ -99,7 +98,7 @@ router.get("/session-fixation", async (req, res) => {
 router.get("/session-hijacking", async (req, res) => {
     try {
         // Call the respective controller function
-        const response = await axios.get(`http://${req.query.domain}/fileContent`)
+        const response =req.body.fileContent
         const results = await sessionHijackingWithObject(response);
         return sendResponse(res,200,"dsad",results)
     } catch (error) {

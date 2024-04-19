@@ -1,23 +1,5 @@
 const dns = require("dns");
-const { EmailVerifyModel } = require("../../models/sensitivekeywordsModel");
-const { sensitiveinfoinbodyModel } = require("../../models/SensitiveInfoInBodyModel");
-const { NodeVersionModel } = require("../../models/NodeVersionModel");
-const CallEmailVerify = async (email, hostname) => {
-  const existingMessage = await EmailVerifyModel.findOne(
-    { email, hostname },
-    { _id: 0, exist: true }
-  );
-  if (existingMessage) {
-    // Handle matching hostname and sensitive key
-    //console.log("Found existing");
-  } else {
-    await sensitiveinfoinbodyModel.create({
-      email,
-      hostname,
-    });
-    // Return success response for creating new data
-  }
-}
+
 const checkDomainAvailability = async (domain) => {
   return new Promise((resolve, reject) => {
     dns.lookup(domain, (err, d) => {
@@ -48,19 +30,6 @@ const validatePassword = async (str = '') => {
 };
 
 
-const Nodeversion = async (appid, version) => {
-  const existingMessage = await NodeVersionModel.findOne({ appid });
-  if (existingMessage) {
-    const data = await NodeVersionModel.findOneAndUpdate(
-      { appid },
-      { version }
-    );
-    return data
-  } else {
-    const data = await NodeVersionModel.create({ appid, version });
-    return data
-  }
-}
 
 const hasDuplicateParameters = (params) => {
   const seen = new Set();
@@ -82,7 +51,7 @@ const hashttpParametersPollutionavailable = async (params, appid) => {
   }
 }
 module.exports = {
-  CallEmailVerify, checkDomainAvailability, hashttpParametersPollutionavailable, validatePassword, Nodeversion
+  checkDomainAvailability, hashttpParametersPollutionavailable, validatePassword
 }
 
 

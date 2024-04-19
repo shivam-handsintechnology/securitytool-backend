@@ -7,8 +7,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
 import axios from 'axios';
-// const baseURL = '/api/'
-const baseURL = 'http://localhost:20000/api/'
+ const baseURL = '/api/'
+// const baseURL = 'http://localhost:20000/api/'
 // const baseURL = 'https://securitytool.handsintechnology.in/api/'
 
 axios.defaults.baseURL = baseURL

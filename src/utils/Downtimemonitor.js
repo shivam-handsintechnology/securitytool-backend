@@ -26,13 +26,14 @@ async function checkWebsiteAvailability(website) {
     const endTime = new Date().getTime();
     const responseTime = endTime - startTime;
     // Handle success response
-    //console.log(`${website.name} is available. Response Time: ${responseTime}ms`)
+    if (response.status === 200) {
+      sendEmailAlert(website.name, 'Website is up and running');
+    }
   } catch (error) {
     // Handle error response
     if (error.code === 'CERT_HAS_EXPIRED') {
-      //console.log(`${website.name} is down. Error: ${error.message}`);
+      sendEmailAlert(website.name, 'Website has an expired SSL certificate');
     }
-
     // Send email alert
     sendEmailAlert(website.name, 'Website is down');
   }
@@ -50,9 +51,9 @@ function sendEmailAlert(websiteName, alertMessage) {
   };
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      //console.log('Error sending email:', error);
+      return `Email not sent: ${error.message}`
     } else {
-      //console.log('Email sent:', info.response);
+      return `Email sent: ${info.response}`
     }
   });
 }
@@ -63,12 +64,12 @@ function sendEmailAlert(websiteName, alertMessage) {
 
 // Start monitoring loop
 function startMonitoring() {
-  //console.log('Monitoring started...');
-  // setInterval(() => {
-  // websites.forEach((website) => {
-  //   checkWebsiteAvailability(website);
-  // });
-  // }, 5000); // Check every 5 seconds
+  console.log('Monitoring started...');
+  setInterval(() => {
+  websites.forEach((website) => {
+    checkWebsiteAvailability(website);
+  });
+  }, 5000); 
 }
 const SSLverifier = async (hostname) => {
   return new Promise((resolve, reject) => {
@@ -95,15 +96,19 @@ const SSLverifier = async (hostname) => {
         const valid = moment(validTo, 'MMM DD HH:mm:ss YYYY GMT');
         const currentDate = moment();
 
+       try{
         // Check for self-signed certificate
-        var s = JSON.stringify(certificate.subject);
-        var i = JSON.stringify(certificate.issuer);
+        let s = JSON.stringify(certificate.subject);
+        let i = JSON.stringify(certificate.issuer);
         s = JSON.parse(s);
         i = JSON.parse(i);
         if (_.isEqual(s, i)) {
           result.self = 'Self-signed certificate detected';
         } else {
           result.self = 'Certificate is not self-signed';
+        }}
+        catch(error){
+        reject({ message: "Something is Wrong" });
         }
 
         // Check for expired certificate
@@ -134,9 +139,8 @@ const SSLverifier = async (hostname) => {
       });
 
       req.on('error', (error) => {
-        console.log("error",error)
-         if(error.code === 'ENOTFOUND'){
-          reject({message:"Domain Not Found"});  
+        if (error.code === 'ENOTFOUND') {
+          reject({ message: "Domain Not Found" });
         }
         reject(error);
       });

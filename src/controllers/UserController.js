@@ -120,7 +120,7 @@ Register = async (req, res) => {
       return sendResponse(res, 200, "register successfully", { appid: user.appid });
     }
   } catch (error) {
-    //console.log(error)
+  
     return errorHandler(res)
   }
 }
@@ -149,7 +149,6 @@ Login = async (req, res) => {
     return sendResponse(res, 200, "login successfully", { token, appid: user.appid });
 
   } catch (error) {
-    console.log(error)
     return errorHandler(res,500,error.message,)
   }
 
@@ -232,7 +231,7 @@ Logout = async (req, res) => {
     jwt.destroy(token)
     sendResponse(res, 200, "logout successfully")
   } catch (error) {
-    //console.log({ error });
+   
     return errorHandler(res)
   }
 }
@@ -327,7 +326,7 @@ const Profile = async (req, res) => {
     }
   }
   catch (error) {
-    //console.log(error)
+   
     return errorHandler(res)
   }
 }

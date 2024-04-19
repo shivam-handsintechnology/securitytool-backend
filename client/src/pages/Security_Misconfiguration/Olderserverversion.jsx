@@ -5,9 +5,9 @@ import { useSelector } from 'react-redux'
 const Olderserverversion = () => {
   const UserData = useSelector((state) => state.UserReducer)
 
-  const PasswordInsecureData=useDataFetch(`SecurityMisconfiguration/passwords-insecure?domain=${UserData.domain}&type=nodejs`,[UserData.domain])
-  const supportOldNodejVersion=useDataFetch(`SecurityMisconfiguration/support-oldnodejs-version?domain=${UserData.domain}&type=nodejs`,[UserData.domain])
-   const WeekPassword=useDataFetch(`SecurityMisconfiguration/week-passwords-insecure?domain=${UserData.domain}&type=nodejs`,[UserData.domain])
+  const PasswordInsecureData=useDataFetch(`SecurityMisconfiguration/passwords-insecure?domain=${UserData.domain}`,[UserData.domain])
+  const supportOldNodejVersion=useDataFetch(`SecurityMisconfiguration/support-oldnodejs-version?domain=${UserData.domain}`,[UserData.domain])
+   const WeekPassword=useDataFetch(`SecurityMisconfiguration/week-passwords-insecure?domain=${UserData.domain}`,[UserData.domain])
 
   return (
    <>

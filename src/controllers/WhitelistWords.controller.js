@@ -56,7 +56,7 @@ module.exports = {
             await WhitelisttDirectryListingWords.insertMany(data, { ordered: false });
             return res.status(200).json({ message: "Words added to white list" });
         } catch (error) {
-            //console.log("error", error.name)
+          
             if (error.name === 'MongoBulkWriteError') {
                 return res.status(400).json({ message: "some Words already exist", error:error.message });
             }

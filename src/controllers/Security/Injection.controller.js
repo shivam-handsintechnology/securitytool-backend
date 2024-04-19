@@ -13,9 +13,9 @@ const getAllLogs = async (req, res) => {
             obj[i]=rest[i]
         }
         obj["user"]=mongoose.Types.ObjectId(req.user.id)
-        console.log(obj)
+     
         const totalCount = await Project_Security_Logs.countDocuments(obj);
-        ////console.log({ totalCount })
+   
         // Convert page and limit to numbers
         const pageNumber = totalCount > 10 ? parseInt(page) || 1 : 1;
         const limitNumber = parseInt(limit) || 10;
@@ -39,7 +39,7 @@ const getAllLogs = async (req, res) => {
             totalPages: Math.ceil(totalCount / limitNumber)
         })
     } catch (error) {
-        return  errorHandler(res, error)
+        return   errorHandler(res,500,error.message)
     }
 }
 const getLogs = async (req, res) => {
@@ -52,52 +52,71 @@ const getLogs = async (req, res) => {
             return sendResponse(res, 404, "plesae enter valid id")
         }
     } catch (error) {
-        return  errorHandler(res, error)
+        return   errorHandler(res,500,error.message)
     }
 }
 const getLogsCount = async (req, res) => {
     try {
-       
-        const alltypesinjection = require("../../utils/Injectionstype.json").data
+        let data = [];
+        console.log("object", req.user);
+        let finalResult = [];
+        let result = {};
+        const alltypesinjection = require("../../utils/Injectionstype.json").data;
         const typeTitles = alltypesinjection.map(entry => entry.slug);
-        let obj = {}
-        const data = await Project_Security_Logs.aggregate([
+        data = await Project_Security_Logs.aggregate([
             {
-                $match:{
-                        user:mongoose.Types.ObjectId(req.user.id),
-                        domain:req.query.domain
-                    }
-                ,
+                $match: {
+                    user: new mongoose.Types.ObjectId(req.user.id),
+                    domain: req.query.domain
+                }
+            },
+            {
                 $group: {
                     _id: "$type",
                     count: { $sum: 1 }
                 }
             }
-        ])
-        let result = {}
-        data.forEach(entry => {
-            result[entry._id] = entry.count
-        })
-        let finalResult =[]
-        typeTitles.forEach(title => {
-            title!=="VPN"&&  title!=="Remote-FiLe-Inclusion" && finalResult.push({
-                name:title=="cmd"?"Command Line":title==="xss-injection"?"XSS":title==="html"?"HTML":title==="XML-Injection"?"XML":title,value:result[title] || 0,color:getRandomColor(title)
-            })
-        })
+        ]);
        
-        console.log(finalResult)
-       return sendResponse(res, 200, "data fetch successfully", finalResult)
- 
-    
+        if (data.length > 0) {
+            data.forEach(entry => {
+                result[entry._id] = entry.count;
+            });
+            typeTitles.forEach(title => {
+                if (title !== "VPN" && title !== "Remote-FiLe-Inclusion") {
+                    finalResult.push({
+                        name: title === "cmd" ? "Command Line" : 
+                              title === "xss-injection" ? "XSS" : 
+                              title === "html" ? "HTML" : 
+                              title === "XML-Injection" ? "XML" : title,
+                        value: result[title] || 0,
+                        color: getRandomColor(title)
+                    });
+                }
+            });
+        } else {
+            typeTitles.forEach(title => {
+                if (title !== "VPN" && title !== "Remote-FiLe-Inclusion") {
+                    finalResult.push({
+                        name: title === "XML-Injection" ? "XML" : title,
+                        value: 0,
+                        color: getRandomColor(title)
+                    });
+                }
+            });
+        }
 
+        return sendResponse(res, 200, "Data fetched successfully", finalResult);
     } catch (error) {
-      return   errorHandler(res, error)
+        console.log(error);
+        return errorHandler(res, 500, error.message);
     }
-}
+};
+
 const deleteLogs = async (req, res) => {
     try {
         const ip = req.params.ip
-        //console.log(ip)
+      
 
         const data = await Project_Security_Logs.findOneAndDelete({ ip })
         if (data) {
@@ -107,7 +126,7 @@ const deleteLogs = async (req, res) => {
         }
 
     } catch (error) {
-     return    errorHandler(res, error)
+        return   errorHandler(res,500,error.message)
     }
 }
 

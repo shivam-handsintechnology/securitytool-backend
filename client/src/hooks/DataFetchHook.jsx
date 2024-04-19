@@ -10,9 +10,9 @@ const useDataFetch = (url, dependencies=[], validation=null, showErrorToast=fals
     useEffect(() => {
         const fetchData = async () => {
             try {
-                setErrors((prev) => ({ ...prev, loading: true }))
+                setErrors((prev) => ({ ...prev, loading: true , error: false}))
                 const response = await axios.get(url);
-                setErrors((prev) => ({ ...prev, loading: false }))
+                setErrors((prev) => ({ ...prev, loading: false, error: false }))
                 const { data, statusCode, message } = response;
                 switch (statusCode) {
                     case 200:

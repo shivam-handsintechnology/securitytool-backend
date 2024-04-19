@@ -1,11 +1,11 @@
 const jwt = require("jsonwebtoken");
 
 const { sendResponse } = require("../utils/dataHandler");
+const { errorHandler } = require("../utils/errorHandler");
 const verifyToken = (req, res, next) => {
+ try {
   var Authenticate = true;
   const authHeader = req.headers.authorization;
-  //console.log()
-  // //console.log({authHeader})
   if (!authHeader) {
     Authenticate = false;
     return sendResponse(res, 403, "missing authorization", { Authenticate })
@@ -20,7 +20,7 @@ const verifyToken = (req, res, next) => {
           Authenticate = false;
           return sendResponse(res, 403, err.message, { Authenticate })
         }
-        req.user = { ...user, selectedhost: req.headers.SelectedHost ? req.headers.SelectedHost : null };
+        req.user = user
         next();
       });
       break;
@@ -59,6 +59,10 @@ const verifyToken = (req, res, next) => {
       Authenticate = false;
       return sendResponse(res, 403, "unknown authorization type", { Authenticate });
   }
+ } catch (error) {
+  console.log(error)
+  return errorHandler(res, 500, error.message)
+ }
 };
 
 

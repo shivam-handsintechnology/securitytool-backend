@@ -5,7 +5,7 @@ import {Link} from "react-router-dom"
 const ServerErrorMessage = (props) => {
   console.log("props",props)
   const UserData = useSelector((state) => state.UserReducer)
-  const ErrorMessage=useDataFetch(`ErrorMessage?domain=${UserData.domain}&type=nodejs`,[UserData.domain])
+  const ErrorMessage=useDataFetch(`ErrorMessage?domain=${UserData.domain}`,[UserData.domain])
  console.log("ErrorMessage",ErrorMessage.data)
   return (
     <div>

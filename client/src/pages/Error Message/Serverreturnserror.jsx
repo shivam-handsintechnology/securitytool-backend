@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 const Serverreturnserror = (props) => {
   const UserData = useSelector((state) => state.UserReducer)
 
-  const postSessionData=useDataFetch(`ErrorMessage/403error-message?domain=${UserData.domain}&type=nodejs`,[UserData.domain])
+  const postSessionData=useDataFetch(`ErrorMessage/403error-message?domain=${UserData.domain}`,[UserData.domain])
     console.log("postSessionData", postSessionData)
   return (
     <div>

@@ -5,7 +5,7 @@ module.exports = async function cors(req, res, next) {
     let allowOrigin="https://securitytool.handsintechnology.in"
     //  let allowOrigin="http://localhost:3000"
     res.header("Access-Control-Allow-Origin", allowOrigin);
-    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.header("Access-Control-Allow-Origin", allowOrigin);
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE'); // Allow specific HTTP methods
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allow specific headers
     if (req.originalUrl === '/api/client/protection') {

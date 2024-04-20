@@ -160,4 +160,15 @@ module.exports = {
             return res.status(500).json({ error: "Internal Server Error" });
         }
     },
+    sensitiveDatatransmitinPlainText: async (req, res) => {
+        try {
+            const { data, domain, appid } = req.body;
+            const { _id } = req.user;
+            const sensitivekey = await checkForSensitiveInfoInBody(data, sensitivedata);
+            let successMessage;
+            return res.status(200).json({ success: true, message: successMessage });
+        } catch (error) {
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
 }

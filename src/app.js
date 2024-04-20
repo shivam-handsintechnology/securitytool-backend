@@ -31,16 +31,6 @@ app.set('trust proxy', 1) // trust first proxy
 app.use(hpp()); // Prevent HTTP Parameter Pollution
 app.use(helmet()) // Secure your app by setting various HTTP headers
 app.use(apirouter) // Use the API router
-// Serve static files for your frontend
-app.use(express.static(path.join(__dirname, '../client/build'))); // Serve the static files
-
-app.get('*', (req, res) => {
-  let directory = path.join(__dirname, '../client', 'build', 'index.html');
-  if (!fs.existsSync(directory)) {
-    return res.status(404).json({ message: 'Page not found' });
-  }
-  return res.sendFile(path.join(__dirname, '../client', 'build', 'index.html')); // Send the index.html file
-});
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error(err.stack);

@@ -854,15 +854,15 @@ define(["eve"], function(eve) {
      > Parameters
      - colour (string) colour string in one of formats:
      # <ul>
-     #     <li>Colour name (“<code>red</code>”, “<code>green</code>”, “<code>cornflowerblue</code>”, etc)</li>
-     #     <li>#••• — shortened HTML colour: (“<code>#000</code>”, “<code>#fc0</code>”, etc)</li>
-     #     <li>#•••••• — full length HTML colour: (“<code>#000000</code>”, “<code>#bd2300</code>”)</li>
-     #     <li>rgb(•••, •••, •••) — red, green and blue channels’ values: (“<code>rgb(200,&nbsp;100,&nbsp;0)</code>”)</li>
-     #     <li>rgb(•••%, •••%, •••%) — same as above, but in %: (“<code>rgb(100%,&nbsp;175%,&nbsp;0%)</code>”)</li>
-     #     <li>hsb(•••, •••, •••) — hue, saturation and brightness values: (“<code>hsb(0.5,&nbsp;0.25,&nbsp;1)</code>”)</li>
-     #     <li>hsb(•••%, •••%, •••%) — same as above, but in %</li>
-     #     <li>hsl(•••, •••, •••) — same as hsb</li>
-     #     <li>hsl(•••%, •••%, •••%) — same as hsb</li>
+     #     <li className="list-unstyled">Colour name (“<code>red</code>”, “<code>green</code>”, “<code>cornflowerblue</code>”, etc)</li>
+     #     <li className="list-unstyled">#••• — shortened HTML colour: (“<code>#000</code>”, “<code>#fc0</code>”, etc)</li>
+     #     <li className="list-unstyled">#•••••• — full length HTML colour: (“<code>#000000</code>”, “<code>#bd2300</code>”)</li>
+     #     <li className="list-unstyled">rgb(•••, •••, •••) — red, green and blue channels’ values: (“<code>rgb(200,&nbsp;100,&nbsp;0)</code>”)</li>
+     #     <li className="list-unstyled">rgb(•••%, •••%, •••%) — same as above, but in %: (“<code>rgb(100%,&nbsp;175%,&nbsp;0%)</code>”)</li>
+     #     <li className="list-unstyled">hsb(•••, •••, •••) — hue, saturation and brightness values: (“<code>hsb(0.5,&nbsp;0.25,&nbsp;1)</code>”)</li>
+     #     <li className="list-unstyled">hsb(•••%, •••%, •••%) — same as above, but in %</li>
+     #     <li className="list-unstyled">hsl(•••, •••, •••) — same as hsb</li>
+     #     <li className="list-unstyled">hsl(•••%, •••%, •••%) — same as hsb</li>
      # </ul>
      = (object) RGB object in format:
      o {
@@ -4017,14 +4017,14 @@ define(["eve"], function(eve) {
      **
      * Object that contains easing formulas for animation. You could extend it with your own. By default it has following list of easing:
      # <ul>
-     #     <li>“linear”</li>
-     #     <li>“&lt;” or “easeIn” or “ease-in”</li>
-     #     <li>“>” or “easeOut” or “ease-out”</li>
-     #     <li>“&lt;>” or “easeInOut” or “ease-in-out”</li>
-     #     <li>“backIn” or “back-in”</li>
-     #     <li>“backOut” or “back-out”</li>
-     #     <li>“elastic”</li>
-     #     <li>“bounce”</li>
+     #     <li className="list-unstyled">“linear”</li>
+     #     <li className="list-unstyled">“&lt;” or “easeIn” or “ease-in”</li>
+     #     <li className="list-unstyled">“>” or “easeOut” or “ease-out”</li>
+     #     <li className="list-unstyled">“&lt;>” or “easeInOut” or “ease-in-out”</li>
+     #     <li className="list-unstyled">“backIn” or “back-in”</li>
+     #     <li className="list-unstyled">“backOut” or “back-out”</li>
+     #     <li className="list-unstyled">“elastic”</li>
+     #     <li className="list-unstyled">“bounce”</li>
      # </ul>
      # <p>See also <a href="http://raphaeljs.com/easing.html">Easing demo</a>.</p>
     \*/

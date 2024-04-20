@@ -3,16 +3,21 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 
 
-const useDataFetch = (url, dependencies=[], validation=null, showErrorToast=false) => {
-    const [data, setData] = useState(null);
-    const [errors, setErrors] = useState({ loading: false, error: false, message: '' });
+const useDataFetch = (url, dependencies=[],type=null) => {
+    const [data, setData] = useState(type);
+    const [errors, setErrors] = useState({ loading: false, error: false, message: '', progress: 0 });
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                setErrors((prev) => ({ ...prev, loading: true , error: false}))
-                const response = await axios.get(url);
-                setErrors((prev) => ({ ...prev, loading: false, error: false }))
+                setErrors((prev) => ({ ...prev, loading: true , progress: 0, error: false }))
+                const response = await axios.get(url, {
+                    onDownloadProgress: progressEvent => {
+                        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                        setErrors(prev => ({ ...prev, progress }));
+                    },
+                });
+                setErrors((prev) => ({ ...prev, loading: false, error: false, progress: 100 }))
                 const { data, statusCode, message } = response;
                 switch (statusCode) {
                     case 200:
@@ -20,9 +25,6 @@ const useDataFetch = (url, dependencies=[], validation=null, showErrorToast=fals
                         break;
                     default:
                         setErrors((prev) => ({ ...prev, loading: false, error: true, message: message }))
-                        if (showErrorToast) {
-                            toast.error(message);
-                        }
                         break;
                 }
             } catch (error) {
@@ -30,42 +32,19 @@ const useDataFetch = (url, dependencies=[], validation=null, showErrorToast=fals
                  let message=response?.data?.message ? response?.data?.message : 'An error occurred'
                 setErrors((prev) => ({
                     ...prev, loading: false,
-                    error: true,
+                    error: true,progress: 100,
                     message: message
                 }))
-                if (showErrorToast) {
-                    toast.error(message)
-                }
                 setData(null);
             }
         };
-        switch (validation) {
-            case validation!==null:
-                const { CallBack, data } = validation;
-                if (typeof CallBack === 'function') {
-                    console.log("CallBack", CallBack)
-                    const validationError = CallBack(data);
-                    console.log("validationError", validationError)
-                    if (validationError) {
-                        setErrors((prev) => ({ ...prev, loading: false, error: true, message: validationError }))
-                        if (showErrorToast) {
-                            toast.error(validationError);
-                        }
-                    } else {
-                        fetchData();
-                    }
-                }
-                break;
-        
-            default:
-                fetchData();
-                break;
-        }
+        fetchData();
  
     }, dependencies);
 
     return { data, errors };
 };
+
 
 
 export default useDataFetch;

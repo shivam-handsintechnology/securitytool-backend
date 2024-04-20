@@ -8,9 +8,7 @@ import { Validators } from '../../utils/Validators/Validator'
 const SessionManagement = () => {
   const data = useSelector((state) => state.LogDataReducer)
   const UserData = useSelector((state) => state.UserReducer)
-  let validation = null
-  const showErrorToast = true
-  const postSessionData = useDataFetch(`AuthSessionGuardian/session-vulnurability?domain=${UserData.domain}`, [UserData.domain], validation, showErrorToast)
+  const postSessionData = useDataFetch(`AuthSessionGuardian/session-vulnurability?domain=${UserData.domain}`, [UserData.domain], [])
   console.log("postSessionData", postSessionData)
 
   return (
@@ -24,7 +22,7 @@ const SessionManagement = () => {
           <div className="col-md-12 col-lg-12">
             <table className="table table-striped">
               <tbody>
-                {postSessionData.data && postSessionData.data.length > 0 ? (
+                {postSessionData.data.length > 0 ? (
                   postSessionData.data.map((obj, index) => (
                     <tr key={index}>
                       {Object.entries(obj).map(([key, value]) => (

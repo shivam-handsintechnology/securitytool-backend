@@ -6135,7 +6135,7 @@ $.widget( "ui.autocomplete", {
 	},
 
 	_renderItem: function( ul, item ) {
-		return $( "<li>" )
+		return $( "<li className="list-unstyled">" )
 			.append( $( "<div>" ).text( item.label ) )
 			.appendTo( ul );
 	},
@@ -14099,7 +14099,7 @@ var widgetsSelectmenu = $.widget( "ui.selectmenu", [ $.ui.formResetMixin, {
 			var li;
 
 			if ( item.optgroup !== currentOptgroup ) {
-				li = $( "<li>", {
+				li = $( "<li className="list-unstyled">", {
 					text: item.optgroup
 				} );
 				that._addClass( li, "ui-selectmenu-optgroup", "ui-menu-divider" +
@@ -14121,7 +14121,7 @@ var widgetsSelectmenu = $.widget( "ui.selectmenu", [ $.ui.formResetMixin, {
 	},
 
 	_renderItem: function( ul, item ) {
-		var li = $( "<li>" ),
+		var li = $( "<li className="list-unstyled">" ),
 			wrapper = $( "<div>", {
 				title: item.element.attr( "title" )
 			} );

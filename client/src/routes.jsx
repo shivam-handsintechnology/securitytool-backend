@@ -40,7 +40,6 @@ import ErrorPageHandler from './pages/ErrorPageHandler';
 import AllWebsites from './pages/master/security/AllWebsite';
 import AllLogs from './pages/master/security/Alllogs';
 import Dashboard from "./pages/master/security/Dashboard";
-import Main from './pages/master/Main';
 import SensitiveData from './pages/master/security/SensitiveDataExposure/SensitiveData';
 import Sessionnotexpire from './pages/Broken Authentication/Sessionnotexpire';
 import Sessiontimeout from './pages/Broken Authentication/Sessiontimeout';
@@ -81,258 +80,260 @@ import Adversaryfingerprint from './pages/Sensitive_Data_Exposure/Adversaryfinge
 import ServerErrorMessage from './pages/Error Message/ServerErrorMessage';
 import GoBack from './components/GoBack';
 import DomainSeletor from './components/DomainSeletor';
+import Loader from './components/Loader';
+
 export const ProtectedRoutes = [
 
 
   {
     path: '/',
     exact: true,
-    element: <Main Goback={<GoBack/>} />,
+    element: <Dashboard Goback={<GoBack/>}  />,
     Layout: "AdminLayout"
 
   },
   {
     path: '/dashboard',
     exact: true,
-    element: <Main Goback={<GoBack/>} />,
+    element: <Dashboard Goback={<GoBack/>}  />,
     Layout: "AdminLayout"
 
   },
   {
     path: '/SSLInformation',
     exact: true,
-    element: <SSLInformation Goback={<GoBack/>} />,
+    element: <SSLInformation Goback={<GoBack/>}  />,
     Layout: "AdminLayout"
   },
  
   {
     path: '/block',
     exact: true,
-    element: <Block Goback={<GoBack/>} />,
+    element: <Block Goback={<GoBack/>}  />,
     Layout: "AdminLayout"
   },
   {
     path: '/Ipwhitelist',
     exact: true,
     Layout: "AdminLayout",
-    element: <Ipwhitelist Goback={<GoBack/>} />,
+    element: <Ipwhitelist Goback={<GoBack/>}  />,
   },
   {
     path: '/Blacklist',
     exact: true,
     Layout: "AdminLayout",
-    element: <Blacklist Goback={<GoBack/>} />,
+    element: <Blacklist Goback={<GoBack/>}  />,
   },
   {
     path: '/Visitordetails/:ip',
     exact: true,
     Layout: "AdminLayout",
-    element: <Visitordetails Goback={<GoBack/>} />,
+    element: <Visitordetails Goback={<GoBack/>}  />,
   },
   {
     path: '/logs/:type',
     exact: true,
     Layout: "AdminLayout",
-    element: <AllLogs Goback={<GoBack/>} />,
+    element: <AllLogs Goback={<GoBack/>}  />,
   },
   {
     path: '/SensitiveData/:type',
     exact: true,
     Layout: "AdminLayout",
-    element: <SensitiveData Goback={<GoBack/>} />,
+    element: <SensitiveData Goback={<GoBack/>}  />,
   },
   {
     path: 'Websites',
     exact: true,
     Layout: "AdminLayout",
-    element: <AllWebsites Goback={<GoBack/>} />,
+    element: <AllWebsites Goback={<GoBack/>}  />,
   },
   {
     path: '/Sessionnotexpire',
     exact: true,
     Layout: "AdminLayout",
-    element: <Sessionnotexpire Goback={<GoBack/>} />,
+    element: <Sessionnotexpire Goback={<GoBack/>}  />,
   },
   {
     path: '/Sessiontimeout',
     exact: true,
     Layout: "AdminLayout",
-    element: <Sessiontimeout Goback={<GoBack/>} />,
+    element: <Sessiontimeout Goback={<GoBack/>}  />,
   },
   {
     path: '/Sessiontoken',
     exact: true,
-    element: <Sessiontoken Goback={<GoBack/>} />,
+    element: <Sessiontoken Goback={<GoBack/>}  />,
   },
   {
     path: '/Adversaryhijack',
     exact: true,
-    element: <Adversaryhijack Goback={<GoBack/>} />,
+    element: <Adversaryhijack Goback={<GoBack/>}  />,
   },
   {
     path: '/Sessionhijackattack',
     exact: true,
-    element: <Sessionhijackattack Goback={<GoBack/>} />,
+    element: <Sessionhijackattack Goback={<GoBack/>}  />,
   },
   {
     path: '/Ssl',
     exact: true,
-    element: <Ssl Goback={<GoBack/>} />,
+    element: <Ssl Goback={<GoBack/>}  />,
   },
   {
     path: '/Serverreturnserror',
     exact: true,
-    element: <Serverreturnserror Goback={<GoBack/>} />,
+    element: <Serverreturnserror Goback={<GoBack/>}  />,
   },
   {
     path: '/Serverhttperror',
     exact: true,
-    element: <Serverhttperror Goback={<GoBack/>} />,
+    element: <Serverhttperror Goback={<GoBack/>}  />,
   },
   {
     path: '/Helpfulerrormessage',
     exact: true,
-    element: <Helpfulerrormessage Goback={<GoBack/>} />,
+    element: <Helpfulerrormessage Goback={<GoBack/>}  />,
   },
   {
     path:"/ServerErrorMessage",
     exact:true,
-    element:<ServerErrorMessage Goback={<GoBack/>}/>
+    element:<ServerErrorMessage Goback={<GoBack/>} />
   },
   {
     path: '/Directorylisting',
     exact: true,
-    element: <Directorylisting Goback={<GoBack/>} />,
+    element: <Directorylisting Goback={<GoBack/>}  />,
   },
   {
     path: '/HTTPparameterpollution',
     exact: true,
-    element: <HTTPparameterpollution Goback={<GoBack/>} />,
+    element: <HTTPparameterpollution Goback={<GoBack/>}  />,
   },
   {
     path: '/Serverobotstxtfile',
     exact: true,
-    element: <Serverobotstxtfile Goback={<GoBack/>} />,
+    element: <Serverobotstxtfile Goback={<GoBack/>}  />,
   },
   {
     path: '/Arbitrarymethods',
     exact: true,
-    element: <Arbitrarymethods Goback={<GoBack/>} />,
+    element: <Arbitrarymethods Goback={<GoBack/>}  />,
   },
   {
     path: '/Passwordplaintext',
     exact: true,
-    element: <Passwordplaintext Goback={<GoBack/>} />,
+    element: <Passwordplaintext Goback={<GoBack/>}  />,
   },
   {
     path: '/Olderserverversion',
     exact: true,
-    element: <Olderserverversion Goback={<GoBack/>} />,
+    element: <Olderserverversion Goback={<GoBack/>}  />,
   },
   {
     path: '/DangerousHTTPmethods',
     exact: true,
-    element: <DangerousHTTPmethods Goback={<GoBack/>} />,
+    element: <DangerousHTTPmethods Goback={<GoBack/>}  />,
   },
   {
     path: '/OPTIONSmethod',
     exact: true,
-    element: <OPTIONSmethod Goback={<GoBack/>} />,
+    element: <OPTIONSmethod Goback={<GoBack/>}  />,
   },
   {
     path: '/Weakalgorithm',
     exact: true,
-    element: <Weakalgorithm Goback={<GoBack/>} />,
+    element: <Weakalgorithm Goback={<GoBack/>}  />,
   },
   {
     path: '/Adversaryemailidsspaming',
     exact: true,
-    element: <Adversaryemailidsspaming Goback={<GoBack/>} />,
+    element: <Adversaryemailidsspaming Goback={<GoBack/>}  />,
   },
   {
     path: '/Adversaryfingerprint',
     exact: true,
-    element: <Adversaryfingerprint Goback={<GoBack/>} />,
+    element: <Adversaryfingerprint Goback={<GoBack/>}  />,
   },
   {
     path: '/Serversidesourcedisclosure',
     exact: true,
-    element: <Serversidesourcedisclosure Goback={<GoBack/>} />,
+    element: <Serversidesourcedisclosure Goback={<GoBack/>}  />,
   },
   {
     path: '/Criticalinformationinurl',
     exact: true,
-    element: <Criticalinformationinurl Goback={<GoBack/>} />,
+    element: <Criticalinformationinurl Goback={<GoBack/>}  />,
   },
   {
     path: '/Defaultwebpageinserver',
     exact: true,
-    element: <Defaultwebpageinserver Goback={<GoBack/>} />,
+    element: <Defaultwebpageinserver Goback={<GoBack/>}  />,
   },
   {
     path: '/Sensitivedataaccessible',
     exact: true,
-    element: <Sensitivedataaccessible Goback={<GoBack/>} />,
+    element: <Sensitivedataaccessible Goback={<GoBack/>}  />,
   },
   {
     path: '/Sensitiveinformationrevealed',
     exact: true,
-    element: <Sensitiveinformationrevealed Goback={<GoBack/>} />,
+    element: <Sensitiveinformationrevealed Goback={<GoBack/>}  />,
   },
   {
     path: '/Cleartextpassword',
     exact: true,
-    element: <Cleartextpassword Goback={<GoBack/>} />,
+    element: <Cleartextpassword Goback={<GoBack/>}  />,
   },
   {
     path: '/URLredirection',
     exact: true,
-    element: <URLredirection Goback={<GoBack/>} />,
+    element: <URLredirection Goback={<GoBack/>}  />,
   },
   {
     path: '/Crossframescripting',
     exact: true,
-    element: <Crossframescripting Goback={<GoBack/>} />,
+    element: <Crossframescripting Goback={<GoBack/>}  />,
   },
   {
     path: '/Crosssitescriptingattack',
     exact: true,
-    element: <Crosssitescriptingattack Goback={<GoBack/>} />,
+    element: <Crosssitescriptingattack Goback={<GoBack/>}  />,
   },
   {
     path: '/Storedcrosssitescripting',
     exact: true,
-    element: <Storedcrosssitescripting Goback={<GoBack/>} />,
+    element: <Storedcrosssitescripting Goback={<GoBack/>}  />,
   },
   {
     path: '/XSSpossible',
     exact: true,
-    element: <XSSpossible Goback={<GoBack/>} />,
+    element: <XSSpossible Goback={<GoBack/>}  />,
   },
   {
     path: '/Sensitivedatastored',
     exact: true,
-    element: <Sensitivedatastored Goback={<GoBack/>} />,
+    element: <Sensitivedatastored Goback={<GoBack/>}  />,
   },
   {
     path: '/Crossdomainpolicy',
     exact: true,
-    element: <Crossdomainpolicy Goback={<GoBack/>} />,
+    element: <Crossdomainpolicy Goback={<GoBack/>}  />,
   },
   {
     path: '/Originheader',
     exact: true,
-    element: <Originheader Goback={<GoBack/>} />,
+    element: <Originheader Goback={<GoBack/>}  />,
   },
   {
     path: '/AccessControlAllowOrigin',
     exact: true,
-    element: <AccessControlAllowOrigin Goback={<GoBack/>} />,
+    element: <AccessControlAllowOrigin Goback={<GoBack/>}  />,
   },
   {
     path: '/XXE',
     exact: true,
-    element: <XXE Goback={<GoBack/>} />,
+    element: <XXE Goback={<GoBack/>}  />,
   },
 
 ];
@@ -340,17 +341,17 @@ const PublicRoutes = [
   {
     path: '/login',
     exact: true,
-    element: <UserLogin Goback={<GoBack/>} />,
+    element: <UserLogin Goback={<GoBack/>}  />,
   },
   {
     path: '/register',
     exact: true,
-    element: <UserRegister Goback={<GoBack/>} />,
+    element: <UserRegister Goback={<GoBack/>}  />,
   },
   {
     path: '*',
     exact: true,
-    element: <ErrorPageHandler Goback={<GoBack/>} />,
+    element: <ErrorPageHandler Goback={<GoBack/>}  />,
   },
 ];
 

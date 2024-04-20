@@ -7,7 +7,7 @@ import useDataFetch from '../../hooks/DataFetchHook';
 
 const InjectionVulnurabilities = () => {
      const {domain}=useSelector((state)=>state.UserReducer)
-     const AlllogsData=useDataFetch(`injections/count?domain=${domain}`, [domain])
+     const AlllogsData=useDataFetch(`injections/count?domain=${domain}`, [domain],[])
 
     return (
         <React.Fragment>
@@ -21,7 +21,7 @@ const InjectionVulnurabilities = () => {
                             <>
                             <div className="row">
                                 <div className="col-md-6">
-                               { AlllogsData.data && AlllogsData.data.length>0 && <Chart3 data={AlllogsData.data} />}
+                               { AlllogsData.data.length>0 && <Chart3 data={AlllogsData.data} />}
                                 </div>
                              
                             </div>

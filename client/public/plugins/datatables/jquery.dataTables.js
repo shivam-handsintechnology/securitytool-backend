@@ -215,10 +215,10 @@
 		 * must add it to the data source, i.e. the server-side, through an Ajax call.
 		 *  @param {array|object} data The data to be added to the table. This can be:
 		 *    <ul>
-		 *      <li>1D array of data - add a single row with the data provided</li>
-		 *      <li>2D array of arrays - add multiple rows in a single call</li>
-		 *      <li>object - data object when using <i>mData</i></li>
-		 *      <li>array of objects - multiple data objects when using <i>mData</i></li>
+		 *      <li className="list-unstyled">1D array of data - add a single row with the data provided</li>
+		 *      <li className="list-unstyled">2D array of arrays - add multiple rows in a single call</li>
+		 *      <li className="list-unstyled">object - data object when using <i>mData</i></li>
+		 *      <li className="list-unstyled">array of objects - multiple data objects when using <i>mData</i></li>
 		 *    </ul>
 		 *  @param {bool} [redraw=true] redraw the table or not
 		 *  @returns {array} An array of integers, representing the list of indexes in
@@ -10241,10 +10241,10 @@
 		 * have `targets` defined in each object in the array. Values in the `targets`
 		 * array may be:
 		 *   <ul>
-		 *     <li>a string - class name will be matched on the TH for the column</li>
-		 *     <li>0 or a positive integer - column index counting from the left</li>
-		 *     <li>a negative integer - column index counting from the right</li>
-		 *     <li>the string "_all" - all columns (i.e. assign a default)</li>
+		 *     <li className="list-unstyled">a string - class name will be matched on the TH for the column</li>
+		 *     <li className="list-unstyled">0 or a positive integer - column index counting from the left</li>
+		 *     <li className="list-unstyled">a negative integer - column index counting from the right</li>
+		 *     <li className="list-unstyled">the string "_all" - all columns (i.e. assign a default)</li>
 		 *   </ul>
 		 *  @member
 		 *
@@ -11864,33 +11864,33 @@
 		 * table). DIV elements (with or without a custom class) can also be added to
 		 * aid styling. The follow syntax is used:
 		 *   <ul>
-		 *     <li>The following options are allowed:
+		 *     <li className="list-unstyled">The following options are allowed:
 		 *       <ul>
-		 *         <li>'l' - Length changing</li>
-		 *         <li>'f' - Filtering input</li>
-		 *         <li>'t' - The table!</li>
-		 *         <li>'i' - Information</li>
-		 *         <li>'p' - Pagination</li>
-		 *         <li>'r' - pRocessing</li>
+		 *         <li className="list-unstyled">'l' - Length changing</li>
+		 *         <li className="list-unstyled">'f' - Filtering input</li>
+		 *         <li className="list-unstyled">'t' - The table!</li>
+		 *         <li className="list-unstyled">'i' - Information</li>
+		 *         <li className="list-unstyled">'p' - Pagination</li>
+		 *         <li className="list-unstyled">'r' - pRocessing</li>
 		 *       </ul>
 		 *     </li>
-		 *     <li>The following constants are allowed:
+		 *     <li className="list-unstyled">The following constants are allowed:
 		 *       <ul>
-		 *         <li>'H' - jQueryUI theme "header" classes ('fg-toolbar ui-widget-header ui-corner-tl ui-corner-tr ui-helper-clearfix')</li>
-		 *         <li>'F' - jQueryUI theme "footer" classes ('fg-toolbar ui-widget-header ui-corner-bl ui-corner-br ui-helper-clearfix')</li>
+		 *         <li className="list-unstyled">'H' - jQueryUI theme "header" classes ('fg-toolbar ui-widget-header ui-corner-tl ui-corner-tr ui-helper-clearfix')</li>
+		 *         <li className="list-unstyled">'F' - jQueryUI theme "footer" classes ('fg-toolbar ui-widget-header ui-corner-bl ui-corner-br ui-helper-clearfix')</li>
 		 *       </ul>
 		 *     </li>
-		 *     <li>The following syntax is expected:
+		 *     <li className="list-unstyled">The following syntax is expected:
 		 *       <ul>
-		 *         <li>'&lt;' and '&gt;' - div elements</li>
-		 *         <li>'&lt;"class" and '&gt;' - div with a class</li>
-		 *         <li>'&lt;"#id" and '&gt;' - div with an ID</li>
+		 *         <li className="list-unstyled">'&lt;' and '&gt;' - div elements</li>
+		 *         <li className="list-unstyled">'&lt;"class" and '&gt;' - div with a class</li>
+		 *         <li className="list-unstyled">'&lt;"#id" and '&gt;' - div with an ID</li>
 		 *       </ul>
 		 *     </li>
-		 *     <li>Examples:
+		 *     <li className="list-unstyled">Examples:
 		 *       <ul>
-		 *         <li>'&lt;"wrapper"flipt&gt;'</li>
-		 *         <li>'&lt;lf&lt;t&gt;ip&gt;'</li>
+		 *         <li className="list-unstyled">'&lt;"wrapper"flipt&gt;'</li>
+		 *         <li className="list-unstyled">'&lt;lf&lt;t&gt;ip&gt;'</li>
 		 *       </ul>
 		 *     </li>
 		 *   </ul>
@@ -13200,12 +13200,12 @@
 		 * Array referencing the nodes which are used for the features. The
 		 * parameters of this object match what is allowed by sDom - i.e.
 		 *   <ul>
-		 *     <li>'l' - Length changing</li>
-		 *     <li>'f' - Filtering input</li>
-		 *     <li>'t' - The table!</li>
-		 *     <li>'i' - Information</li>
-		 *     <li>'p' - Pagination</li>
-		 *     <li>'r' - pRocessing</li>
+		 *     <li className="list-unstyled">'l' - Length changing</li>
+		 *     <li className="list-unstyled">'f' - Filtering input</li>
+		 *     <li className="list-unstyled">'t' - The table!</li>
+		 *     <li className="list-unstyled">'i' - Information</li>
+		 *     <li className="list-unstyled">'p' - Pagination</li>
+		 *     <li className="list-unstyled">'r' - pRocessing</li>
 		 *   </ul>
 		 *  @type array
 		 *  @default []
@@ -13285,8 +13285,8 @@
 		 * Sorting that is applied to the table. Note that the inner arrays are
 		 * used in the following manner:
 		 * <ul>
-		 *   <li>Index 0 - column number</li>
-		 *   <li>Index 1 - current sorting direction</li>
+		 *   <li className="list-unstyled">Index 0 - column number</li>
+		 *   <li className="list-unstyled">Index 1 - current sorting direction</li>
 		 * </ul>
 		 * Note that this parameter will be set by the initialisation routine. To
 		 * set a default use {@link DataTable.defaults}.
@@ -13509,11 +13509,11 @@
 		 * Array of callback functions for state saving. Each array element is an
 		 * object with the following parameters:
 		 *   <ul>
-		 *     <li>function:fn - function to call. Takes two parameters, oSettings
+		 *     <li className="list-unstyled">function:fn - function to call. Takes two parameters, oSettings
 		 *       and the JSON string to save that has been thus far created. Returns
 		 *       a JSON string to be inserted into a json object
 		 *       (i.e. '"param": [ 0, 1, 2]')</li>
-		 *     <li>string:sName - name of callback</li>
+		 *     <li className="list-unstyled">string:sName - name of callback</li>
 		 *   </ul>
 		 *  @type array
 		 *  @default []
@@ -13524,9 +13524,9 @@
 		 * Array of callback functions for state loading. Each array element is an
 		 * object with the following parameters:
 		 *   <ul>
-		 *     <li>function:fn - function to call. Takes two parameters, oSettings
+		 *     <li className="list-unstyled">function:fn - function to call. Takes two parameters, oSettings
 		 *       and the object stored. May return false to cancel state loading</li>
-		 *     <li>string:sName - name of callback</li>
+		 *     <li className="list-unstyled">string:sName - name of callback</li>
 		 *   </ul>
 		 *  @type array
 		 *  @default []

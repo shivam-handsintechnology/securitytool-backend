@@ -141,30 +141,39 @@ function containsMySQLCode(fileContent) {
 
   return false;
 }
-async function scanHardCodedData(content, file) {
-  const results = ["Hard Coded Data Not Found in the Project"];
-  content = content.replace(/"/g, "'"); // Replace double quotes with single quotes
-  const sensitiveFields = sensitivedata;
-
-  for (const field of sensitiveFields) {
-    const regexIsEqualTo = new RegExp(`${field}\\s*=\\s*['"](.*?)['"]`, "g");
+async function scanHardCodedData(response) {
+  const results = [];
+  const sensitiveData = sensitivedata;
+  // Iterate through the data and process each item
+  for (const item of response) {
+    try {
+      let modifiedContent = item.content.replace(/"/g, "'");
+      modifiedContent = modifiedContent.toLowerCase();
+      // Check for sensitive data in the content
+      for (const field of sensitiveData) {
+        const regexIsEqualTo = new RegExp(`${field}\\s*=\\s*['"](.*?)['"]`, "g");
     const regexIsObject = new RegExp(`${field}\\s*:\\s*['"]([^'"]*)['"]`, "g");
 
     let match;
-    if ((match = regexIsEqualTo.exec(content)) !== null) {
+    if ((match = regexIsEqualTo.exec(modifiedContent)) !== null) {
       const hardcodedValue = match[1];
-      const lineNumber = getLineNumber(content, match.index);
-      results.splice(0, 1);
-      results.push(`find ${hardcodedValue}  in a ${field} at line ${lineNumber} in ${file}`);
+      const lineNumber = getLineNumber(modifiedContent, match.index);
+      results.push(`find ${hardcodedValue}  in a ${field} at line ${lineNumber} in ${item.directoryPath +"/"+item.name+item.extension}`);
     }
 
-    if ((match = regexIsObject.exec(content)) !== null) {
-      results.splice(0, 1);
+    if ((match = regexIsObject.exec(modifiedContent)) !== null) {
+
       const hardcodedValue = match[1];
-      const lineNumber = getLineNumber(content, match.index);
-      results.push(`find ${hardcodedValue}  in a ${field} at line ${lineNumber} in ${file}`);
+      const lineNumber = getLineNumber(modifiedContent, match.index);
+      results.push(`find ${hardcodedValue}  in a ${field} at line ${lineNumber} in ${item.directoryPath +"/"+item.name+item.extension}`);
+    }
+      }
+    } catch (error) {
+      console.error("Error processing file content:", error);
+      // Handle error if necessary
     }
   }
+  
   return results;
 
 }

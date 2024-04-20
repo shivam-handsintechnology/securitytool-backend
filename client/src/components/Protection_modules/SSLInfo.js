@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import useDataFetch from '../../hooks/DataFetchHook'
 const SSLInfo = () => {
     const userData = useSelector(state => state.UserReducer)
-    const SSlInfo = useDataFetch(`client/sslverify?domain=${userData.domain}`, [userData.domain])
+    const SSlInfo = useDataFetch(`client/sslverify?domain=${userData.domain}`, [userData.domain],)
     console.log("SSlInfo",SSlInfo)
   
    

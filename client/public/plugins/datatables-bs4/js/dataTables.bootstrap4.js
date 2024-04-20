@@ -128,7 +128,7 @@ DataTable.ext.renderer.pageButton.bootstrap = function ( settings, host, idx, bu
 				}
 
 				if ( btnDisplay ) {
-					node = $('<li>', {
+					node = $('<li className="list-unstyled">', {
 							'class': classes.sPageButton+' '+btnClass,
 							'id': idx === 0 && typeof button === 'string' ?
 								settings.sTableId +'_'+ button :

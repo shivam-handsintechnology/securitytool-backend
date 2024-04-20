@@ -1,7 +1,7 @@
 import React from 'react'
 import { useDataFetch, usePostData } from '../../hooks/DataFetchHook'
 import { useSelector } from 'react-redux'
-
+import LoadingSpinner from '../../components/LoaderAndError/loader'
 const Olderserverversion = () => {
   const UserData = useSelector((state) => state.UserReducer)
 
@@ -12,7 +12,7 @@ const Olderserverversion = () => {
   return (
    <>
   {
-    PasswordInsecureData.errors.loading ? <p>Loading...</p> : PasswordInsecureData.errors.error ? <p>{PasswordInsecureData.errors.message}</p> :
+    PasswordInsecureData.errors.loading ? <LoadingSpinner /> : PasswordInsecureData.errors.error ? <p>{PasswordInsecureData.errors.message}</p> :
     <table className="table table-striped">
     <tbody>
        <>
@@ -26,7 +26,7 @@ const Olderserverversion = () => {
   </table>
   }
   {
-    supportOldNodejVersion.errors.loading ? <p>Loading...</p> : supportOldNodejVersion.errors.error ? <p>{supportOldNodejVersion.errors.message}</p> :
+    supportOldNodejVersion.errors.loading ? <LoadingSpinner /> : supportOldNodejVersion.errors.error ? <p>{supportOldNodejVersion.errors.message}</p> :
     <table className="table table-striped">
     <tbody>
        <>
@@ -40,7 +40,7 @@ const Olderserverversion = () => {
   </table>
   }
   {
-    WeekPassword.errors.loading ? <p>Loading...</p> : WeekPassword.errors.error ? <p>{WeekPassword.errors.message}</p> :
+    WeekPassword.errors.loading ? <LoadingSpinner /> : WeekPassword.errors.error ? <p>{WeekPassword.errors.message}</p> :
     <table className="table table-striped">
     <tbody>
        <>

@@ -1,7 +1,7 @@
 import React from 'react'
 import { useDataFetch, usePostData } from '../../hooks/DataFetchHook'
 import { useSelector } from 'react-redux'
-
+import LoadingSpinner from '../../components/LoaderAndError/loader'
 const OPTIONSmethod = () => {
   const UserData = useSelector((state) => state.UserReducer)
 
@@ -9,7 +9,7 @@ const OPTIONSmethod = () => {
   console.log("postSessionData", postSessionData)
 return (
   <div>
-  {postSessionData.errors.loading ? <p>Loading...</p> : postSessionData.errors.error ? <p>{postSessionData.errors.message}</p> :
+  {postSessionData.errors.loading ? <LoadingSpinner /> : postSessionData.errors.error ? <p>{postSessionData.errors.message}</p> :
    <table className="table table-striped">
    <tbody>
      {postSessionData.data && postSessionData.data.length > 0 ? (

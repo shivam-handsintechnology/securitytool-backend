@@ -15,7 +15,7 @@ const BusinessLogicFlow = () => {
                     <div className="row">
                         <div className="col-md-12 col-lg-12">
                             <ul>
-                                <li><span><b>Can session puzzling be used to bypass authentication or authorization ? :</b>{" " + businessLogicFlow}</span></li>
+                                <li className="list-unstyled"><span><b>Can session puzzling be used to bypass authentication or authorization ? :</b>{" " + businessLogicFlow}</span></li>
 
                             </ul>
                         </div>

@@ -8,6 +8,7 @@ import SecurityMisconfiguration from "../../../components/Protection_modules/Sec
 import SensitiveDataExposure from "../../../components/Protection_modules/SensitiveDataExposure";
 import useDataFetch from "../../../hooks/DataFetchHook";
 import { useSelector } from "react-redux";
+import ServerErrorMessage from "../../Error Message/ServerErrorMessage";
 
 
 export default function Dashboard() {
@@ -56,7 +57,7 @@ export default function Dashboard() {
           <SSLInfo />
           {/* End SSl Info */}
           {/* Error Message */}
-          
+          <ServerErrorMessage/>
           {/* End Error Message */}
           {/* Insecure Direct Object References */}
           <DirectObjectReferenceProtection />

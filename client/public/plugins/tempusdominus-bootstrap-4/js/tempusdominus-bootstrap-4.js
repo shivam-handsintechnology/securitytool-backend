@@ -1784,7 +1784,7 @@ var TempusDominusBootstrap4 = function ($) {
                 dateView = $('<div>').addClass('datepicker').append(this._getDatePickerTemplate()),
                 timeView = $('<div>').addClass('timepicker').append(this._getTimePickerTemplate()),
                 content = $('<ul>').addClass('list-unstyled'),
-                toolbar = $('<li>').addClass('picker-switch' + (this._options.collapse ? ' accordion-toggle' : '')).append(this._getToolbar());
+                toolbar = $('<li className="list-unstyled">').addClass('picker-switch' + (this._options.collapse ? ' accordion-toggle' : '')).append(this._getToolbar());
 
             if (this._options.inline) {
                 template.removeClass('dropdown-menu');
@@ -1813,13 +1813,13 @@ var TempusDominusBootstrap4 = function ($) {
                 content.append(toolbar);
             }
             if (this._hasDate()) {
-                content.append($('<li>').addClass(this._options.collapse && this._hasTime() ? 'collapse' : '').addClass(this._options.collapse && this._hasTime() && this._options.viewMode === 'times' ? '' : 'show').append(dateView));
+                content.append($('<li className="list-unstyled">').addClass(this._options.collapse && this._hasTime() ? 'collapse' : '').addClass(this._options.collapse && this._hasTime() && this._options.viewMode === 'times' ? '' : 'show').append(dateView));
             }
             if (this._options.toolbarPlacement === 'default') {
                 content.append(toolbar);
             }
             if (this._hasTime()) {
-                content.append($('<li>').addClass(this._options.collapse && this._hasDate() ? 'collapse' : '').addClass(this._options.collapse && this._hasDate() && this._options.viewMode === 'times' ? 'show' : '').append(timeView));
+                content.append($('<li className="list-unstyled">').addClass(this._options.collapse && this._hasDate() ? 'collapse' : '').addClass(this._options.collapse && this._hasDate() && this._options.viewMode === 'times' ? 'show' : '').append(timeView));
             }
             if (this._options.toolbarPlacement === 'bottom') {
                 content.append(toolbar);

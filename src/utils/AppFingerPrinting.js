@@ -67,7 +67,7 @@ function checkServerFingerprinting(hostname) {
 }
 function analyzeResponseForPathDisclosure(response, hostname) {
     return new Promise((resolve, reject) => {
-        let isPhysical_path_disclosure = "Not Found";
+        let isPhysical_path_disclosure = "No";
 
         if (typeof response === 'object') {
             const jsonString = JSON.stringify(response.data);
@@ -76,15 +76,15 @@ function analyzeResponseForPathDisclosure(response, hostname) {
             }
         } else if (typeof response === 'string') {
             if (response.includes(`/${hostname}/`)) {
-                isPhysical_path_disclosure = `Potential server path disclosure vulnerability found in response: ${response}`;
+                isPhysical_path_disclosure = `Potential server path disclosure vulnerability found`;
             }
         } else if (Array.isArray(response)) {
             const joinedString = response.join('');
             if (joinedString.includes(`/${hostname}/`)) {
-                isPhysical_path_disclosure = `Potential server path disclosure vulnerability found in response: ${joinedString}`;
+                isPhysical_path_disclosure = `Potential server path disclosure vulnerability found `;
             }
         } else {
-            isPhysical_path_disclosure = "Not Found";
+            isPhysical_path_disclosure = "No";
         }
 
         resolve(isPhysical_path_disclosure);

@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 import useDataFetch from '../../hooks/DataFetchHook'
-
+import LoadingSpinner from '../../components/LoaderAndError/loader'
 const Adversaryfingerprint = () => {
     const UserData = useSelector((state) => state.UserReducer)
     const postSessionData=useDataFetch(`SensitiveDataExposure/fingerprint-detection?domain=${UserData.domain}`,[UserData.domain])
@@ -9,7 +9,7 @@ const Adversaryfingerprint = () => {
   return (
     <div>
     {postSessionData.errors.loading ? (
-      <p>Loading...</p>
+      <LoadingSpinner />
     ) : postSessionData.errors.error ? (
       <p>{postSessionData.errors.message}</p>
     ) : (

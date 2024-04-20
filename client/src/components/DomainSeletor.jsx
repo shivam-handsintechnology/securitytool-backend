@@ -9,7 +9,7 @@ const DomainSeletor = () => {
     const [pageNumber, setPageNumber] = useState(1)
     // Assign All Funtions
     const dispatch = useDispatch()
-    const getAllDomains = useDataFetch(`security/domain?limit=${limit}&page=${pageNumber}`, [pageNumber])
+    const getAllDomains = useDataFetch(`security/domain?limit=${limit}&page=${pageNumber}`, [pageNumber],)
     console.log("getAllDomains",getAllDomains)
    // Add Columns/Rows
     const columns = [

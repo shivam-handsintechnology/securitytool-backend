@@ -3,6 +3,7 @@ const axios = require("axios");
 const { errorHandler } = require("../../utils/errorHandler");
 const { EmailVerifyModel, CrticalInformationInurl } = require("../../models/sensitivekeywordsModel");
 const {checkServerFingerprinting, Full_Path_Disclosure} = require("../../utils/AppFingerPrinting");
+const { scanHardCodedData } = require("../../utils/scanClientData");
 module.exports={
     sourcecodeDisclousoure:async(req,res)=>{
         try {
@@ -48,12 +49,12 @@ module.exports={
     SensitiveKeysinUrl: async (req, res) => {
         try {
             let { appid } = req.user;
-            let {  type, page = 1, limit = 10,complete,domain } = req.query; // Default to page 1 and page size of 10 if not provided
+            let {  type, page = 1, limit = 1,complete,domain,isQuestion="" } = req.query; // Default to page 1 and page size of 10 if not provided
             page = parseInt(page);
             limit = parseInt(limit);
-            
             let skip = (page - 1) * limit;
             let pipeline=[]
+            
             if(!complete){
                 pipeline= [{ $match: { appid, type,domain } },
                     { $group: { _id: "$url", count: { $sum: 1 } } },
@@ -69,6 +70,14 @@ module.exports={
                     { $limit: limit }]
             
             }
+            if(isQuestion){
+                pipeline= [{ $match: { appid, type,domain } },
+                    { $group: { _id: "$url", count: { $sum: 1 } } },
+                    { $project: { labels: "$_id", values: "$count", _id: 0 } },
+                    { $sort: { labels: 1 } }, 
+                    { $skip: skip }, 
+                    { $limit: limit }]
+            }
             let [totalCountData, data] = await Promise.all([
                 CrticalInformationInurl.aggregate([
                     { $match: { appid, type,domain } },
@@ -78,8 +87,14 @@ module.exports={
             ]);
     
             let totalCount = totalCountData.length > 0 ? totalCountData[0].totalCount : 0;
-             
-            return sendResponse(res, 200, "fetch", { data, totalPages: Math.ceil(totalCount / limit) });
+            let response={
+                data,
+                totalPages: Math.ceil(totalCount / limit)
+            }
+            if(isQuestion){
+                response=data
+            }
+            return sendResponse(res, 200, "fetch", response);
         } catch (error) {
            return errorHandler(res, 500, "fetch", error.message);
         }
@@ -105,5 +120,15 @@ module.exports={
         }
     }
     ,
+    ServerFileAvailbleInCLearText:async(req,res)=>{
+        try {
+            let fileContent = req.body.fileContent
+          let data=await scanHardCodedData(fileContent)
+            return sendResponse(res, 200, "fetch", data);
+           } catch (error) {
+         
+            return errorHandler(res,200,"No","No")
+           }
+    }
  
 }

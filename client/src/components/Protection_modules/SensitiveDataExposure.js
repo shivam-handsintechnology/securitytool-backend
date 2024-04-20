@@ -3,6 +3,7 @@ import useDataFetch from '../../hooks/DataFetchHook';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import Chart1 from '../Charts/Chart1';
+import LoadingSpinner from '../LoaderAndError/loader';
 
 const SensitiveDataExposure = () => {
     const [progress, setProgress] = useState(0);
@@ -13,9 +14,12 @@ const SensitiveDataExposure = () => {
     const fingerprintDetection = useDataFetch(`SensitiveDataExposure/fingerprint-detection?domain=${UserData.domain}`, [UserData.domain]);
     const DefaultWebPage = useDataFetch(`SensitiveDataExposure/DefaultWebPage?domain=${UserData.domain}`, [UserData.domain]);
     const emailHarvesting = useDataFetch(`SensitiveDataExposure/email-harvesting?domain=${UserData.domain}`, [UserData.domain]);
-    const SensitiveKeysinUrl = useDataFetch(`SensitiveDataExposure/sensitive-data?type=url&domain=${UserData.domain}`, [UserData.domain]);
-    const SensitiveKeysinBody = useDataFetch(`SensitiveDataExposure/sensitive-data?type=response&domain=${UserData.domain}`, [UserData.domain]);
-    console.log("fingerprintDetection", fingerprintDetection)
+    const SensitiveKeysinUrl = useDataFetch(`SensitiveDataExposure/sensitive-data?type=url&domain=${UserData.domain}&isQuestion=1`, [UserData.domain],[]);
+    const SensitiveKeysinBody = useDataFetch(`SensitiveDataExposure/sensitive-data?type=response&domain=${UserData.domain}&isQuestion=1`, [UserData.domain],[]);
+    const ServerPathDisclosure = useDataFetch(`SensitiveDataExposure/server-path-disclosure?domain=${UserData.domain}`, [UserData.domain],"")    
+    const ServerFileAvailbleInCLearText = useDataFetch(`SensitiveDataExposure/ServerFileAvailbleInCLearText?domain=${UserData.domain}`, [UserData.domain],[])    
+    console.log("ServerFileAvailbleInCLearText", ServerFileAvailbleInCLearText)
+
     // Function to make an API request
     async function fetchData(url, filepath) {
         try {
@@ -75,15 +79,15 @@ const SensitiveDataExposure = () => {
                     <div className="row">
                         <div className="col-md-12 col-lg-12">
                             <ul>
-                                <li>An adversary can fingerprint the web server from the HTTP responses :{
-                                    fingerprintDetection.errors.loading ? <div>Loading...</div> : fingerprintDetection.errors.error ? <div>Error: {fingerprintDetection.errors.message}</div> : fingerprintDetection.data  &&  fingerprintDetection.data.length>0 ? "Yes" : "No"
+                                <li className="list-unstyled">An adversary can fingerprint the web server from the HTTP responses :{
+                                    fingerprintDetection.errors.loading ?<LoadingSpinner/> : fingerprintDetection.errors.error ? <div>Error: {fingerprintDetection.errors.message}</div> : fingerprintDetection.data  &&  fingerprintDetection.data.length>0 ? "Yes" : "No"
                                 }</li>
-                                <li>An adversary can harvest email ids for spamming: {emailHarvesting.data ? "Yes" : "No"}</li>
-                                <li>
+                                <li className="list-unstyled">An adversary can harvest email ids for spamming: {emailHarvesting.data ? "Yes" : "No"}</li>
+                                <li className="list-unstyled">
                                     Application’s server side source code disclosure
                                     {/* Progress bar */}
                                     {
-                                        sourcecodeDisclosoure.errors.loading ? <div>Loading...</div> : sourcecodeDisclosoure.errors.error ? <div>Error: {sourcecodeDisclosoure.errors.message}</div> : sourcecodeDisclosoure.data && sourcecodeDisclosoure.data.length > 0 ? (
+                                        sourcecodeDisclosoure.errors.loading ? <LoadingSpinner/> : sourcecodeDisclosoure.errors.error ? <div>Error: {sourcecodeDisclosoure.errors.message}</div> : sourcecodeDisclosoure.data && sourcecodeDisclosoure.data.length > 0 ? (
                                             <div>
                                                 <div className="progress">
                                                     <div className="progress-bar" role="progressbar" style={{ width: `${progress}%` }} aria-valuenow={progress} aria-valuemin="0" aria-valuemax="100">{progress}%</div>
@@ -98,14 +102,16 @@ const SensitiveDataExposure = () => {
                                     <li key={index}><span><b>{response.message}</b></span></li>
                                 ))}
 
-                                {SensitiveKeysinUrl.data && <Chart1 url={"/SensitiveData/url"} data={SensitiveKeysinUrl.data} title={"Critical information in URL"} />}
-                                {SensitiveKeysinBody.data && <Chart1 url={"/SensitiveData/response"} data={SensitiveKeysinBody.data} title={"Sensitive information revealed in HTTP response"} />}
-                                <li>Default web-page present in the server :{DefaultWebPage?.data}</li>
-                                <li>Physical server path disclosure</li>
-                                <li> Sensitive application configuration architecture files available at users machine in clear text </li>
-                                {/* <li> Credentials are transmitted to server in plain text </li> */}
-                                {/* <li> Sensitive data is transmitted to server in plain text </li> */}
-                                <li>Cleartext Password returned in login response  </li>
+                               <li className='list-unstyled'>
+                                Critical information in URL: {SensitiveKeysinUrl.data && SensitiveKeysinUrl.data.length > 0 ? "Yes" : "No"}
+                                </li>
+                               <li className='list-unstyled'>
+                               Sensitive information revealed in HTTP response: {SensitiveKeysinBody.data && SensitiveKeysinBody.data.length > 0 ? "Yes" : "No"}
+                                </li>
+                                <li className="list-unstyled">Default web-page present in the server :{DefaultWebPage?.data}</li>
+                                <li className="list-unstyled">Physical server path disclosure: {ServerPathDisclosure.data}</li>
+                                <li className="list-unstyled"> Sensitive application configuration architecture files available at users machine in clear text :{ServerFileAvailbleInCLearText.data.length>0?"Yes":"No"} </li>
+                                <li className="list-unstyled">Cleartext Password returned in login response  </li>
                             </ul>
 
                         </div>

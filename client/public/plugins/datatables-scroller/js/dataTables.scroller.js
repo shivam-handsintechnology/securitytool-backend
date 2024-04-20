@@ -71,11 +71,11 @@ var DataTable = $.fn.dataTable;
  *
  * Key features include:
  *   <ul class="limit_length">
- *     <li>Speed! The aim of Scroller for DataTables is to make rendering large data sets fast</li>
- *     <li>Full compatibility with deferred rendering in DataTables for maximum speed</li>
- *     <li>Display millions of rows</li>
- *     <li>Integration with state saving in DataTables (scrolling position is saved)</li>
- *     <li>Easy to use</li>
+ *     <li className="list-unstyled">Speed! The aim of Scroller for DataTables is to make rendering large data sets fast</li>
+ *     <li className="list-unstyled">Full compatibility with deferred rendering in DataTables for maximum speed</li>
+ *     <li className="list-unstyled">Display millions of rows</li>
+ *     <li className="list-unstyled">Integration with state saving in DataTables (scrolling position is saved)</li>
+ *     <li className="list-unstyled">Easy to use</li>
  *   </ul>
  *
  *  @class

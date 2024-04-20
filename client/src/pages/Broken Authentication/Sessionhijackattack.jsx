@@ -1,6 +1,7 @@
 import React from 'react'
 import { useDataFetch, usePostData } from '../../hooks/DataFetchHook'
 import { useSelector } from 'react-redux'
+import LoadingSpinner from '../../components/LoaderAndError/loader'
 
 const Sessionhijackattack = () => {
   const UserData = useSelector((state) => state.UserReducer)
@@ -9,7 +10,7 @@ const Sessionhijackattack = () => {
     console.log("postSessionData", postSessionData)
   return (
     <div>
-    {postSessionData.errors.loading ? <p>Loading...</p> : postSessionData.errors.error ? <p>{postSessionData.errors.message}</p> : <p>
+    {postSessionData.errors.loading ? <LoadingSpinner /> : postSessionData.errors.error ? <p>{postSessionData.errors.message}</p> : <p>
       {
         postSessionData.data && postSessionData.data.length > 0 && postSessionData.data.map((obj, index) => (
           <div key={index}>

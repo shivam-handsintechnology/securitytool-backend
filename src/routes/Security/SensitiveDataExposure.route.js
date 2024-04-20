@@ -28,5 +28,12 @@ router.post("/critical-info-url", verifyToken,
 router.get("/fingerprint-detection", verifyToken,
     ValidationMiddlewareQuery(DomainValidationSchema),
     SensitiveDataExposure.FingerprintDetection)
+router.get("/server-path-disclosure", verifyToken,
+    ValidationMiddlewareQuery(DomainValidationSchema),
+    SensitiveDataExposure.ServerPathDisclosure),
+router.get("/ServerFileAvailbleInCLearText", verifyToken,
+    ValidationMiddlewareQuery(DomainValidationSchema),
+    GetFileCOntentMiddleware,
+    SensitiveDataExposure.ServerFileAvailbleInCLearText)
 
 module.exports = router

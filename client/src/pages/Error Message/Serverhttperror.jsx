@@ -2,7 +2,7 @@ import React from 'react';
 import { useDataFetch } from '../../hooks/DataFetchHook';
 import { useSelector } from 'react-redux';
 import { Table } from 'react-bootstrap';
-
+import LoadingSpinner from '../../components/LoaderAndError/loader'
 const ServerHttpError = (props) => {
   const UserData = useSelector((state) => state.UserReducer);
   const postSessionData = useDataFetch(`ErrorMessage/http-error-messages?domain=${UserData.domain}`, [UserData.domain]);
@@ -11,7 +11,7 @@ const ServerHttpError = (props) => {
     <div>
        {props.Goback}
       {postSessionData.errors.loading ? (
-        <p>Loading...</p>
+        <LoadingSpinner />
       ) : postSessionData.errors.error ? (
         <p>{postSessionData.errors.message}</p>
       ) : (

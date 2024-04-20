@@ -4,6 +4,7 @@ const https = require('https');
 const { useCustomAxios } = require('../utilities/functions/fetchUrl');
 const { default: mongoose } = require('mongoose');
 const { sendResponse } = require('./dataHandler');
+const passwordhashlist = require('../data/json/passwordhashlist');
 // XLInjectionCheck
 function checkForXMLInjection(xml) {
   // Check for CDATA injection attacks
@@ -88,24 +89,24 @@ const CreateuserDetails = async (req, res, message, type) => {
     console.error(error)
   }
 }
-const CreatStatusCodesDetails = async (ErrorStatuscode, message, url, domain, id,appid) => {
+const CreatStatusCodesDetails = async (ErrorStatuscode, message, url, domain, id, appid) => {
   try {
     const StatusCodeModels = require('../models/ServerErrorResponseCodes')
     const ResponseCodesLoginPageModels = require('../models/ResponseCodesLoginPageModels')
     const UserRawData = {
       ErrorStatuscode,
       message,
-      domain,appid,user: mongoose.Types.ObjectId(id)
+      domain, appid, user: mongoose.Types.ObjectId(id)
     }
     if (url.includes('/login') || url.includes('/signin')) {
-      const finduser = await ResponseCodesLoginPageModels.findOne({ErrorStatuscode,domain,user: mongoose.Types.ObjectId(id)})
+      const finduser = await ResponseCodesLoginPageModels.findOne({ ErrorStatuscode, domain, user: mongoose.Types.ObjectId(id) })
       if (finduser) {
         console.log("already exist")
       } else {
         await ResponseCodesLoginPageModels.create(UserRawData)
       }
     } else {
-      const finduser = await StatusCodeModels.findOne({ErrorStatuscode,domain,user: mongoose.Types.ObjectId(id)})
+      const finduser = await StatusCodeModels.findOne({ ErrorStatuscode, domain, user: mongoose.Types.ObjectId(id) })
       if (finduser) {
         console.log("already exist")
       } else {
@@ -274,7 +275,7 @@ async function checkForSensitiveInfoInBody(data, keysToMatch) {
 
     return matchedData;
   } catch (error) {
-     throw new Error(error.message);
+    throw new Error(error.message);
   }
 }
 
@@ -337,24 +338,29 @@ async function CheckJwttokenSecurity(req) {
 }
 async function CheckPasswordKeyText(data, keysToMatch) {
   try {
-    let matchedData = null; // Initialize variable to store matched data
+    let isHashedPassword = false; // Initialize variable to store matched data
+    let ispassword = false
     const recursiveSearch = (currentData) => {
       if (typeof currentData === "object" && currentData !== null) {
         // If the current data is an object, recursively search its properties
         Object.entries(currentData).forEach(([key, value]) => {
           if (keysToMatch.includes(key) && value) {
+            ispassword = true
             // If the current key matches one of the keys and the value is not falsy, set it as the matched data
-            matchedData = value;
+            for (let i of passwordhashlist) {
+              if (i.regex.test(value)) {
+                isHashedPassword = true;
+                break;
+              }
+            }
           } else {
             recursiveSearch(value);
           }
         });
       }
     }
-
     recursiveSearch(data);
-
-    return matchedData;
+    return { isHashedPassword, ispassword };
   } catch (error) {
     throw new Error(error.message);
   }

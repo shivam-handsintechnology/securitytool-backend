@@ -85,26 +85,10 @@ module.exports = {
          
             const sensitivekey = await checkForSensitiveInfoInBody(data, sensitivedata);
             const passworddata = await CheckPasswordKeyText(data, passwordkeys); // Check for password keys in the data
-            let found = false; // Flag to track if a match is found
-            let algorithm= "";
+             console.log("passworddata",passworddata)
             // Check if domain exists in the database
             const existingRecord = await PasswordValidateModel.findOne({ domain });
             let passwordkeyavailable = false;
-            if (passworddata) {
-                passwordkeyavailable = true;
-                // Domain exists, update the record
-                for (const item of passwordTestHashes) {
-                    const regexPattern = new RegExp(eval(item.regex));
-                    if (regexPattern.test(passworddata)) {
-                        algorithm = item.name;
-                        found = true; // Set found to true since a match is found
-                        break; // Once a match is found, exit the loop
-                    }
-                }
-            }else if(!passworddata){
-                passwordkeyavailable = false;
-            }
-            
             // If no match is found and domain doesn't exist, create a record with HashedPassword set to false
             if (!existingRecord) {
                 await PasswordValidateModel.create({
@@ -114,7 +98,7 @@ module.exports = {
                     passwordkeyavailable
                 });
             }
-          else  if (existingRecord) {
+             else  if (existingRecord) {
                 await PasswordValidateModel.updateOne(
                     { domain },
                     {

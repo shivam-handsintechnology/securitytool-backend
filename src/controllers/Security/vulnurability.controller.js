@@ -67,9 +67,7 @@ module.exports = {
                 } else {
                     return sendResponse(res, 200, "fetch", EmailExist)
                 }
-
             }
-        
             return sendResponse(res, 200, "fetch", isVerifyEmail)
         } catch (error) {
             return res.status(500).json({ message: error.message });

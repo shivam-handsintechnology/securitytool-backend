@@ -3,7 +3,6 @@ const router = express.Router();
 const middlwareController = require('../controllers/middlwaresController')
 const IpController = require('../controllers/IP.controller')
 const DomainController = require('../controllers/DomainController')
-const TestRouter = require('./test')
 const WhitelistWords = require('./whitelistwords.route');
 // middlewares
 router.get('/middlwares', middlwareController.getMiddlewareController);
@@ -17,6 +16,5 @@ router.route('/domain').post(DomainController.addDomain).get(DomainController.ge
 // Whitelist words
 router.use("/whitelistwords", WhitelistWords)
 
-router.use("/test", TestRouter)
 
 module.exports = router

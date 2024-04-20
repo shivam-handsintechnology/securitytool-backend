@@ -12,7 +12,7 @@ import ServerErrorMessage from "../../Error Message/ServerErrorMessage";
 
 
 export default function Dashboard() {
-  
+  console.log(process.env)
    
   return (
     <React.Fragment>

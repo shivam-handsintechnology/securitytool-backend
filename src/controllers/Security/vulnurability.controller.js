@@ -6,50 +6,13 @@ const { Project_Security_Logs } = require("../../models/Project_Security_Logs");
 const { CrticalInformationInurl, EmailVerifyModel, } = require("../../models/sensitivekeywordsModel");
 const { checkForSensitiveInfoInBody, CheckPasswordKeyText, CreatStatusCodesDetails, isHashedPassword, } = require("../../utils/functions");
 const { sensitivedata, passwordkeys, } = require("../../sensitive/availableapikeys");
-const { SSLverifier } = require("../../utils/Downtimemonitor");
 const { sendResponse } = require("../../utils/dataHandler");
 const { errorHandler } = require("../../utils/errorHandler");
 const { AllowedDomainsModel } = require('../../models/AllowedDomainsModel');
-
 const verifyEmail = require('../../utils/emailverify');
 const { PasswordHashingDataModel } = require('../../models/Security/SecurityMisconfiguration.model');
 const { PasswordValidateModel } = require('../../models/PasswordVaildateModel');
 module.exports = {
-    httpparameterpollution: async (req, res) => {
-        try {
-            let domain = req.query.domain
-            let url = `http://${domain}/sitescanner?id=1&id=2&id=3`;
-            let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
-            if (isExistDomain) {
-                let response = await axios.get(url)
-                if (response.status === 200) {
-                    let isHttp = await hashttpParametersPollutionavailable(response.data)
-                    let data = { succces: false, data: isHttp, message: isHttp }
-                    return sendResponse(res, 200, "success", data)
-
-                } else {
-                    throw new Error("Data Not found")
-                }
-            } else {
-                return errorHandler(res, 500, error.message, { succces: false, data: {}, message: error.message })
-            }
-        } catch (error) {
-            console.error("Error processing request:", error);
-            return errorHandler(res, 500, error.message || "Internal Server Error");
-        }
-    },
-
-    sslverify: async (req, res) => {
-        try {
-            let domain = req.query.domain
-
-            const response = await SSLverifier(domain).then(data => data)
-            return sendResponse(res, 200, "SSL verified successfully", response)
-        } catch (error) {
-        
-            return errorHandler(res, 500, error.message)
-        }
-    },
     createuserdetails: async (req, res) => {
         try {
             let { UserRawData,domain, appid } = req.body;
@@ -197,61 +160,4 @@ module.exports = {
             return res.status(500).json({ error: "Internal Server Error" });
         }
     },
-
-    sessionstoragedata: async (req, res) => {
-        try {
-            const { filteredRequests, localStorageData, sessionStorageData } = req.body
-           return sendResponse(res, 200, "fetch", { filteredRequests, localStorageData, sessionStorageData })
-        } catch (error) {
-            return res.status(500).json({ message: "Internal Server Error" });
-        }
-    },
-    accesscontrollalloworigin: async (req, res) => {
-        try {
-            if (req.user) {
-                const response = await axios.get(`http://autotest.handsintechnology.in/`).then((res => res)).catch((err => err.response))
-                const access_control_allow_origin = response.headers['access-control-allow-origin']
-                if (access_control_allow_origin) {
-                    if (access_control_allow_origin === '*') {
-                        return sendResponse(res, 200, "access controll alow origin is set to *", { access_control_allow_origin: "access controll alow origin is set to *" })
-
-                    } else {
-                        return sendResponse(res, 200, "access controll alow origin is not set to *", { access_control_allow_origin: "access controll alow origin is not  set to *" })
-                    }
-                } else {
-                    return sendResponse(res, 200, "access controll alow origin is not set", { access_control_allow_origin: "access controll alow origin is not set" })
-
-                }
-            } else {
-                return res.status(403).json("you are not allowed");
-            }
-
-        } catch (error) {
-            return errorHandler(res, 500, error.message)
-        }
-    },
-    securityheaders: async (req, res) => {
-        try {
-            const valid = await checkDomainAvailability(req.query.domain)
-
-            if (!valid) {
-                return res.json("please enter valid url")
-            } else if (valid) {
-                const checkMyHeaders = require('../../utils/ScanHeaders')
-                let url = `http://${req.query.domain}/`
-                const data = await checkMyHeaders(url)
-                    .then((messages) => messages)
-                const rawHeaders = data.headers
-                return sendResponse(res, 200, "fetch all data", { headersinfo: data.messages, rawHeaders })
-
-            }
-
-
-        } catch (error) {
-         
-            errorHandler(res, 500, error.message)
-        }
-
-    },
-
 }

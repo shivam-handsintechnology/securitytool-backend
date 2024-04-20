@@ -9,7 +9,11 @@ module.exports = {
         try {
             let domain = req.query.domain
             let url = `http://${domain}/DirectoryListingEnable`;
-                let response = await axios.get(url)
+                let response = await axios.get(url,{
+                  headers: {
+                      'origin': "https://securitytool.handsintechnology.in",
+                  }
+              })
                 if (response.status === 200) {
               
                   return   sendResponse(res, 200, "success",response.data)
@@ -43,7 +47,11 @@ module.exports = {
     try {
         let domain = req.query.domain
         let url = `http://${domain}/sitescanner?id=1&id=2&id=3`;
-            let response = await axios.get(url)
+            let response = await axios.get(url,{
+              headers: {
+                  'origin': "https://securitytool.handsintechnology.in",
+              }
+          })
             if (response.status === 200) {
               let isHttp = await hashttpParametersPollutionavailable(response.data)
               return   sendResponse(res, 200, "success",isHttp)

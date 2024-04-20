@@ -10,20 +10,14 @@ const AuthSessionGuardian=require("./Security/AuthSessionGuardian.route")
 const InsecureObjectRefGuard=require("./Security/Insecure_Direct_Object_References.route")
 const InjectionsRoute=require("./Security/Injection.routes")
 const Authrouter = require('./UserRoutes');
-const { ValidationMiddleware} = require('../middlewares/ValidationMiddleware');
+const { ValidationMiddleware, ValidationMiddlewareQuery} = require('../middlewares/ValidationMiddleware');
 const { DomainValidationSchema } = require('../helpers/Validators');
 const verifyToken = require('../middlewares/VerifyUser');
 const GetFileCOntentMiddleware = require('../middlewares/GetFileCOntentMiddleware');
-const JsSnippetController=require("../controllers/JsSnippetController")
-router.route('/protected').get( JsSnippetController.JsSnippet).post(JsSnippetController.getALlDataFromSnippet);
-router.get('/', (req, res) => {
-  try {
-   return  res.render('index', { title: 'Express.js' });
-  } catch (error) {
-    return res.status(500).json({ message: 'Something broke!' });
-  }
-})
-// Security
+
+const { SSLverifier } = require('../utils/Downtimemonitor');
+const { sendResponse } = require('../utils/dataHandler');
+const { errorHandler } = require('../utils/errorHandler');
 router.use("/security", verifytoken, Security)
 // Get Client Information
 router.use("/client", GetClientInformation)
@@ -35,7 +29,18 @@ ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware,AuthSessio
 )
 // Injections
 router.use("/injections",InjectionsRoute)
-router.use("/allDashboardDataShow", require("./Security/AllDashboardDataShow"))
+// SSL Verify
+router.use("/SSLVerify", verifyToken,
+ValidationMiddlewareQuery(DomainValidationSchema),async (req, res) => {
+  try {
+      let domain = req.query.domain
+      const response = await SSLverifier(domain).then(data => data)
+      return sendResponse(res, 200, "SSL verified successfully", response)
+  } catch (error) {
+  
+      return errorHandler(res, 500, error.message)
+  }
+})
 // Error Message
 router.use("/ErrorMessage", require("./Security/ErrorMessage.route"))
 // Insecure Direct Object References

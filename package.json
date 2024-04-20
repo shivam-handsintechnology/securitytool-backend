@@ -4,8 +4,8 @@
     "description": "this is for increase security of web applications",
     "main": "src/app.js",
     "scripts": {
-        "dev": "nodemon src/app.js",
-        "start": "node src/app.js",
+        "dev": "cross-env NODE_ENV=development nodemon src/app.js",
+       "start": "cross-env NODE_ENV=production node src/app.js",
         "build": "npm install && npm install --prefix client && npm run build --prefix client"
     },
     "engines": {
@@ -38,6 +38,7 @@
         "winston": "^3.12.0"
     },
     "devDependencies": {
+        "cross-env": "^7.0.3",
         "eslint": "^8.56.0",
         "nodemailer": "^6.9.11",
         "pm2": "^5.3.1"

@@ -1,10 +1,10 @@
 const { errorHandler } = require("../utils/errorHandler");
-const allowOrigin = ["https://securitytool.handsintechnology.in", "http://localhost:3000", "http://localhost:3001"];
+const allowOrigin = ["https://securitytool-front.handsintechnology.in"];
 const SkipApi = [
 "/api/client/protection",
 "/api/client/sensitivekeysinurl",
 "/api/client/createuserdetails",
-"/api/client/emailverify",
+// "/api/client/emailverify",
 ];
 module.exports = async function cors(req, res, next) {
  

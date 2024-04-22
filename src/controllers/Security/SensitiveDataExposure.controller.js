@@ -170,11 +170,7 @@ module.exports={
         try {
             let {appid}=req.user
             let domain=req.query.domain
-            let data=await PasswordValidateModel.aggregate([
-             {
-               $match: { appid,domain:"localhost:8000" }
-             },
-            ])
+            let data=await PasswordValidateModel.findOne({appid,domain})
             return sendResponse(res,200,"fetch",data)
           } catch (error) {
            errorHandler(res,500,"fetch",error.message)

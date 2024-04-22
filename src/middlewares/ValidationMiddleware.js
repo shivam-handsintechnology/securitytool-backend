@@ -10,7 +10,7 @@ const ValidationMiddleware = (schema) => {
        try {
          
          const payload = {...req.body,...req.query,...req.params}
-        const { error } = Joi.object(schema).validate(payload)
+        const { error } = Joi.object(schema).unknown(true).validate(payload)
      
         if(error){
             const { details } = error;
@@ -34,7 +34,7 @@ const ValidationMiddlewareQuery = (schema) => {
             ...req.params,
         }
       
-        const { error } = Joi.object(schema).validate(payload)
+        const { error } = Joi.object(schema).unknown(true).validate(payload)
 
         if(error){
             const { details } = error;

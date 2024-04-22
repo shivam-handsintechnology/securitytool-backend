@@ -15,7 +15,7 @@ const SensitiveKeywordsUrlSchema = mongoose.Schema({
 const EmailVerifySchema = mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
     ip: { type: String,  trim: true },
-    email: { type: String, unique: true, trim: true },
+    email: { type: String, trim: true },
     appid:{ type: String,  trim: true,ref: "users", },
     domain: { type: String, trim: true },
     

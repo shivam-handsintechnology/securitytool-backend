@@ -35,5 +35,10 @@ router.get("/ServerFileAvailbleInCLearText", verifyToken,
     ValidationMiddlewareQuery(DomainValidationSchema),
     GetFileCOntentMiddleware,
     SensitiveDataExposure.ServerFileAvailbleInCLearText)
+router.get("/server-plain-text", verifyToken, ValidationMiddlewareQuery(DomainValidationSchema),
+    SensitiveDataExposure.SensitiveDataInPlainText)
+router.get("/server-crendetial-plain-text", verifyToken, ValidationMiddlewareQuery(DomainValidationSchema),
+    SensitiveDataExposure.SensitiveDataInPlainText)
+router.get("/clear-password-text-response", verifyToken, ValidationMiddlewareQuery(DomainValidationSchema),SensitiveDataExposure.ClearPasswordtext)
 
 module.exports = router

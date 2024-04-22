@@ -5,6 +5,7 @@ const { useCustomAxios } = require('../utilities/functions/fetchUrl');
 const { default: mongoose } = require('mongoose');
 const { sendResponse } = require('./dataHandler');
 const passwordhashlist = require('../data/json/passwordhashlist');
+
 // XLInjectionCheck
 function checkForXMLInjection(xml) {
   // Check for CDATA injection attacks
@@ -253,9 +254,9 @@ async function InjectionChecker(req) {
   return { containsSql, validateXss, validatehtml, containCommand }
 
 }
-async function checkForSensitiveInfoInBody(data, keysToMatch) {
+async function checkForSensitiveInfoInBody(data, keysToMatch,passwordTestHashes) {
   try {
-
+    let result = []
     let matchedData = null; // Initialize variable to store matched data
     const recursiveSearch = (currentData) => {
       if (typeof currentData === "object" && currentData !== null) {
@@ -264,6 +265,7 @@ async function checkForSensitiveInfoInBody(data, keysToMatch) {
           if (keysToMatch.includes(key) && value) {
             // If the current key matches one of the keys and the value is not falsy, set it as the matched data
             matchedData = key;
+            result.push(matchedData)
           } else {
             recursiveSearch(value);
           }
@@ -272,8 +274,8 @@ async function checkForSensitiveInfoInBody(data, keysToMatch) {
     }
 
     recursiveSearch(data);
-
-    return matchedData;
+    console.log("result", result)
+    return matchedData ;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -336,7 +338,8 @@ async function CheckJwttokenSecurity(req) {
 
   }
 }
-async function CheckPasswordKeyText(data, keysToMatch) {
+async function CheckPasswordKeyText(data, keysToMatch,passwordhashlist) {
+  
   try {
     let isHashedPassword = false; // Initialize variable to store matched data
     let ispassword = false
@@ -348,7 +351,9 @@ async function CheckPasswordKeyText(data, keysToMatch) {
             ispassword = true
             // If the current key matches one of the keys and the value is not falsy, set it as the matched data
             for (let i of passwordhashlist) {
-              if (i.regex.test(value)) {
+              let regx =eval(i.regex)
+              console.log("let check the password", regx.test(value),i.name)
+              if (regx.test(value)) {
                 isHashedPassword = true;
                 break;
               }
@@ -365,6 +370,38 @@ async function CheckPasswordKeyText(data, keysToMatch) {
     throw new Error(error.message);
   }
 }
+async function CheckAllDataIsEncrypted(data, keysToMatch,passwordhashlist) {
+  try {
+    const matchedData = []; // Initialize array to store matched data
+    const recursiveSearch = (currentData) => {
+      if (typeof currentData === "object" && currentData !== null) {
+        // If the current data is an object, recursively search its properties
+        Object.entries(currentData).forEach(([key, value]) => {
+          if (keysToMatch.includes(key) && value) {
+            // If the current key matches one of the keys and the value is not falsy
+            const matchedItem = { key, value,encrypted:false };
+            for (item of passwordhashlist){
+              let regx =eval(item.regex)
+              console.log("let check the password", regx.test(value),item.name)
+              if(regx.test(value)){
+                matchedItem["encrypted"] = true
+                break;
+              }
+            }
+            matchedData.push(matchedItem);
+          } else {
+            recursiveSearch(value);
+          }
+        });
+      }
+    }
+    recursiveSearch(data);
+    return matchedData;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
 module.exports = {
   CreatStatusCodesDetails,
   hasSqlInjection,
@@ -377,6 +414,6 @@ module.exports = {
   InjectionChecker,
   CheckJwttokenSecurity,
   checkForSensitiveInfoInBody,
-  CheckPasswordKeyText
+  CheckPasswordKeyText,CheckAllDataIsEncrypted
   // checkForSensitiveInfo
 }

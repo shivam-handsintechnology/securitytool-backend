@@ -4,6 +4,9 @@ const { errorHandler } = require("../../utils/errorHandler");
 const { EmailVerifyModel, CrticalInformationInurl } = require("../../models/sensitivekeywordsModel");
 const {checkServerFingerprinting, Full_Path_Disclosure} = require("../../utils/AppFingerPrinting");
 const { scanHardCodedData } = require("../../utils/scanClientData");
+const { ServerDataInPlaintextModel } = require("../../models/Security/SecurityMisconfiguration.model");
+const { PasswordValidateModel } = require("../../models/PasswordVaildateModel");
+
 module.exports={
     sourcecodeDisclousoure:async(req,res)=>{
         try {
@@ -15,6 +18,7 @@ module.exports={
            }
     },
     DefaultWebPage:async(req,res)=>{
+        let status = 500
         try {
             let domain = req.query.domain
             let url = `http://${domain}/`;
@@ -23,7 +27,10 @@ module.exports={
                   return  sendResponse(res, 200, "success", "Yes")
                 } else if(response.status===404) {
                   return  sendResponse(res, 200, "success", "No")
+                }else{
+                    return  sendResponse(res, 200, "success", "No")
                 }
+              
           
            } catch (error) {
          
@@ -33,15 +40,26 @@ module.exports={
   
     emailHarvesting:async(req,res)=>{
        try {
+        let {complete}=req.query
          let emailHarvest=false
-         console.log("user",req.user)
          let {appid}=req.user
          let domain=req.query.domain
-         let data=await EmailVerifyModel.findOne({appid,domain})
-         if(data){
+         let data=await EmailVerifyModel.aggregate([
+          {
+            $match: { appid,domain }
+          },
+          {
+            $group: {
+              _id: "$email",
+              count: { $sum: 1 }
+            }
+          }
+         ])
+         if(data.length>0){
             emailHarvest=true
          }
-         return sendResponse(res,200,"fetch",emailHarvest)
+         
+         return sendResponse(res,200,"fetch",complete?data:emailHarvest)
        } catch (error) {
         errorHandler(res,500,"fetch",error.message)
        }
@@ -129,6 +147,38 @@ module.exports={
          
             return errorHandler(res,200,"No","No")
            }
+    },
+    SensitiveDataInPlainText: async (req, res) => {
+        let status = 500
+     try {
+
+        let domain = req.query.domain
+        let appid = req.user.appid
+
+        let esxistpsesitiveData = await ServerDataInPlaintextModel.findOne( { domain: domain, appid: appid });
+        if(esxistpsesitiveData == null){
+            status = 404
+            throw new Error("No data found")
+        }
+         return sendResponse(res, 200, "success", esxistpsesitiveData)
+     } catch (error) {
+        console.log(error)
+        return errorHandler(res, status, error.message)
+     }
+    },
+    ClearPasswordtext:async(req,res)=>{
+        try {
+            let {appid}=req.user
+            let domain=req.query.domain
+            let data=await PasswordValidateModel.aggregate([
+             {
+               $match: { appid,domain:"localhost:8000" }
+             },
+            ])
+            return sendResponse(res,200,"fetch",data)
+          } catch (error) {
+           errorHandler(res,500,"fetch",error.message)
+          }
     }
  
 }

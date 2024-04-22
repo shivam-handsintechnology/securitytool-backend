@@ -13,7 +13,7 @@ module.exports = {
                   headers: {
                       'origin': "https://securitytool.handsintechnology.in",
                   }
-              })
+              }).catch((e)=>e.response)
                 if (response.status === 200) {
               
                   return   sendResponse(res, 200, "success",response.data)

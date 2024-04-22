@@ -51,20 +51,20 @@ module.exports=[{
     "example": "$2a$10$C7ZfZWRjB9HqH3qNPASZyuPrdVYdFNvJcnLdnjC9mkEnxvxcpKudW",
    
   },
-  {
+  // {
   
-    "name": "CRC32",
-    "regex": /^[0-9a-fA-F]{8}$/,
-    "example": "63cfeb0d",
+  //   "name": "CRC32",
+  //   "regex": /^[0-9a-fA-F]{8}$/,
+  //   "example": "63cfeb0d",
    
-  },
-  {
+  // },
+  // {
   
-    "name": "GOST (ГОСТ)",
-    "regex": /^[0-9a-fA-F]{64}$/,
-    "example": "20704d3b2e681e9429e492160068fb65f613715b1632ee6ca6b100839b147f9f",
+  //   "name": "GOST (ГОСТ)",
+  //   "regex": /^[0-9a-fA-F]{64}$/,
+  //   "example": "20704d3b2e681e9429e492160068fb65f613715b1632ee6ca6b100839b147f9f",
    
-  },
+  // },
   {
    
     "name": "Whirlpool",

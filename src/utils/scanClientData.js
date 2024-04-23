@@ -533,16 +533,109 @@ async function findCssFiles(url) {
   await browser.close();
   return cssFiles;
 }
-const  ScanCssVunurabiltyXss=async(hostname)=>{
-  const url = `http://${hostname}`; // Replace with the desired URL
-findCssFiles(url)
-  .then(cssFiles => {
-    cssFiles.forEach(file => console.log(file));
-  })
-  .catch(error => {
-    console.error('Error:', error);
+const getLineNumberAndContent = (content, index) => {
+  // Split the content into lines
+  const lines = content.split('\n');
+  // Find the line number containing the index
+  let lineNumber = 1;
+  let totalChars = 0;
+  for (let i = 0; i < lines.length; i++) {
+    totalChars += lines[i].length + 1; // Add 1 for the newline character
+    if (totalChars > index) {
+      lineNumber = i + 1;
+      break;
+    }
+  }
+  return { lineNumber, lineContent: lines[lineNumber - 1] };
+};
+const ScanCssVunurabiltyXss = async (hostname) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const cssFiles = await findCssFiles(`http://${hostname}`);
+      let results = [];
+      for (const file of cssFiles) {
+        const response = await fetch(file);
+        const cssContent = await response.text();
+
+        // Check for JavaScript URLs in url() properties
+        const jsUrlMatches = cssContent.match(/url\(['"]?(javascript:[^'"\)]*)['"]?\)/gi);
+        if (jsUrlMatches && jsUrlMatches.length > 0) {
+          jsUrlMatches.forEach(match => {
+            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
+            results.push(`XSS Vulnerability (JavaScript URL) found in the file at line ${lineNumber} in ${file}: ${match}`);
+          });
+        }
+
+        // Check for expression() function
+        const expressionMatches = cssContent.match(/expression\(([^)]*)\)/gi);
+        if (expressionMatches && expressionMatches.length > 0) {
+          expressionMatches.forEach(match => {
+            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
+            results.push(`XSS Vulnerability (expression function) found in the file at line ${lineNumber} in ${file}: ${match}`);
+          });
+        }
+
+        // Check for HTML entities
+        const htmlEntityMatches = cssContent.match(/&#x.{1,8};|&#\d+;|&.{1,8};/gi);
+        if (htmlEntityMatches && htmlEntityMatches.length > 0) {
+          htmlEntityMatches.forEach(match => {
+            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
+            results.push(`XSS Vulnerability (HTML entity) found in the file at line ${lineNumber} in ${file}: ${match}`);
+          });
+        }
+
+        // Check for URLs with javascript: protocol directly within property values
+        const javascriptProtocolMatches = cssContent.match(/['"]?(javascript:[^'"\)]*)['"]?/gi);
+        if (javascriptProtocolMatches && javascriptProtocolMatches.length > 0) {
+          javascriptProtocolMatches.forEach(match => {
+            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
+            results.push(`XSS Vulnerability (javascript protocol) found in the file at line ${lineNumber} in ${file}: ${match}`);
+          });
+        }
+
+        // Check for -moz-binding property
+        const mozBindingMatches = cssContent.match(/-moz-binding\s*:\s*([^;]+);/gi);
+        if (mozBindingMatches && mozBindingMatches.length > 0) {
+          mozBindingMatches.forEach(match => {
+            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
+            results.push(`XSS Vulnerability (-moz-binding) found in the file at line ${lineNumber} in ${file}: ${match}`);
+          });
+        }
+
+        // Check for behavior property
+        const behaviorMatches = cssContent.match(/behavior\s*:\s*([^;]+);/gi);
+        if (behaviorMatches && behaviorMatches.length > 0) {
+          behaviorMatches.forEach(match => {
+            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
+            results.push(`XSS Vulnerability (behavior) found in the file at line ${lineNumber} in ${file}: ${match}`);
+          });
+        }
+
+        // Check for SVG/XML namespaces
+        const svgNamespaceMatches = cssContent.match(/xmlns(?::|&#[xX]0*3a|&colon;)\s*=\s*(['"]?[^'"\s>]+['"]?)/gi);
+        if (svgNamespaceMatches && svgNamespaceMatches.length > 0) {
+          svgNamespaceMatches.forEach(match => {
+            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
+            results.push(`XSS Vulnerability (SVG/XML namespace) found in the file at line ${lineNumber} in ${file}: ${match}`);
+          });
+        }
+
+        // Check for Data URIs
+        const dataUriMatches = cssContent.match(/url\(['"]?data:[^'"\)]*['"]?\)/gi);
+        if (dataUriMatches && dataUriMatches.length > 0) {
+          dataUriMatches.forEach(match => {
+            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
+            results.push(`XSS Vulnerability (Data URI) found in the file at line ${lineNumber} in ${file}: ${match}`);
+          });
+        }
+      }
+      resolve(results);
+    } catch (error) {
+      reject(error);
+    }
   });
-}
+};
+
 module.exports = {
   scanDirectoryOptionMethod,ScanCssVunurabiltyXss, scanSessionvulnerability,getDashboardData,
   ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanHardCodedData, scanRedirectvulnerability, scanSQLvulnerability, get403ErrorMessage, getHttpErrorMessages, getLoginErrorMessages

@@ -4,6 +4,7 @@ const { errorHandler } = require('../utils/errorHandler');
 const SensitiveDataStoredInLocalStorageModel = require('../models/Security/SensitiveDataStoredInLocalStorage.model');
 const { CheckAllSensitiveData } = require('../utils/functions');
 const { sensitivedata } = require('../sensitive/availableapikeys');
+const { AllowedWebDomainsModel } = require('../models/AllowedDomainsModel');
 module.exports = {
   JsSnippet: (req, res) => {
     // Resolve the path to the protected JavaScript file
@@ -15,6 +16,7 @@ module.exports = {
     let status = 500;
     try {
       const { data, appid, hostname ,cssxssvulnurability} = req.body;
+     
       let cssxss=cssxssvulnurability?cssxssvulnurability:undefined
       if (appid == null || appid == undefined || appid == "") {
         status = 400;
@@ -24,7 +26,10 @@ module.exports = {
         status = 400;
         throw new Error("Hostname is required")
       }
-      console.log("Data",data)
+      let createWebDomain = await AllowedWebDomainsModel.findOne({ appid: appid ,domain:hostname});
+      if (!createWebDomain) {
+          await AllowedWebDomainsModel.create({ appid: appid, domain:hostname });
+      }
       if(data!==null && data!==undefined && Object.keys(data).length>0){
         let sensitive=await CheckAllSensitiveData(data,sensitivedata)
         console.log("Sensitive Data",sensitive)

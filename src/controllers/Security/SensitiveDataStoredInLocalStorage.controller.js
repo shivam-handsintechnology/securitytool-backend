@@ -4,6 +4,8 @@ const { errorHandler } = require("../../utils/errorHandler");
 module.exports={
     get: async (req, res) => {
         try {
+          
+          
             let data = await SensitiveDataStoredInLocalStorage.aggregate([
                 {
                     $match: {

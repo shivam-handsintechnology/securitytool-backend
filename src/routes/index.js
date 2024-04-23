@@ -6,6 +6,7 @@ const verifytoken = require('../middlewares/VerifyUser')
 const GetClientInformation = require('./getClientintformation.route')
 const SecurityMisconfiguration=require("./Security/SecurityMisconfiguration.route")
 const SensitiveDataExposure=require("./Security/SensitiveDataExposure.route")
+const SensitiveDataLocalStorage=require("../controllers/Security/SensitiveDataStoredInLocalStorage.controller")
 const AuthSessionGuardian=require("./Security/AuthSessionGuardian.route")
 const InsecureObjectRefGuard=require("./Security/Insecure_Direct_Object_References.route")
 const InjectionsRoute=require("./Security/Injection.routes")
@@ -49,5 +50,12 @@ router.use("/InsecureObjectRefGuard", InsecureObjectRefGuard)
 router.use("/SecurityMisconfiguration", SecurityMisconfiguration)
 // SensitiveDataExposure
 router.use("/SensitiveDataExposure", SensitiveDataExposure)
+// Unvalidated Redirects and Forwards
+router.get("/UnvalidatedRedirects",verifyToken,
+ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware, require("../controllers/Security/UnvalidatedRedirectsandForwards.controller").get)
+// Sensitive data is Store in Local Storage
+router.get("/SecureRedirectAwareness",verifyToken,
+ValidationMiddleware(DomainValidationSchema), SensitiveDataLocalStorage.get)
+
 router.use("/api",router)
 module.exports = router

@@ -1,36 +1,4 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
-const {sensitivedata} = require('../sensitive/availableapikeys');
-async function scanStaticUrl(url) {
-   return new Promise((resolve, reject) => {
-         axios.get(url).then((response) => {
-              const html = response.data;
-              const $ = cheerio.load(html);
-              const frameworks = [];
-              if ($('[data-reactroot]').length > 0 || $('[id="root"]').length > 0) {
-                frameworks.push('React');
-              }
-              if ($('[data-v-]').length > 0) {
-                frameworks.push('Vue');
-              }
-              if ($('[ng-app]').length > 0 || $('[ng-version]').length > 0) {
-                frameworks.push('Angular');
-              }
-              if ($('meta[name="next-head-count"]').length > 0 || $('[data-next-root]').length > 0) {
-                frameworks.push('Next.js');
-              }
-              if (frameworks.length === 0) {
-                resolve('No frameworks detected.');
-              }
 
-              else {
-                resolve(frameworks);
-              }
-         }).catch((err) => {
-              reject(`Error accessing ${url}: ${err}`);
-         });
-    });
-}
 const npmAuditrail=async(auditarray)=>{
   return new Promise((resolve,reject)=>{
  try {
@@ -60,4 +28,4 @@ const npmAuditrail=async(auditarray)=>{
  }
   })
 }
-module.exports = {scanStaticUrl,npmAuditrail};
+module.exports = {npmAuditrail};

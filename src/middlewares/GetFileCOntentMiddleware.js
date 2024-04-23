@@ -11,7 +11,13 @@ module.exports = async (req, res, next) => {
             }).then(response => response).catch(error => error.response)
           
             if (response.status == 200) {
-                req.body.fileContent = response.data.data
+                if(Array.isArray(response.data.data)){
+                    req.body.fileContent = response.data.data
+                }
+                if(!Array.isArray(response.data.data)){
+                    throw new Error("Invalid File Content")
+                }
+                
             }
             if (response.status >= 400) {
                 throw new Error("Access Denied")

@@ -401,6 +401,29 @@ async function CheckAllDataIsEncrypted(data, keysToMatch,passwordhashlist) {
     throw new Error(error.message);
   }
 }
+async function CheckAllSensitiveData(data, keysToMatch) {
+  try {
+    const matchedData = []; // Initialize array to store matched data
+    const recursiveSearch = (currentData) => {
+      if (typeof currentData === "object" && currentData !== null) {
+        // If the current data is an object, recursively search its properties
+        Object.entries(currentData).forEach(([key, value]) => {
+          if (keysToMatch.includes(key) && value) {
+            // If the current key matches one of the keys and the value is not falsy
+            const matchedItem = { key, value,};
+            matchedData.push(matchedItem);
+          } else {
+            recursiveSearch(value);
+          }
+        });
+      }
+    }
+    recursiveSearch(data);
+    return matchedData;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 
 module.exports = {
   CreatStatusCodesDetails,
@@ -413,7 +436,7 @@ module.exports = {
   hasXSSnjection,
   InjectionChecker,
   CheckJwttokenSecurity,
-  checkForSensitiveInfoInBody,
+  checkForSensitiveInfoInBody,CheckAllSensitiveData,
   CheckPasswordKeyText,CheckAllDataIsEncrypted
   // checkForSensitiveInfo
 }

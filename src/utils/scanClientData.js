@@ -178,30 +178,33 @@ async function scanHardCodedData(response) {
 
 }
 
-async function scanRedirectvulnerability(content, file) {
-  const results = ["Redirect Vulnerability Not Found in the file"];
-  content = content.toLowerCase();
-  //  redirect vunurability
-  const redirectmatches = content.match(/\.redirect\s*\(([^)]+)\)/g);
-  if (redirectmatches && Array.isArray(redirectmatches)) {
-    for (const match of redirectmatches) {
-      const dataMatch = match.match(/\(([^)]+)\)/);
-      if (dataMatch && dataMatch[1]) {
-        const data = dataMatch[1];
-        // Check if third-party URLs are used in the redirection
-        const thirdPartyURLs = data.match(/(?:https?:\/\/)?([^\s\/]+)/g);
-        if (thirdPartyURLs && thirdPartyURLs.length > 0) {
-          for (const url of thirdPartyURLs) {
-            if (url.includes("http") || url.includes("https")) {
-              results.splice(0, 1);
-              results.push(`Found a third-party URL: ${url} at file ${file}`);
-              // Perform further actions or checks as needed
+async function scanRedirectvulnerability(response) {
+  const results = ["Redirect Vulnerability Not Found in the Project"];
+  response.forEach((item) => {
+    let modifiedContent = item.content.replace(/"/g, "'");
+     modifiedContent = modifiedContent.toLowerCase();
+    //  redirect vunurability
+    const redirectmatches = modifiedContent.match(/\.redirect\s*\(([^)]+)\)/g);
+    if (redirectmatches && Array.isArray(redirectmatches)) {
+      for (const match of redirectmatches) {
+        const dataMatch = match.match(/\(([^)]+)\)/);
+        if (dataMatch && dataMatch[1]) {
+          const data = dataMatch[1];
+          // Check if third-party URLs are used in the redirection
+          const thirdPartyURLs = data.match(/(?:https?:\/\/)?([^\s\/]+)/g);
+          if (thirdPartyURLs && thirdPartyURLs.length > 0) {
+            for (const url of thirdPartyURLs) {
+              if (url.includes("http") || url.includes("https")) {
+                results.splice(0, 1);
+                let lineNumber = getLineNumber(modifiedContent, modifiedContent.indexOf(match));
+                results.push(`Redirect Vulnerability Found in the file at line ${lineNumber} in ${item.directoryPath}/${item.name}${item.extension}`);
+              }
             }
           }
         }
       }
     }
-  }
+  });
 
   return results;
 }
@@ -515,7 +518,32 @@ async function getDashboardData(response){
   return data2;
 
 }
+const puppeteer = require('puppeteer');
+
+async function findCssFiles(url) {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: 'networkidle2' });
+
+  const cssFiles = await page.evaluate(() => {
+    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+    return links.map(link => link.href);
+  });
+
+  await browser.close();
+  return cssFiles;
+}
+const  ScanCssVunurabiltyXss=async(hostname)=>{
+  const url = `http://${hostname}`; // Replace with the desired URL
+findCssFiles(url)
+  .then(cssFiles => {
+    cssFiles.forEach(file => console.log(file));
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
 module.exports = {
-  scanDirectoryOptionMethod, scanSessionvulnerability,getDashboardData,
+  scanDirectoryOptionMethod,ScanCssVunurabiltyXss, scanSessionvulnerability,getDashboardData,
   ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanHardCodedData, scanRedirectvulnerability, scanSQLvulnerability, get403ErrorMessage, getHttpErrorMessages, getLoginErrorMessages
 };

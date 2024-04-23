@@ -5,7 +5,7 @@
     "main": "src/app.js",
     "scripts": {
         "dev": "cross-env NODE_ENV=development nodemon src/app.js",
-       "start": "cross-env NODE_ENV=production node src/app.js",
+        "start": "cross-env NODE_ENV=production node src/app.js",
         "build": "npm install && npm install --prefix client && npm run build --prefix client"
     },
     "engines": {
@@ -34,6 +34,7 @@
         "moment": "^2.29.4",
         "mongoose": "^6.11.1",
         "ping": "^0.4.4",
+        "puppeteer": "^22.7.0",
         "uuid": "^9.0.1",
         "winston": "^3.12.0"
     },

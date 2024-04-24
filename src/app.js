@@ -22,6 +22,27 @@ DBConnection(process.env.MONGO_URI) // Connect to MongoDB
 const app = express(); // Create Express APP
 app.set('view engine', 'ejs'); // Set the view engine to ejs
 app.use(express.urlencoded({ extended: true })); // body parser 
+// Private ip discloeed
+app.use((req, res, next) => {
+  const checkPrivateIP = (data) => {
+      const privateIPRegex = /^(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.)/;
+      if (typeof data === 'string' && privateIPRegex.test(data)) {
+          console.log('Private IP address detected:', data);
+          // Take appropriate action, such as logging, blocking, or sanitizing the data
+      } else if (typeof data === 'object') {
+          for (const key in data) {
+              if (Object.prototype.hasOwnProperty.call(data, key)) {
+                  checkPrivateIP(data[key]);
+              }
+          }
+      }
+  };
+
+  checkPrivateIP(req.headers);
+  checkPrivateIP(req.body);
+
+  next();
+});
 app.use(cors(),CorsMiddleware) // Enable CORS
 app.use(express.json({ limit: "50mb", extended: true })); // body parser
 app.use(fileUpload({

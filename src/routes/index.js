@@ -54,8 +54,7 @@ router.use("/SensitiveDataExposure", SensitiveDataExposure)
 router.get("/UnvalidatedRedirects",verifyToken,
 ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware, require("../controllers/Security/UnvalidatedRedirectsandForwards.controller").get)
 // Cross-Site Scripting (XSS)
-router.get("/CrossSiteScripting",verifyToken,
-ValidationMiddleware(DomainValidationSchema), require("../controllers/Security/CrossSiteScripting.controller").XSSCssVulnurabilty)
+router.get("/CrossSiteScripting",verifyToken, require("../controllers/Security/CrossSiteScripting.controller").XSSCssVulnurabilty)
 // Sensitive data is Store in Local Storage
 router.get("/SecureRedirectAwareness",verifyToken,
 

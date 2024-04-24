@@ -4,6 +4,9 @@ const {
 } = require("../sensitive/availableapikeys");
 const staticFolders = require("../data/json/staticFolders.json");
 const { SessionVulnurability } = require("../helpers/SessionVulnurabiltyChecker");
+const xssregularexprssionmatchdata = require("../data/json/xssregularexprssionmatchdata");
+const beautify = require('js-beautify').css;
+const puppeteer = require('puppeteer');
 // regular expression paterns
 // OPTIONS method
 async function scanDirectoryOptionMethod(response) {
@@ -518,7 +521,7 @@ async function getDashboardData(response){
   return data2;
 
 }
-const puppeteer = require('puppeteer');
+
 
 async function findCssFiles(url) {
   const browser = await puppeteer.launch();
@@ -557,76 +560,23 @@ const ScanCssVunurabiltyXss = async (hostname) => {
         const response = await fetch(file);
         const cssContent = await response.text();
 
-        // Check for JavaScript URLs in url() properties
-        const jsUrlMatches = cssContent.match(/url\(['"]?(javascript:[^'"\)]*)['"]?\)/gi);
-        if (jsUrlMatches && jsUrlMatches.length > 0) {
-          jsUrlMatches.forEach(match => {
-            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
-            results.push(`XSS Vulnerability (JavaScript URL) found in the file at line ${lineNumber} in ${file}: ${match}`);
-          });
-        }
+        // Beautify the CSS content
+        const formattedCssContent = beautify(cssContent, { indent_size: 2 });
 
-        // Check for expression() function
-        const expressionMatches = cssContent.match(/expression\(([^)]*)\)/gi);
-        if (expressionMatches && expressionMatches.length > 0) {
-          expressionMatches.forEach(match => {
-            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
-            results.push(`XSS Vulnerability (expression function) found in the file at line ${lineNumber} in ${file}: ${match}`);
-          });
-        }
-
-        // Check for HTML entities
-        const htmlEntityMatches = cssContent.match(/&#x.{1,8};|&#\d+;|&.{1,8};/gi);
-        if (htmlEntityMatches && htmlEntityMatches.length > 0) {
-          htmlEntityMatches.forEach(match => {
-            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
-            results.push(`XSS Vulnerability (HTML entity) found in the file at line ${lineNumber} in ${file}: ${match}`);
-          });
-        }
-
-        // Check for URLs with javascript: protocol directly within property values
-        const javascriptProtocolMatches = cssContent.match(/['"]?(javascript:[^'"\)]*)['"]?/gi);
-        if (javascriptProtocolMatches && javascriptProtocolMatches.length > 0) {
-          javascriptProtocolMatches.forEach(match => {
-            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
-            results.push(`XSS Vulnerability (javascript protocol) found in the file at line ${lineNumber} in ${file}: ${match}`);
-          });
-        }
-
-        // Check for -moz-binding property
-        const mozBindingMatches = cssContent.match(/-moz-binding\s*:\s*([^;]+);/gi);
-        if (mozBindingMatches && mozBindingMatches.length > 0) {
-          mozBindingMatches.forEach(match => {
-            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
-            results.push(`XSS Vulnerability (-moz-binding) found in the file at line ${lineNumber} in ${file}: ${match}`);
-          });
-        }
-
-        // Check for behavior property
-        const behaviorMatches = cssContent.match(/behavior\s*:\s*([^;]+);/gi);
-        if (behaviorMatches && behaviorMatches.length > 0) {
-          behaviorMatches.forEach(match => {
-            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
-            results.push(`XSS Vulnerability (behavior) found in the file at line ${lineNumber} in ${file}: ${match}`);
-          });
-        }
-
-        // Check for SVG/XML namespaces
-        const svgNamespaceMatches = cssContent.match(/xmlns(?::|&#[xX]0*3a|&colon;)\s*=\s*(['"]?[^'"\s>]+['"]?)/gi);
-        if (svgNamespaceMatches && svgNamespaceMatches.length > 0) {
-          svgNamespaceMatches.forEach(match => {
-            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
-            results.push(`XSS Vulnerability (SVG/XML namespace) found in the file at line ${lineNumber} in ${file}: ${match}`);
-          });
-        }
-
-        // Check for Data URIs
-        const dataUriMatches = cssContent.match(/url\(['"]?data:[^'"\)]*['"]?\)/gi);
-        if (dataUriMatches && dataUriMatches.length > 0) {
-          dataUriMatches.forEach(match => {
-            const { lineNumber } = getLineNumberAndContent(cssContent, cssContent.indexOf(match));
-            results.push(`XSS Vulnerability (Data URI) found in the file at line ${lineNumber} in ${file}: ${match}`);
-          });
+        // Check all regular expressions
+        for (const key of xssregularexprssionmatchdata) {
+          let word = key.expression;
+          if (formattedCssContent.includes(word)) {
+            let { lineNumber, lineContent } = getLineNumberAndContent(formattedCssContent, formattedCssContent.indexOf(word));
+            results.push({
+              file: file,
+              lineNumber: lineNumber,
+              lineContent: lineContent,
+              expression: word,
+              name: key.name,
+              hostname: hostname
+            });
+          }
         }
       }
       resolve(results);

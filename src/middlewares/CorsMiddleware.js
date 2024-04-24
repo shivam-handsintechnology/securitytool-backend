@@ -19,7 +19,7 @@ module.exports = async function cors(req, res, next) {
   }
 
   // Check if the request has an origin header
- /* if (!req.headers.origin) {
+ if (!req.headers.origin) {
     return errorHandler(res, 403, "Forbidden");
   } else {
     // Check if the origin is in the allowed origins list
@@ -29,7 +29,7 @@ module.exports = async function cors(req, res, next) {
       return errorHandler(res, 403, "Forbidden");
     }
   }
-*/
+
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);

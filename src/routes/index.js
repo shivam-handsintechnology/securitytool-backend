@@ -2,7 +2,6 @@
 const express = require('express');
 const router = express.Router();
 const Security = require('./security')
-const verifytoken = require('../middlewares/VerifyUser')
 const GetClientInformation = require('./getClientintformation.route')
 const SecurityMisconfiguration=require("./Security/SecurityMisconfiguration.route")
 const SensitiveDataExposure=require("./Security/SensitiveDataExposure.route")
@@ -10,8 +9,10 @@ const SensitiveDataLocalStorage=require("../controllers/Security/SensitiveDataSt
 const AuthSessionGuardian=require("./Security/AuthSessionGuardian.route")
 const InsecureObjectRefGuard=require("./Security/Insecure_Direct_Object_References.route")
 const InjectionsRoute=require("./Security/Injection.routes")
+const WeekCrossDomainPolicy=require("./Security/WeakCrossDomainPolicy.route")
 const Authrouter = require('./UserRoutes');
 const { ValidationMiddleware, ValidationMiddlewareQuery} = require('../middlewares/ValidationMiddleware');
+const verifytoken = require('../middlewares/VerifyUser')
 const { DomainValidationSchema } = require('../helpers/Validators');
 const verifyToken = require('../middlewares/VerifyUser');
 const GetFileCOntentMiddleware = require('../middlewares/GetFileCOntentMiddleware');
@@ -57,8 +58,8 @@ ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware, require("
 router.get("/CrossSiteScripting",verifyToken, require("../controllers/Security/CrossSiteScripting.controller").XSSCssVulnurabilty)
 // Sensitive data is Store in Local Storage
 router.get("/SecureRedirectAwareness",verifyToken,
-
 ValidationMiddleware(DomainValidationSchema), SensitiveDataLocalStorage.get)
-
+ // Week Cross Domain Policy
+router.use("/WeakCrossDomainPolicy",verifyToken,ValidationMiddleware(DomainValidationSchema),WeekCrossDomainPolicy )
 router.use("/api",router)
 module.exports = router

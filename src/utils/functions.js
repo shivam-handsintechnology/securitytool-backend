@@ -1,10 +1,8 @@
 const Project_Security_Logs = require('.././models/Project_Security_Logs')
-// const axios = require('axios')
-const https = require('https');
 const { useCustomAxios } = require('../utilities/functions/fetchUrl');
 const { default: mongoose } = require('mongoose');
-const { sendResponse } = require('./dataHandler');
-const passwordhashlist = require('../data/json/passwordhashlist');
+let validator=require('validator')
+const { passwordkeys } = require('./passwordlist');
 
 // XLInjectionCheck
 function checkForXMLInjection(xml) {
@@ -401,25 +399,61 @@ async function CheckAllDataIsEncrypted(data, keysToMatch,passwordhashlist) {
     throw new Error(error.message);
   }
 }
-async function CheckAllSensitiveData(data, keysToMatch) {
+// Define a function to check for CSS injection
+function isObject(input) {
+  return input !== null && typeof input === 'object' && !Array.isArray(input);
+}
+
+
+async function CheckAllSensitiveData(data) {
   try {
-    const matchedData = []; // Initialize array to store matched data
-    const recursiveSearch = (currentData) => {
-      if (typeof currentData === "object" && currentData !== null) {
-        // If the current data is an object, recursively search its properties
-        Object.entries(currentData).forEach(([key, value]) => {
-          if (keysToMatch.includes(key) && value) {
-            // If the current key matches one of the keys and the value is not falsy
-            const matchedItem = { key, value,};
-            matchedData.push(matchedItem);
-          } else {
-            recursiveSearch(value);
-          }
-        });
-      }
+    let result= {
+      isEmail:false,
+      isJwt:false,
     }
-    recursiveSearch(data);
-    return matchedData;
+    if(data && data.startsWith('{') && data.endsWith('}')){
+      data=JSON.parse(data)
+    }
+    // Recursive function to check for CSS attacks in nested objects or arrays
+    function checkForSensitiveDaa(obj) {
+     
+        if (isObject(obj)) {
+            for (const key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                    const value = obj[key];
+                    if (isObject(value) || Array.isArray(value)) {
+                        checkForSensitiveDaa(value); // Recursive call for nested objects or arrays
+                    } else if (typeof value === 'string') {
+                      
+                      if(validator.isEmail(value)){
+                        result.isEmail=true
+                      }
+                      if(validator.isJWT(value)){
+                        result.isJwt=true
+                      }
+
+                    }
+                }
+            }
+        } else if (Array.isArray(obj)) {
+            obj.forEach(item => {
+                if (isObject(item) || Array.isArray(item)) {
+                    checkForSensitiveDaa(item); // Recursive call for nested objects or arrays
+                } else if (typeof item === 'string') {
+                  if(validator.isEmail(item)){
+                    result.isEmail=true
+                  }
+                  if(validator.isJWT(item)){
+                    result.isJwt=true
+                  }
+                }
+            });
+        }
+        return result;
+    }
+    // Start checking for CSS attacks
+    checkForSensitiveDaa(input);
+
   } catch (error) {
     throw new Error(error.message);
   }

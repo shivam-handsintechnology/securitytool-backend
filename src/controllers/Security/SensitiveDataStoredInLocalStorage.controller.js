@@ -1,12 +1,11 @@
+const SensitiveDataStoredInLocalStorageModel = require("../../models/Security/SensitiveDataStoredInLocalStorage.model");
 const { sendResponse } = require("../../utils/dataHandler");
 const { errorHandler } = require("../../utils/errorHandler");
 
 module.exports={
     get: async (req, res) => {
         try {
-          
-          
-            let data = await SensitiveDataStoredInLocalStorage.aggregate([
+            let data = await SensitiveDataStoredInLocalStorageModel.aggregate([
                 {
                     $match: {
                         appid: req.user.appid,

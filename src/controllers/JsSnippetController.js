@@ -76,7 +76,7 @@ module.exports = {
         return sendResponse(res, 200, 'Data received successfully')
 
     } catch (error) {
-      errorHandler(res, status, error.message);
+     return errorHandler(res, status, error.message);
     }
 
   }

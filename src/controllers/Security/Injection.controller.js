@@ -6,7 +6,7 @@ const { default: mongoose } = require('mongoose')
 const getAllLogs = async (req, res) => {
     try {
         // Get total count of users
-        const { page, limit, ...rest } = req.query;
+        const { page, limit,question, ...rest } = req.query;
         let obj = {}
         let restdata=Object.keys(rest)
         for (let i of restdata){

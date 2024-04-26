@@ -1,6 +1,5 @@
 // Import external modules
 const cors = require("cors")
-const fs=require("fs")
 const fileUpload = require('express-fileupload')
 const express = require("express");
 const hpp = require('hpp')
@@ -9,12 +8,10 @@ const dotenv = require('dotenv')
 const cluster = require("cluster")
 const os = require("os")
 const process = require("process");
-const path = require("path")
 // import internal modules
 const logger = require('./logger/logger');
 const apirouter = require('./routes')
-const { DBConnection } = require("./config/connection"); 
-const CorsMiddleware = require("./middlewares/CorsMiddleware");
+const { DBConnection } = require("./config/connection"); // Database connection
 const numCPUs = os.cpus().length // Get the number of CPU cores
 // Connected to mongodb
 dotenv.config(); // Load environment variables
@@ -22,30 +19,7 @@ DBConnection(process.env.MONGO_URI) // Connect to MongoDB
 const app = express(); // Create Express APP
 app.set('view engine', 'ejs'); // Set the view engine to ejs
 app.use(express.urlencoded({ extended: true })); // body parser 
-// Private ip discloeed
-app.use((req, res, next) => {
-  const checkPrivateIP = (data) => {
-      const privateIPRegex = /^(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.)/;
-      if (typeof data === 'string') {
-          if (privateIPRegex.test(data)){
-            console.log('Private IP address detected:', data);
-          }
-          // Take appropriate action, such as logging, blocking, or sanitizing the data
-      } else if (typeof data === 'object') {
-          for (const key in data) {
-              if (Object.prototype.hasOwnProperty.call(data, key)) {
-                  checkPrivateIP(data[key]);
-              }
-          }
-      }
-  };
-
-  checkPrivateIP(req.headers);
-  checkPrivateIP(req.body);
-
-  next();
-});
-app.use(cors(),CorsMiddleware) // Enable CORS
+app.use(cors()) // Enable CORS
 app.use(express.json({ limit: "50mb", extended: true })); // body parser
 app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 },   // File Upload Functionality

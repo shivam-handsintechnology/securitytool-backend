@@ -20,19 +20,20 @@ const GetFileCOntentMiddleware = require('../middlewares/GetFileCOntentMiddlewar
 const { SSLverifier } = require('../utils/Downtimemonitor');
 const { sendResponse } = require('../utils/dataHandler');
 const { errorHandler } = require('../utils/errorHandler');
-router.use("/security", verifytoken, Security)
+const CorsMiddleware = require('../middlewares/CorsMiddleware');
+router.use("/security",CorsMiddleware, verifytoken, Security)
 // Get Client Information
 router.use("/client", GetClientInformation)
 // Auth
-router.use("/auth", Authrouter)
+router.use("/auth",CorsMiddleware, Authrouter)
 // Broken Authentication and Session Management
-router.use("/AuthSessionGuardian", verifyToken,
+router.use("/AuthSessionGuardian",CorsMiddleware, verifyToken,
 ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware,AuthSessionGuardian
 )
 // Injections
-router.use("/injections",InjectionsRoute)
+router.use("/injections",CorsMiddleware,InjectionsRoute)
 // SSL Verify
-router.use("/SSLVerify", verifyToken,
+router.use("/SSLVerify",CorsMiddleware, verifyToken,
 ValidationMiddlewareQuery(DomainValidationSchema),async (req, res) => {
   try {
       let domain = req.query.domain
@@ -44,21 +45,21 @@ ValidationMiddlewareQuery(DomainValidationSchema),async (req, res) => {
   }
 })
 // Error Message
-router.use("/ErrorMessage", require("./Security/ErrorMessage.route"))
+router.use("/ErrorMessage",CorsMiddleware, require("./Security/ErrorMessage.route"))
 // Insecure Direct Object References
-router.use("/InsecureObjectRefGuard", InsecureObjectRefGuard)
+router.use("/InsecureObjectRefGuard",CorsMiddleware, InsecureObjectRefGuard)
 // SecurityMisconfiguration
-router.use("/SecurityMisconfiguration", SecurityMisconfiguration)
+router.use("/SecurityMisconfiguration",CorsMiddleware, SecurityMisconfiguration)
 // SensitiveDataExposure
-router.use("/SensitiveDataExposure", SensitiveDataExposure)
+router.use("/SensitiveDataExposure",CorsMiddleware, SensitiveDataExposure)
 // Unvalidated Redirects and Forwards
-router.get("/UnvalidatedRedirects",verifyToken,
+router.get("/UnvalidatedRedirects",CorsMiddleware,verifyToken,
 ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware, require("../controllers/Security/UnvalidatedRedirectsandForwards.controller").get)
 // Cross-Site Scripting (XSS)
-router.use("/CrossSiteScripting",verifyToken, require("./Security/CrossSiteScripting"))
+router.use("/CrossSiteScripting",CorsMiddleware,verifyToken, require("./Security/CrossSiteScripting"))
 // Sensitive data is Store in Local Storage
-router.get("/SensitiveStorageLocalStorage",verifyToken, SensitiveDataLocalStorage.get)
+router.get("/SensitiveStorageLocalStorage",CorsMiddleware,verifyToken, SensitiveDataLocalStorage.get)
  // Week Cross Domain Policy
-router.use("/WeakCrossDomainPolicy",verifyToken,ValidationMiddleware(DomainValidationSchema),WeekCrossDomainPolicy )
+router.use("/WeakCrossDomainPolicy",CorsMiddleware,verifyToken,ValidationMiddleware(DomainValidationSchema),WeekCrossDomainPolicy )
 router.use("/api",router)
 module.exports = router

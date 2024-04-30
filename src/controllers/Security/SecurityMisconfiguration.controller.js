@@ -1,8 +1,9 @@
-const { ClientLoagsModel } = require("../../models/ClientLoagsModel")
 const mongoose = require("mongoose")
+const { default: axios } = require("axios")
+const validator=require("validator")
+const { ClientLoagsModel } = require("../../models/ClientLoagsModel")
 const { sendResponse } = require("../../utils/dataHandler")
 const { AllowedDomainsModel } = require("../../models/AllowedDomainsModel")
-const { default: axios } = require("axios")
 const { ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanDirectoryOptionMethod } = require("../../utils/scanClientData")
 const { PasswordHashingDataModel } = require("../../models/Security/SecurityMisconfiguration.model")
 const { errorHandler } = require("../../utils/errorHandler")
@@ -86,19 +87,35 @@ module.exports = {
                     }
                 })
                 if (response.status === 200) {
-
-                    let obj = "Password is not hashed"
-                    for (const item of passwordTestHashes) {
-                        const regexPattern = new RegExp(eval(item.regex));
-                        if (regexPattern.test(response.data.data.password)) {
-                            obj = `password found with ${item.name} algorithm`;
-                            break; // Once a match is found, exit the loop
-                        }
+                    console.log("password response", response.data.data.password)
+                    let hashedPassword = response.data.data.password;
+                     if(validator.isMD5(hashedPassword)){
+                        return sendResponse(res, 200, "success", "Password is Md5");
+                    }
+                   
+                    else if(validator.isHash(hashedPassword)){
+                        return sendResponse(res, 200, "success", "Password is Hash But we are not able to verify the algorithm");
+                    }
+                    else if(validator.isStrongPassword(hashedPassword)){
+                        return sendResponse(res, 200, "success", "Password is Strong But we are not able to verify the algorithm");
                     }
 
-                    if (!obj) {
-                        return sendResponse(res, 200, "success", "Password is not hashed");
+                    else if(!validator.isStrongPassword(hashedPassword)){
+                        return sendResponse(res, 200, "success", "Password is Weak");
                     }
+                    // let obj = "Password is not hashed"
+                    // for (const item of passwordTestHashes) {
+                    //     const regexPattern = eval(item.regex);
+                    //     console.log("regexPattern", regexPattern)
+                    //     if (regexPattern.test(hashedPassword)) {
+                    //         obj = `password found with ${item.name} algorithm`;
+                    //         break; // Once a match is found, exit the loop
+                    //     }
+                    // }
+
+                    // if (!obj) {
+                    //     return sendResponse(res, 200, "success", "Password is not hashed");
+                    // }
 
                     return sendResponse(res, 200, "success", obj);
                 } else {
@@ -108,21 +125,12 @@ module.exports = {
                 throw new Error("Domain Is Not exist ")
             }
         } catch (error) {
-
+           
             return errorHandler(res, 500, "success", error.message)
         }
     },
     WealALgorithmPassword: async (req, res) => {
         try {
-            const WeeakPasswordAlgorith = [
-                { name: "MD5" },
-                { name: "SHA-1" },
-                { name: "SHA-256" },
-                { name: "SHA-512" },
-            ]
-            const passwordTestHashes = await PasswordHashingDataModel.aggregate([
-                { $match: {} }
-            ]);
             let domain = req.query.domain
             let url = `http://${domain}/passwords-insecure`;
             let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
@@ -133,23 +141,13 @@ module.exports = {
                     }
                 })
                 if (response.status === 200) {
-
-                    let obj = "Password is not hashed"
-                    for (const item of passwordTestHashes) {
-                        const regexPattern = new RegExp(eval(item.regex));
-                        if (regexPattern.test(response.data.data.password)) {
-                            let weekPassword = WeeakPasswordAlgorith.find((obj) => obj.name === item.name)
-                            obj = weekPassword ? `password found with ${item.name} algorithm` : "Password is not hashed";
-
-                            break; // Once a match is found, exit the loop
-                        }
-                    }
-
-                    if (!obj) {
-                        return sendResponse(res, 200, "success", "Password is not hashed");
-                    }
-
-                    return sendResponse(res, 200, "success", obj);
+                    let hashedPassword = response.data.data.password;
+                    if(validator.isStrongPassword(hashedPassword)){
+                       return sendResponse(res, 200, "success", "Password is Strong");
+                   }
+                   else if(!validator.isStrongPassword(hashedPassword)){
+                       return sendResponse(res, 200, "success", "Password is  Weak");
+                   }
                 } else {
                     throw new Error("access Denied")
                 }

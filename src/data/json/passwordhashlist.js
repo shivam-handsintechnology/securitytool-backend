@@ -47,7 +47,7 @@ module.exports=[{
   {
    
     "name": "bcrypt",
-    "regex": /^\\\\$2[ayb]\\\\$.{56}$/,
+    "regex": /^$2[ayb]?$.{56}$/,
     "example": "$2a$10$C7ZfZWRjB9HqH3qNPASZyuPrdVYdFNvJcnLdnjC9mkEnxvxcpKudW",
    
   },

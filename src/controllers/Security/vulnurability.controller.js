@@ -1,7 +1,7 @@
 
 const { Project_Security_Logs } = require("../../models/Project_Security_Logs");
 const { CrticalInformationInurl, EmailVerifyModel, } = require("../../models/sensitivekeywordsModel");
-const { checkForSensitiveInfoInBody, CheckPasswordKeyText, CreatStatusCodesDetails, CheckAllDataIsEncrypted, } = require("../../utils/functions");
+const { checkForSensitiveInfoInBody, CheckPasswordKeyText, CheckAllDataIsEncrypted, } = require("../../utils/functions");
 const { sensitivedata, passwordkeys, } = require("../../sensitive/availableapikeys");
 const { sendResponse } = require("../../utils/dataHandler");
 const { errorHandler } = require("../../utils/errorHandler");
@@ -35,22 +35,7 @@ module.exports = {
 
         }
     },
-    errorMessages: async (req, res) => {
-        try {
-            let { data, domain, url, appid } = req.body;
-            const { _id } = req.user;
-            if (data.resoponsecodedata.code) {
-                await CreatStatusCodesDetails(
-                    data.resoponsecodedata.code,
-                    data.resoponsecodedata.phrase, url, domain, _id, appid
-                );
-            }
-            return sendResponse(res, 200, "fetch", "ok")
-
-        } catch (error) {
-            return errorHandler(res, 500, error.message)
-        }
-    },
+ 
     emailverify: async (req, res) => {
         try {
             let { email, domain, appid, ip } = req.body;

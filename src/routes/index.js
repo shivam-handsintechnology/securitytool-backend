@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Security = require('./security')
-const GetClientInformation = require('./getClientintformation.route')
+const GetClientInformation = require('./monitor.route')
 const SecurityMisconfiguration=require("./Security/SecurityMisconfiguration.route")
 const SensitiveDataExposure=require("./Security/SensitiveDataExposure.route")
 const SensitiveDataLocalStorage=require("../controllers/Security/SensitiveDataStoredInLocalStorage.controller")

@@ -407,53 +407,87 @@ function isObject(input) {
 
 async function CheckAllSensitiveData(data) {
   try {
-    let result= {
-      isEmail:false,
-      isJwt:false,
-    }
-    if(data && data.startsWith('{') && data.endsWith('}')){
-      data=JSON.parse(data)
-    }
-    // Recursive function to check for CSS attacks in nested objects or arrays
-    function checkForSensitiveDaa(obj) {
-     
-        if (isObject(obj)) {
-            for (const key in obj) {
-                if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                    const value = obj[key];
-                    if (isObject(value) || Array.isArray(value)) {
-                        checkForSensitiveDaa(value); // Recursive call for nested objects or arrays
-                    } else if (typeof value === 'string') {
-                      
-                      if(validator.isEmail(value)){
-                        result.isEmail=true
-                      }
-                      if(validator.isJWT(value)){
-                        result.isJwt=true
-                      }
+    const result = [];
 
-                    }
-                }
+    // Recursive function to check for sensitive data in nested objects or arrays
+    function checkForSensitiveData(obj) {
+      if (Array.isArray(obj)) {
+        obj.forEach(item => {
+          if (typeof item === 'object' && item !== null) {
+            // Check if the item is an object with a 'value' property
+            if (item.hasOwnProperty('value')) {
+              checkValue(item);
+            } else {
+              checkForSensitiveData(item); // Recursive call for nested objects or arrays
             }
-        } else if (Array.isArray(obj)) {
-            obj.forEach(item => {
-                if (isObject(item) || Array.isArray(item)) {
-                    checkForSensitiveDaa(item); // Recursive call for nested objects or arrays
-                } else if (typeof item === 'string') {
-                  if(validator.isEmail(item)){
-                    result.isEmail=true
-                  }
-                  if(validator.isJWT(item)){
-                    result.isJwt=true
-                  }
-                }
-            });
+          }
+        });
+      } else if (typeof obj === 'object' && obj !== null) {
+        for (const key in obj) {
+          if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            const value = obj[key];
+            if (typeof value === 'object' && value !== null) {
+              checkForSensitiveData(value); // Recursive call for nested objects or arrays
+            } else if (typeof value === 'string') {
+              checkValue({ key, value });
+            }
+          }
         }
-        return result;
+      }
+      return result;
     }
-    // Start checking for CSS attacks
-    checkForSensitiveDaa(input);
 
+    // Helper function to check the value for sensitive data
+    function checkValue(item) {
+      const { key, value } = item;
+      const sensitiveData = { isEmail: false, isJwt: false,isPassportNumber:false, isBase64: false,isCreditCard:false,isHashedPassword:false,isPhoneNumber:false,};
+      if (typeof value === 'string') {
+        // Check if the value is a stringified JSON object
+        if (isJsonString(value)) {
+          const parsedValue = JSON.parse(value);
+          checkForSensitiveData(parsedValue);
+        } else {
+          // Check if the value is a string containing sensitive data
+          if (validator.isEmail(value)) {
+            sensitiveData.isEmail = true;
+          }
+          if (validator.isJWT(value)) {
+            sensitiveData.isJwt = true;
+          }
+          if (validator.isBase64(value)) {
+            sensitiveData.isBase64 = true;
+          }
+          if(validator.isCreditCard(value)){
+            sensitiveData.isCreditCard=true
+          }
+          if(validator.isHash(value)){
+            sensitiveData.isHashedPassword=true
+          }
+          if(validator.isMobilePhone(value)){
+            sensitiveData.isPhoneNumber=true
+          }
+          // if(validator.isPassportNumber(value)){
+          //   sensitiveData.isPassportNumber=true
+          // }
+         
+        }
+      }
+
+      result.push({ key,value:sensitiveData });
+    }
+
+    // Helper function to check if a string is a valid JSON string
+    function isJsonString(str) {
+      try {
+        JSON.parse(str);
+      } catch (e) {
+        return false;
+      }
+      return true;
+    }
+
+    // Start checking for sensitive data
+    return checkForSensitiveData(data);
   } catch (error) {
     throw new Error(error.message);
   }

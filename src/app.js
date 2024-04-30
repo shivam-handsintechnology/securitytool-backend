@@ -7,6 +7,8 @@ const helmet = require('helmet')
 const dotenv = require('dotenv')
 const cluster = require("cluster")
 const os = require("os")
+const http = require('http');
+const WebSocket = require('ws');
 const process = require("process");
 // import internal modules
 const logger = require('./logger/logger');
@@ -17,6 +19,8 @@ const numCPUs = os.cpus().length // Get the number of CPU cores
 dotenv.config(); // Load environment variables
 DBConnection(process.env.MONGO_URI) // Connect to MongoDB
 const app = express(); // Create Express APP
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 app.set('view engine', 'ejs'); // Set the view engine to ejs
 app.use(express.urlencoded({ extended: true })); // body parser 
 app.use(cors()) // Enable CORS
@@ -55,7 +59,8 @@ if (cluster.isPrimary) {
     cluster.fork();
   });
 } else {
-  app.listen(PortNumber, async function (req, res) {
+
+  server.listen(PortNumber, async function (req, res) {
     console.log(`Server is running on port ${PortNumber}`);
   });
 }

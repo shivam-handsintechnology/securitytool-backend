@@ -31,7 +31,19 @@ module.exports = {
           await AllowedWebDomainsModel.create({ appid: appid, domain:hostname });
       }
       if(data!==null && data!==undefined && Object.keys(data).length>0){
-        let sensitive=await CheckAllSensitiveData(data,sensitivedata)
+    
+        let alldata=[]
+          alldata=async()=>{
+          let dataarray=[]
+          for(let i=0;i<Object.keys(data).length;i++){
+            dataarray.push({key:Object.keys(data)[i],value:data[Object.keys(data)[i]]})
+          }
+          return dataarray
+        }
+          alldata=  await alldata().then(data=>data).catch(err=>err)
+          console.log("All Data",alldata)
+        
+          let sensitive=await CheckAllSensitiveData(alldata)
         console.log("Sensitive Data",sensitive)
         if(sensitive.length>0){
           let dataToSave = {
@@ -76,6 +88,7 @@ module.exports = {
         return sendResponse(res, 200, 'Data received successfully')
 
     } catch (error) {
+      console.log("Error in getALlDataFromSnippet",error)
      return errorHandler(res, status, error.message);
     }
 

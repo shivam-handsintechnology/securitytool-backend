@@ -21,19 +21,21 @@ const { SSLverifier } = require('../utils/Downtimemonitor');
 const { sendResponse } = require('../utils/dataHandler');
 const { errorHandler } = require('../utils/errorHandler');
 const CorsMiddleware = require('../middlewares/CorsMiddleware');
-router.use("/security",CorsMiddleware, verifytoken, Security)
+const IncomingDataHashFormat = require('../middlewares/IncomingDataHashFormat')
+
+router.use("/security",IncomingDataHashFormat,CorsMiddleware, verifytoken, Security)
 // Get Client Information
 router.use("/client", GetClientInformation)
 // Auth
-router.use("/auth",CorsMiddleware, Authrouter)
+router.use("/auth",IncomingDataHashFormat,CorsMiddleware, Authrouter)
 // Broken Authentication and Session Management
-router.use("/AuthSessionGuardian",CorsMiddleware, verifyToken,
+router.use("/AuthSessionGuardian",IncomingDataHashFormat,CorsMiddleware, verifyToken,
 ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware,AuthSessionGuardian
 )
 // Injections
-router.use("/injections",CorsMiddleware,InjectionsRoute)
+router.use("/injections",IncomingDataHashFormat,CorsMiddleware,InjectionsRoute)
 // SSL Verify
-router.use("/SSLVerify",CorsMiddleware, verifyToken,
+router.use("/SSLVerify",IncomingDataHashFormat,CorsMiddleware, verifyToken,
 ValidationMiddlewareQuery(DomainValidationSchema),async (req, res) => {
   try {
       let domain = req.query.domain
@@ -45,21 +47,21 @@ ValidationMiddlewareQuery(DomainValidationSchema),async (req, res) => {
   }
 })
 // Error Message
-router.use("/ErrorMessage",CorsMiddleware, require("./Security/ErrorMessage.route"))
+router.use("/ErrorMessage",IncomingDataHashFormat,CorsMiddleware, require("./Security/ErrorMessage.route"))
 // Insecure Direct Object References
-router.use("/InsecureObjectRefGuard",CorsMiddleware, InsecureObjectRefGuard)
+router.use("/InsecureObjectRefGuard",IncomingDataHashFormat,CorsMiddleware, InsecureObjectRefGuard)
 // SecurityMisconfiguration
-router.use("/SecurityMisconfiguration",CorsMiddleware, SecurityMisconfiguration)
+router.use("/SecurityMisconfiguration",IncomingDataHashFormat,CorsMiddleware, SecurityMisconfiguration)
 // SensitiveDataExposure
-router.use("/SensitiveDataExposure",CorsMiddleware, SensitiveDataExposure)
+router.use("/SensitiveDataExposure",IncomingDataHashFormat,CorsMiddleware, SensitiveDataExposure)
 // Unvalidated Redirects and Forwards
-router.get("/UnvalidatedRedirects",CorsMiddleware,verifyToken,
+router.get("/UnvalidatedRedirects",IncomingDataHashFormat,CorsMiddleware,verifyToken,
 ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware, require("../controllers/Security/UnvalidatedRedirectsandForwards.controller").get)
 // Cross-Site Scripting (XSS)
-router.use("/CrossSiteScripting",CorsMiddleware,verifyToken, require("./Security/CrossSiteScripting"))
+router.use("/CrossSiteScripting",IncomingDataHashFormat,CorsMiddleware,verifyToken, require("./Security/CrossSiteScripting"))
 // Sensitive data is Store in Local Storage
-router.get("/SensitiveStorageLocalStorage",CorsMiddleware,verifyToken, SensitiveDataLocalStorage.get)
+router.get("/SensitiveStorageLocalStorage",IncomingDataHashFormat,CorsMiddleware,verifyToken, SensitiveDataLocalStorage.get)
  // Week Cross Domain Policy
-router.use("/WeakCrossDomainPolicy",CorsMiddleware,verifyToken,ValidationMiddleware(DomainValidationSchema),WeekCrossDomainPolicy )
+router.use("/WeakCrossDomainPolicy",IncomingDataHashFormat,CorsMiddleware,verifyToken,ValidationMiddleware(DomainValidationSchema),WeekCrossDomainPolicy )
 router.use("/api",router)
 module.exports = router

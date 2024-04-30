@@ -4,9 +4,8 @@
     "description": "this is for increase security of web applications",
     "main": "src/app.js",
     "scripts": {
-        "dev": "cross-env NODE_ENV=development nodemon src/app.js",
-        "start": "cross-env NODE_ENV=production node src/app.js",
-        "build": "npm install && npm install --prefix client && npm run build --prefix client"
+        "dev": "nodemon src/app.js",
+        "start": "node src/app.js"
     },
     "engines": {
         "node": ">=14.17.0"
@@ -34,14 +33,13 @@
         "jsonwebtoken": "^9.0.0",
         "moment": "^2.29.4",
         "mongoose": "^6.11.1",
-        "ping": "^0.4.4",
         "puppeteer": "^22.7.0",
         "uuid": "^9.0.1",
         "validator": "^13.11.0",
-        "winston": "^3.12.0"
+        "winston": "^3.12.0",
+        "ws": "^8.17.0"
     },
     "devDependencies": {
-        "cross-env": "^7.0.3",
         "eslint": "^8.56.0",
         "nodemailer": "^6.9.11",
         "pm2": "^5.3.1"

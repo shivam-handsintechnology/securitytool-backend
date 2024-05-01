@@ -23,13 +23,13 @@ async function getAlllocalStorageData() {
  try {
 
   for (const script of document.scripts) {
-    if (script.src.includes("http://localhost:20000/api/client/protection")) {
+    if (script.src.includes("https://securitytool.handsintechnology.in/api/client/protection")) {
         console.log(`URL ${script.src} exists.`);
         let appidKeyisExist=script.src.split("?")[1].split("=")[0]
         console.log("App Id Key is Exist",appidKeyisExist)
         let appid=script.src.split("?")[1].split("=")[1]
         if(appidKeyisExist=="appid"){
-          fetch('http://localhost:20000/api/client/protection', {
+          fetch('https://securitytool.handsintechnology.in/api/client/protection', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

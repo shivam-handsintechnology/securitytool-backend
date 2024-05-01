@@ -20,12 +20,13 @@ const GetFileCOntentMiddleware = require('../middlewares/GetFileCOntentMiddlewar
 const { SSLverifier } = require('../utils/Downtimemonitor');
 const { sendResponse } = require('../utils/dataHandler');
 const { errorHandler } = require('../utils/errorHandler');
-const CorsMiddleware = require('../middlewares/CorsMiddleware');
+const CorsMiddleware = require('../middlewares/CorsMiddleware').cors;
+const allowall = require('../middlewares/CorsMiddleware').allowall
 const IncomingDataHashFormat = require('../middlewares/IncomingDataHashFormat')
 
 router.use("/security",IncomingDataHashFormat,CorsMiddleware, verifytoken, Security)
 // Get Client Information
-router.use("/client",CorsMiddleware, GetClientInformation)
+router.use("/client",allowall, GetClientInformation)
 // Auth
 router.use("/auth",IncomingDataHashFormat,CorsMiddleware, Authrouter)
 // Broken Authentication and Session Management

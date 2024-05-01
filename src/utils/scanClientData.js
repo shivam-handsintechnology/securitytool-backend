@@ -505,42 +505,9 @@ const getLineNumberAndContent = (content, index) => {
   }
   return { lineNumber, lineContent: lines[lineNumber - 1] };
 };
-const ScanCssVunurabiltyXss = async (hostname) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const cssFiles = await findCssFiles(`http://${hostname}`);
-      let results = [];
-      for (const file of cssFiles) {
-        const response = await fetch(file);
-        const cssContent = await response.text();
 
-        // Beautify the CSS content
-        const formattedCssContent = beautify(cssContent, { indent_size: 2 });
-
-        // Check all regular expressions
-        for (const key of xssregularexprssionmatchdata) {
-          let word = key.expression;
-          if (formattedCssContent.includes(word)) {
-            let { lineNumber, lineContent } = getLineNumberAndContent(formattedCssContent, formattedCssContent.indexOf(word));
-            results.push({
-              file: file,
-              lineNumber: lineNumber,
-              lineContent: lineContent,
-              expression: word,
-              name: key.name,
-              hostname: hostname
-            });
-          }
-        }
-      }
-      resolve(results);
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
 
 module.exports = {
-  scanDirectoryOptionMethod,ScanCssVunurabiltyXss, scanSessionvulnerability,
+  scanDirectoryOptionMethod, scanSessionvulnerability,
   ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanHardCodedData, scanRedirectvulnerability, scanSQLvulnerability, get403ErrorMessage, getHttpErrorMessages, getLoginErrorMessages
 };

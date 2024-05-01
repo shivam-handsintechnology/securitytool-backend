@@ -1,5 +1,4 @@
 // Import external modules
-const cors = require("cors")
 const fileUpload = require('express-fileupload')
 const express = require("express");
 const hpp = require('hpp')
@@ -23,7 +22,6 @@ const server = http.createServer(app);
 const wsServer = new WebSocket.Server({ server });
 app.set('view engine', 'ejs'); // Set the view engine to ejs
 app.use(express.urlencoded({ extended: true })); // body parser 
-app.use(cors()) // Enable CORS
 app.use(express.json({ limit: "50mb", extended: true })); // body parser
 app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 },   // File Upload Functionality

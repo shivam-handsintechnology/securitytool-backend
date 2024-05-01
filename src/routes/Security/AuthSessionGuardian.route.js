@@ -14,22 +14,22 @@ router.get("/session-vulnurability", async (req, res) => {
         const possibilities = {};
 
         // Check if session expires on closing the browser
-        possibilities["Session Does Not Expire On Closing The Browser"] = data.sessionExpireOnClose_data.length > 0 ? "Yes" : "No";
+        possibilities["Session Does Not Expire On Closing The Browser"] = data.sessionExpireOnClose_data.length > 0 ? "Yes" : "Not Implemented";
 
         // Check if session timeout is high or not implemented
         const sessionTimeoutImplemented = data.sessionTimeout_data.length > 0;
         possibilities["Session Time-Out Is High (Or) Not Implemented"] = !sessionTimeoutImplemented ? "Not IMplemented" :data.sessionTimeout_data.toString();
 
         // Check if session token is passed in areas other than cookies
-        possibilities["Session Token Being Passed In Other Areas Apart From Cookies"] = data.sessionToken_data.length > 0 ?data.sessionToken_data.toString() : "No";
+        possibilities["Session Token Being Passed In Other Areas Apart From Cookies"] = data.sessionToken_data.length > 0 ?data.sessionToken_data.toString() : "Not Implemented";
 
         // Check if an adversary can hijack user sessions by session fixation
         const sessionFixationPossible = data.sessionFixation_data.length>0
-        possibilities["An Adversary Can Hijack User Sessions By Session Fixation"] = sessionFixationPossible ? data.sessionFixation_data.toString() : "No";
+        possibilities["An Adversary Can Hijack User Sessions By Session Fixation"] = sessionFixationPossible ? data.sessionFixation_data.toString() : "Not Implemented";
 
         // Check if the application is vulnerable to session hijacking attack
         const sessionHijackingPossible = data.sessionHijacking_data.length>0
-        possibilities["Application Is Vulnerable To Session Hijacking Attack"] = sessionHijackingPossible ? data.sessionHijacking_data.toString() : "No";
+        possibilities["Application Is Vulnerable To Session Hijacking Attack"] = sessionHijackingPossible ? data.sessionHijacking_data.toString() : "Not Implemented";
 
         let results=[]
         if(Object.keys(possibilities).length>0){
@@ -51,7 +51,7 @@ router.get("/session-expire-on-close", async (req, res) => {
         // Call the respective controller function
         const response =req.body.fileContent
         const data = await sessionExpireOnClose(response);
-        let results=data &&  data.length > 0 ? {"Session does not expire on closing the browser":"Yes" }:{ "Session does not expire on closing the browser":"No"}
+        let results=data &&  data.length > 0 ? {"Session does not expire on closing the browser":"Yes" }:{ "Session does not expire on closing the browser":"Not Implemented"}
         return sendResponse(res,200,"dsad",[results])
     } catch (error) {
         return errorHandler(res, 500, error.message);

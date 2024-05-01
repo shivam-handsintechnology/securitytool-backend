@@ -3,9 +3,6 @@ const {
   sensitivedata,
 } = require("../sensitive/availableapikeys");
 const staticFolders = require("../data/json/staticFolders.json");
-const { SessionVulnurability } = require("../helpers/SessionVulnurabiltyChecker");
-const xssregularexprssionmatchdata = require("../data/json/xssregularexprssionmatchdata");
-const beautify = require('js-beautify').css;
 const puppeteer = require('puppeteer');
 // regular expression paterns
 // OPTIONS method

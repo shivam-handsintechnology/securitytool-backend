@@ -5,9 +5,6 @@ const SensitiveDataExposure = require("../../controllers/Security/SensitiveDataE
 const { DomainValidationSchema } = require("../../helpers/Validators");
 const GetFileCOntentMiddleware = require("../../middlewares/GetFileCOntentMiddleware");
 
-router.get("/email-harvesting", verifyToken,
-    ValidationMiddlewareQuery(DomainValidationSchema),
-    SensitiveDataExposure.emailHarvesting)
 router.get("/sensitive-data", verifyToken,
     // ValidationMiddlewareQuery(DomainValidationSchema),
     // AuthDomainMiddleware,

@@ -1,7 +1,6 @@
 const mongoose = require("mongoose")
 const { default: axios } = require("axios")
 const validator=require("validator")
-const { ClientLoagsModel } = require("../../models/ClientLoagsModel")
 const { sendResponse } = require("../../utils/dataHandler")
 const { AllowedDomainsModel } = require("../../models/AllowedDomainsModel")
 const { ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanDirectoryOptionMethod } = require("../../utils/scanClientData")

@@ -106,59 +106,20 @@ async function scrapWebsite(url, visited = new Set(), isFirstPage = true) {
   return visited;
 }
 const websiteUrl = 'https://mlsdev.sblcorp.com/';
-// scrapWebsite(websiteUrl)
-//   .then(visitedLinks => {
-//     let links=Array.from(visite+dLinks);
-//     links.forEach(link => {
-// checkAutoComplete(link).catch(error => console.error(error));
-// }
-//     );
-//       console.log('Total visited links:', visitedLinks.size,
-//           '\nList of visited links:',Array.from(visitedLinks)  );
-//   })
-//   .catch(error => {
-//       console.error('Error:', error);
-//   });
+scrapWebsite(websiteUrl)
+  .then(visitedLinks => {
+    let links=Array.from(visite+dLinks);
+    links.forEach(link => {
+checkAutoComplete(link).catch(error => console.error(error));
+}
+    );
+      console.log('Total visited links:', visitedLinks.size,
+          '\nList of visited links:',Array.from(visitedLinks)  );
+  })
+  .catch(error => {
+      console.error('Error:', error);
+  });
 // Example usage
 
 // Example usage
-
-const crypto = require('crypto');
-
-// Assume you have the following password hash
-const passwordHash = '6c1ad0393e1a823b2410211f6af72d99';
-
-// Get a list of all available hashing algorithms
-const algorithms = crypto.getHashes();
-
-// Function to check if the hash matches the algorithm
-function isHashUsing(algorithm) {
-  const testHash = crypto.createHash(algorithm).update('password').digest('hex');
-  return passwordHash === testHash;
-}
-
-// Iterate over the algorithms and find the one used for the given hash
-const usedAlgorithm = algorithms.find(algorithm => {
-  if (passwordHash.startsWith('$')) {
-    // Check if the hash is in the bcrypt format
-    const bcryptInfo = passwordHash.split('$');
-    if (bcryptInfo[1] === '2a' || bcryptInfo[1] === '2b' || bcryptInfo[1] === '2y') {
-      return true;
-    }
-  } else {
-    // Check if the hash matches the algorithm
-    return isHashUsing(algorithm);
-  }
-  return false;
-});
-
-if (usedAlgorithm) {
-  if (passwordHash.startsWith('$')) {
-    console.log('The password is hashed using bcrypt.');
-  } else {
-    console.log(`The password is hashed using ${usedAlgorithm}.`);
-  }
-} else {
-  console.log('The algorithm used to hash the password could not be identified.');
-}
 

@@ -1,7 +1,7 @@
 const { sendResponse } = require("../../utils/dataHandler");
 const axios = require("axios");
 const { errorHandler } = require("../../utils/errorHandler");
-const { EmailVerifyModel, CrticalInformationInurl } = require("../../models/sensitivekeywordsModel");
+const {  CrticalInformationInurl } = require("../../models/sensitivekeywordsModel");
 const {checkServerFingerprinting, Full_Path_Disclosure} = require("../../utils/AppFingerPrinting");
 const { scanHardCodedData } = require("../../utils/scanClientData");
 const { ServerDataInPlaintextModel } = require("../../models/Security/SecurityMisconfiguration.model");
@@ -38,32 +38,7 @@ module.exports={
            }
     },
   
-    emailHarvesting:async(req,res)=>{
-       try {
-        let {complete}=req.query
-         let emailHarvest=false
-         let {appid}=req.user
-         let domain=req.query.domain
-         let data=await EmailVerifyModel.aggregate([
-          {
-            $match: { appid,domain }
-          },
-          {
-            $group: {
-              _id: "$email",
-              count: { $sum: 1 }
-            }
-          }
-         ])
-         if(data.length>0){
-            emailHarvest=true
-         }
-         
-         return sendResponse(res,200,"fetch",complete?data:emailHarvest)
-       } catch (error) {
-        errorHandler(res,500,"fetch",error.message)
-       }
-    },
+ 
     SensitiveKeysinUrl: async (req, res) => {
         try {
             let { appid } = req.user;

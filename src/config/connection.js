@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const IndectionsTypeModel = require("../models/IndecTIonSTypeModel")
-const Injectionstype = require("../utils/Injectionstype.json")
 // Custom function to generate a slug
 function generateSlug(title) {
   // Remove non-alphanumeric characters and replace spaces with hyphens
@@ -15,9 +13,7 @@ async function DBConnection(mongouri) {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       }).then(async () => {
-        await IndectionsTypeModel.insertMany(Injectionstype.data, { ordered: false })
-        // insert csv file data to mongodb
-
+     
         console.log("mongodb connected")
       }).catch((e) => console.log(e.message))
   } catch (error) {
@@ -25,17 +21,5 @@ async function DBConnection(mongouri) {
   }
 
 }
-var whitelist = ['http://localhost:3000', 'http://localhost:5000']
-var corsOptions = {
-  origin: function (origin, callback) {
-    if (typeof (origin) == "undefined") {
-      callback(null, true)
-    }
-    else if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  }
-}
-module.exports = { DBConnection, corsOptions }
+
+module.exports = { DBConnection }

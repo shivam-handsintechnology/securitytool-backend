@@ -20,7 +20,7 @@ dotenv.config(); // Load environment variables
 DBConnection(process.env.MONGO_URI) // Connect to MongoDB
 const app = express(); // Create Express APP
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const wsServer = new WebSocket.Server({ server });
 app.set('view engine', 'ejs'); // Set the view engine to ejs
 app.use(express.urlencoded({ extended: true })); // body parser 
 app.use(cors()) // Enable CORS
@@ -64,6 +64,7 @@ if (cluster.isPrimary) {
     console.log(`Server is running on port ${PortNumber}`);
   });
 }
+require("./utils/Websocket")(wsServer)
 
 
 

@@ -1,11 +1,10 @@
 
 const { Project_Security_Logs } = require("../../models/Project_Security_Logs");
-const { CrticalInformationInurl, EmailVerifyModel, } = require("../../models/sensitivekeywordsModel");
+const { CrticalInformationInurl } = require("../../models/sensitivekeywordsModel");
 const { checkForSensitiveInfoInBody, CheckPasswordKeyText, CheckAllDataIsEncrypted, } = require("../../utils/functions");
 const { sensitivedata, passwordkeys, } = require("../../sensitive/availableapikeys");
 const { sendResponse } = require("../../utils/dataHandler");
 const { errorHandler } = require("../../utils/errorHandler");
-const verifyEmail = require('../../utils/emailverify');
 const { PasswordValidateModel } = require('../../models/PasswordVaildateModel');
 const { PasswordHashingDataModel, ServerDataInPlaintextModel } = require("../../models/Security/SecurityMisconfiguration.model");
 module.exports = {
@@ -36,25 +35,7 @@ module.exports = {
         }
     },
  
-    emailverify: async (req, res) => {
-        try {
-            let { email, domain, appid, ip } = req.body;
-            let isVerifyEmail = await verifyEmail(email)
-            if (!isVerifyEmail) {
-                const EmailExist = await EmailVerifyModel.findOne({ email, domain, appid, ip });
-                if (!EmailExist) {
-                    await EmailVerifyModel.create({ email, domain, appid, ip })
-                    return sendResponse(res, 200, "fetch", EmailExist)
-                } else {
-                    return sendResponse(res, 200, "fetch", EmailExist)
-                }
-            }
-            return sendResponse(res, 200, "fetch", isVerifyEmail)
-        } catch (error) {
-            console.log(error)
-            return res.status(500).json({ message: error.message });
-        }
-    },
+ 
     sensitivekeysinurl: async (req, res) => {
         try {
             const passwordTestHashes = await PasswordHashingDataModel.aggregate([

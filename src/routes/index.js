@@ -25,7 +25,7 @@ const IncomingDataHashFormat = require('../middlewares/IncomingDataHashFormat')
 
 router.use("/security",IncomingDataHashFormat,CorsMiddleware, verifytoken, Security)
 // Get Client Information
-router.use("/client", GetClientInformation)
+router.use("/client",CorsMiddleware, GetClientInformation)
 // Auth
 router.use("/auth",IncomingDataHashFormat,CorsMiddleware, Authrouter)
 // Broken Authentication and Session Management

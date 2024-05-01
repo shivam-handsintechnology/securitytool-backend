@@ -1,7 +1,6 @@
 // Import external modules
 const fileUpload = require('express-fileupload')
 const express = require("express");
-const hpp = require('hpp')
 const helmet = require('helmet')
 const dotenv = require('dotenv')
 const cluster = require("cluster")
@@ -27,7 +26,6 @@ app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 },   // File Upload Functionality
 }));
 app.set('trust proxy', 1) // trust first proxy
-app.use(hpp()); // Prevent HTTP Parameter Pollution
 app.use(helmet()) // Secure your app by setting various HTTP headers
 app.use(apirouter) // Use the API router
 // Error handling middleware

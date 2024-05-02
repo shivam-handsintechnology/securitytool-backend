@@ -63,6 +63,6 @@ router.use("/CrossSiteScripting",IncomingDataHashFormat,CorsMiddleware,verifyTok
 // Sensitive data is Store in Local Storage
 router.get("/SensitiveStorageLocalStorage",IncomingDataHashFormat,CorsMiddleware,verifyToken, SensitiveDataLocalStorage.get)
  // Week Cross Domain Policy
-router.use("/WeakCrossDomainPolicy",IncomingDataHashFormat,CorsMiddleware,verifyToken,ValidationMiddleware(DomainValidationSchema),WeekCrossDomainPolicy )
+router.use("/WeakCrossDomainPolicy",IncomingDataHashFormat,CorsMiddleware,verifyToken,ValidationMiddleware(DomainValidationSchema),WeekCrossDomainPolicy)
 router.use("/api",router)
 module.exports = router

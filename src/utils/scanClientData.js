@@ -46,7 +46,7 @@ async function ScanDangerousMethods(response) {
       // Iterate through the data and process each item
       response.forEach(async (item) => {
         try {
-          const regex = /\.(eval|exec|setTimeout|setInterval|Function|XMLHttpRequest|fetch)\(/ig; // Regex pattern
+          const regex = /(eval|exec|setTimeout|setInterval|Function|XMLHttpRequest|fetch)\(/ig; // Regex pattern
           let modifiedContent = item.content.replace(/"/g, "'");
           const matches = modifiedContent.match(regex);
           if (matches && matches.length > 0) {
@@ -72,41 +72,44 @@ async function ScanDangerousMethods(response) {
   })
 }
 const ScanArbitaryMethods = async (response) => {
+  let results = [];
+  let isAccessControlAllowMethods= false;
   return new Promise(async (resolve, reject) => {
     try {
-      function isStandardMethod(method) {
-        const standardMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE"];
-        return standardMethods.includes(method.toUpperCase());
-      }
-      let results = []
+      const standardMethods = ["GET", "POST", "PUT", "PATCH", "DELETE"];
+     
+
       // Iterate through the data and process each item
       response.forEach(async (item) => {
         try {
-          const regex = /\.(get|post|put|delete|patch|head|options|trace)\(/ig; // Regex pattern
           let modifiedContent = item.content.replace(/"/g, "'");
-          const matches = modifiedContent.match(regex);
-          if (matches && matches.length > 0) {
-            matches.forEach(match => {
-              const arbitraryMethod = match.replace(/\(|\./g, ''); // Remove "(" and "."
-              if (!isStandardMethod(arbitraryMethod)) {
-                results.push({ method: match.replace(/\(|\./g, ''), filename: item.name });
-              }
-            });
+      
+          const allowedMethodsRegex = /\.(header|setHeader)\s*\(\s*['"]Access-Control-Allow-Methods['"][\s,]*['"]([^'"]+)['"][\s,]*\)/i
+          const match = modifiedContent.match(allowedMethodsRegex);
+            console.log({match})
+          if (match && match[2]) {
+            isAccessControlAllowMethods=true
+            const allowedMethods = match[2].split(',').map(method => method.trim().toUpperCase());
+            console.log({allowedMethods})
+            const extraMethods = allowedMethods.filter(method => !standardMethods.includes(method));
+          
+
+            if (extraMethods.length > 0) {
+              results.push(extraMethods?.toString());
+            }
           }
-
-
         } catch (error) {
           console.error("Error processing file content:", error);
-          reject(error)
-          // Handle error if necessary
+          reject(error); // Handle error if necessary
         }
       });
+
       // Resolve results
-      resolve(results);
+      resolve({results,isAccessControlAllowMethods});
     } catch (error) {
-      reject(error)
+      reject(error);
     }
-  })
+  });
 };
 function containsSequelizeCode(fileContent) {
   // Check if the file content contains Sequelize-related code
@@ -320,7 +323,7 @@ async function getLatestNodeVersion(version) {
     version = parseInt(version)
     if (version < 20) {
       return { older_version_support: true }
-    } else {
+    } else if(version>=20) {
       return { older_version_support: false }
     }
   } catch (error) {

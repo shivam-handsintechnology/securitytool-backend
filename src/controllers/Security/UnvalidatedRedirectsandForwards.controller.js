@@ -8,6 +8,7 @@ module.exports = {
            let data= await scanRedirectvulnerability(req.body.fileContent)
         return sendResponse(res,200,"Unvalidated Redirects and Forwards",data);
        } catch (error) {
+        console.log(error)
            return errorHandler(res,500,error.message);
        }
    }

@@ -41,6 +41,8 @@ async function getAlllocalStorageData() {
             } else {
               console.error('Failed to send data');
             }
+          }).catch((error) => {
+            console.error('Failed to send data', error);
           });
         }
         console.log("App Id",appid)

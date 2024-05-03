@@ -37,7 +37,7 @@ module.exports = {
         isRobotsTxt = true
       }
       if (WebDomain.length > 0) {
-       
+
         for (let i = 0; i < WebDomain.length; i++) {
           console.log(WebDomain[i].domain)
           await axios.get(`http://${WebDomain[i].domain}/robots.txt`).then((response) => {
@@ -52,8 +52,8 @@ module.exports = {
           })
         }
       }
-    
-      data = isRobotsTxt? "Yes" : "No"
+
+      data = isRobotsTxt ? "Yes" : "No"
 
       return sendResponse(res, 200, "success", data)
     } catch (error) {
@@ -84,5 +84,40 @@ module.exports = {
     }
 
 
+  },
+  post: async (req, res) => {
+    try {
+      let paterns=[
+        /require\s*\(\s*['"](.+?)['"]\s*\)/g,
+        /import\s*\(\s*['"](.+?)['"]\s*\)/g,
+
+      ]
+      let url = req.body.url;
+      let response = await axios.get(url).then((res) => res).catch((e) => e.response);
+     
+      if (response.status === 200) {
+         let data= response.data.match(/require\s*\(\s*['"](.+?)['"]\s*\)/g) || response.data.match(/import\s+.+?\s+from\s+['"](.+?)['"]/g)
+          if(data){
+            return sendResponse(res, 200, "success", "Yes", "No")
+          }
+        return sendResponse(res, 400, "success", "No", "No")
+      } else {
+        return sendResponse(res, 400, "No", "No")
+      }
+    } catch (error) {
+      return errorHandler(res, 500, error.message)
+    }
+  },fetch: async (req, res) => {
+    try {
+      let { url } = req.body;
+      let response = await axios.get(url).then((res) => res).catch((e) => e.response);
+      if (response.status === 200) {
+        return sendResponse(res, 200, "success", "Yes", "No")
+      } else {
+        return sendResponse(res, 400, "No", "No")
+      }
+    } catch (error) {
+      return errorHandler(res, 500, error.message)
+    }
   }
 }

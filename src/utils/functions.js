@@ -158,6 +158,7 @@ async function CheckAllDataIsEncrypted(data, keysToMatch,passwordhashlist) {
             matchedItem.encrypted=false
           }
             matchedData.push(matchedItem);
+            
           } else {
             recursiveSearch(value);
           }

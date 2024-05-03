@@ -24,19 +24,20 @@ const CorsMiddleware = require('../middlewares/CorsMiddleware').cors;
 const allowall = require('../middlewares/CorsMiddleware').allowall
 const IncomingDataHashFormat = require('../middlewares/IncomingDataHashFormat')
 
-router.use("/security",IncomingDataHashFormat,CorsMiddleware, verifytoken, Security)
+
+router.use("/security",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, verifytoken, Security)
 // Get Client Information
 router.use("/client",allowall, GetClientInformation)
 // Auth
-router.use("/auth",IncomingDataHashFormat,CorsMiddleware, Authrouter)
+router.use("/auth",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, Authrouter)
 // Broken Authentication and Session Management
-router.use("/AuthSessionGuardian",IncomingDataHashFormat,CorsMiddleware, verifyToken,
+router.use("/AuthSessionGuardian",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, verifyToken,
 ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware,AuthSessionGuardian
 )
 // Injections
-router.use("/injections",IncomingDataHashFormat,CorsMiddleware,InjectionsRoute)
+router.use("/injections",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat,InjectionsRoute)
 // SSL Verify
-router.use("/SSLVerify",IncomingDataHashFormat,CorsMiddleware, verifyToken,
+router.use("/SSLVerify",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, verifyToken,
 ValidationMiddlewareQuery(DomainValidationSchema),async (req, res) => {
   try {
       let domain = req.query.domain
@@ -48,21 +49,21 @@ ValidationMiddlewareQuery(DomainValidationSchema),async (req, res) => {
   }
 })
 // Error Message
-router.use("/ErrorMessage",IncomingDataHashFormat,CorsMiddleware, require("./Security/ErrorMessage.route"))
+router.use("/ErrorMessage",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, require("./Security/ErrorMessage.route"))
 // Insecure Direct Object References
-router.use("/InsecureObjectRefGuard",IncomingDataHashFormat,CorsMiddleware, InsecureObjectRefGuard)
+router.use("/InsecureObjectRefGuard",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, InsecureObjectRefGuard)
 // SecurityMisconfiguration
-router.use("/SecurityMisconfiguration",IncomingDataHashFormat,CorsMiddleware, SecurityMisconfiguration)
+router.use("/SecurityMisconfiguration",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, SecurityMisconfiguration)
 // SensitiveDataExposure
-router.use("/SensitiveDataExposure",IncomingDataHashFormat,CorsMiddleware, SensitiveDataExposure)
+router.use("/SensitiveDataExposure",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, SensitiveDataExposure)
 // Unvalidated Redirects and Forwards
-router.use("/UnvalidatedRedirects",IncomingDataHashFormat,CorsMiddleware,verifyToken,
+router.use("/UnvalidatedRedirects",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat,verifyToken,
 ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware, require("../controllers/Security/UnvalidatedRedirectsandForwards.controller").get)
 // Cross-Site Scripting (XSS)
-router.use("/CrossSiteScripting",IncomingDataHashFormat,CorsMiddleware,verifyToken, require("./Security/CrossSiteScripting"))
+router.use("/CrossSiteScripting",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat,verifyToken, require("./Security/CrossSiteScripting"))
 // Sensitive data is Store in Local Storage
-router.use("/SensitiveStorageLocalStorage",IncomingDataHashFormat,CorsMiddleware,verifyToken, SensitiveDataLocalStorage.get)
+router.use("/SensitiveStorageLocalStorage",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat,verifyToken, SensitiveDataLocalStorage.get)
  // Week Cross Domain Policy
-router.use("/WeakCrossDomainPolicy",IncomingDataHashFormat,CorsMiddleware,verifyToken,ValidationMiddleware(DomainValidationSchema),WeekCrossDomainPolicy)
+router.use("/WeakCrossDomainPolicy",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat,verifyToken,ValidationMiddleware(DomainValidationSchema),WeekCrossDomainPolicy)
 router.use("/api",router)
 module.exports = router

@@ -71,6 +71,7 @@ module.exports = {
                 );
             }
             async function CreatData(sensitivekey, domain, appid, type) {
+                
                 const existingMessage = await CrticalInformationInurl.findOne({
                     user: _id,
                     domain,

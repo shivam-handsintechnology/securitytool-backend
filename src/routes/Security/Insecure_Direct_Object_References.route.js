@@ -7,4 +7,6 @@ const verifyToken = require('../../middlewares/VerifyUser');
 router.get('/DirectoryListingEnable',verifyToken,ValidationMiddlewareQuery(DomainValidationSchema), InsecureObjectRefGuard.DirectoryListingEnable);
 router.get('/httpparameterpollution',verifyToken,ValidationMiddlewareQuery(DomainValidationSchema), InsecureObjectRefGuard.httpparameterpollution);
 router.get('/robottxt',verifyToken,ValidationMiddlewareQuery(DomainValidationSchema),GetFileCOntentMiddleware, InsecureObjectRefGuard.robotsTxtPath);
+router.post('/fetch',verifyToken, InsecureObjectRefGuard.fetch);
+router.post('/post',verifyToken, InsecureObjectRefGuard.post);
 module.exports = router;

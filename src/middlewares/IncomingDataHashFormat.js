@@ -17,3 +17,12 @@ module.exports = async function (req, res, next) {
   }
   return next();
 }
+module.exports.convertResponseDatatoEncryptedFormat=async(req,res,next)=>{
+  const originalSend = res.json;
+  // res.json = async function (body) {
+  //   originalSend.call(res, encryptData(JSON.stringify({body:body})))
+   
+  // };
+  next()
+}
+

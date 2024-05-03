@@ -12,8 +12,51 @@ module.exports={
                     $match: {
                         appid: req.user.appid,
                     }
-                }
+                },
+                { $unwind: '$data' },
+                {
+                    $match: {
+                        $or: [
+                            { 'data.value.isEmail': true },
+                            { 'data.value.isJwt': true },
+                            { 'data.value.isPassportNumber': true },
+                            { 'data.value.isBase64': true },
+                            { 'data.value.isCreditCard': true },
+                            { 'data.value.isHashedPassword': true },
+                            { 'data.value.isPhoneNumber': true },
+                        ],
+                    },
+                },
+                { 
+                    $addFields: { 
+                        'data.value': {
+                            $objectToArray: '$data.value'
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        'data.value': {
+                            $filter: {
+                                input: '$data.value',
+                                as: 'field',
+                                cond: { $eq: ['$$field.v', true] }
+                            }
+                        }
+                    }
+                },
+                { 
+                    $sort: { 'data.key': 1 } 
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        data: { $push: '$data' },
+                    },
+                },
             ]);
+            
+            
             data=data.length>0?data[0]["data"]:[]
            return sendResponse(res, 200, "Sensitive Data Stored In Local Storage", data);
         } catch (error) {

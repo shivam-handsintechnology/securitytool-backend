@@ -56,12 +56,12 @@ router.use("/SecurityMisconfiguration",IncomingDataHashFormat,CorsMiddleware, Se
 // SensitiveDataExposure
 router.use("/SensitiveDataExposure",IncomingDataHashFormat,CorsMiddleware, SensitiveDataExposure)
 // Unvalidated Redirects and Forwards
-router.get("/UnvalidatedRedirects",IncomingDataHashFormat,CorsMiddleware,verifyToken,
+router.use("/UnvalidatedRedirects",IncomingDataHashFormat,CorsMiddleware,verifyToken,
 ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware, require("../controllers/Security/UnvalidatedRedirectsandForwards.controller").get)
 // Cross-Site Scripting (XSS)
 router.use("/CrossSiteScripting",IncomingDataHashFormat,CorsMiddleware,verifyToken, require("./Security/CrossSiteScripting"))
 // Sensitive data is Store in Local Storage
-router.get("/SensitiveStorageLocalStorage",IncomingDataHashFormat,CorsMiddleware,verifyToken, SensitiveDataLocalStorage.get)
+router.use("/SensitiveStorageLocalStorage",IncomingDataHashFormat,CorsMiddleware,verifyToken, SensitiveDataLocalStorage.get)
  // Week Cross Domain Policy
 router.use("/WeakCrossDomainPolicy",IncomingDataHashFormat,CorsMiddleware,verifyToken,ValidationMiddleware(DomainValidationSchema),WeekCrossDomainPolicy)
 router.use("/api",router)

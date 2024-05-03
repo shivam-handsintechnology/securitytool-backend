@@ -5,11 +5,6 @@ const SensitiveDataStoredInLocalStorageSchema = new Schema({
         type: String,
         ref: 'User'
     },
-    cssxss:{
-        type:String,
-        required:false
-
-    },
     data:[
         {
             key:{
@@ -22,7 +17,7 @@ const SensitiveDataStoredInLocalStorageSchema = new Schema({
             }
         }
     ],
-    hostname: {
+    domain: {
         type: String,
         required: true
     }

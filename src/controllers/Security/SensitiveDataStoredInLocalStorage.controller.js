@@ -4,7 +4,9 @@ const { errorHandler } = require("../../utils/errorHandler");
 
 module.exports={
     get: async (req, res) => {
+        
         try {
+            if(req.method!=="GET") return errorHandler(res, 405, "Method Not Allowed");
             let data = await SensitiveDataStoredInLocalStorageModel.aggregate([
                 {
                     $match: {

@@ -15,9 +15,8 @@ module.exports = {
   getALlDataFromSnippet: async(req, res) => {
     let status = 500;
     try {
-      const { data, appid, hostname ,cssxssvulnurability} = req.body;
+      const { data, appid, hostname } = req.body;
      
-      let cssxss=cssxssvulnurability?cssxssvulnurability:undefined
       if (appid == null || appid == undefined || appid == "") {
         status = 400;
         throw new Error("App Id is required")
@@ -45,42 +44,43 @@ module.exports = {
         
           let sensitive=await CheckAllSensitiveData(alldata)
         console.log("Sensitive Data",sensitive)
-        if(sensitive.length>0){
-          let dataToSave = {
+        if (sensitive.length > 0) {
+          const dataToSave = {
             appid,
-            data:sensitive,
-            hostname,cssxss
-          }
-          //  Check Records Are Exist in Database
-          let isExist = await SensitiveDataStoredInLocalStorageModel.findOne({ appid: appid, hostname: hostname });
+            data: sensitive,
+            domain: hostname,
+          };
+        
+          // Check if the record exists in the database
+          const isExist = await SensitiveDataStoredInLocalStorageModel.findOne({
+            appid,
+            hostname,
+          });
+        
           if (isExist) {
-          let dexistarray=isExist.data
-          let dataarray=dataToSave.data
-          let finaldataarray=[]
-          for(let i=0;i<dataarray.length;i++){
-            let isExist=false
-            for(let j=0;j<dexistarray.length;j++){
-              if(dataarray[i].key==dexistarray[j].key){
-                isExist=true
+            // If the record exists, update the data array
+            const existingData = isExist.data;
+            const newData = dataToSave.data;
+        
+            // Create a new data array by updating existing keys and adding new keys
+            const updatedData = newData.reduce((acc, curr) => {
+              const existingDataItem = existingData.find((d) => d.key === curr.key);
+              if (existingDataItem) {
+                acc.push(curr);
+              } else {
+                acc.push(curr);
               }
-            }
-            if(isExist==false){
-              finaldataarray.push(dataarray[i])
-            }
-            if(isExist==true){
-              for(let j=0;j<dexistarray.length;j++){
-                if(dataarray[i].key==dexistarray[j].key){
-                  finaldataarray.push(dataarray[i])
-
-                }
-              }
-            }
-          }
-         
-          await SensitiveDataStoredInLocalStorageModel.updateOne({ appid: appid, hostname: hostname }, { $set: { data: finaldataarray,cssxss } });
-          }
-          else {
-            //  If Not Exist Create the Records
+              return acc;
+            }, []);
+        
+            // Update the record with the new data array
+            await SensitiveDataStoredInLocalStorageModel.findOneAndUpdate(
+              { appid, domain: hostname },
+              { data: updatedData },
+              { new: true }
+            );
+          } else {
+            // If the record doesn't exist, create a new one
             await SensitiveDataStoredInLocalStorageModel.create(dataToSave);
           }
         }

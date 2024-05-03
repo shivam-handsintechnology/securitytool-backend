@@ -3,8 +3,6 @@ const router = express.Router();
 const middlwareController = require('../controllers/middlwaresController')
 const IpController = require('../controllers/IP.controller')
 const DomainController = require('../controllers/DomainController')
-const TestRouter = require('./test')
-const WhitelistWords = require('./whitelistwords.route');
 // middlewares
 router.get('/middlwares', middlwareController.getMiddlewareController);
 router.post('/middlwares/switch', middlwareController.findAndUpdateMiddlewareController);
@@ -15,8 +13,6 @@ router.route("/blacklist").post(IpController.AddBlackListIp).get(IpController.Bl
 // Domains
 router.route('/domain').post(DomainController.addDomain).get(DomainController.getAllDomains).delete(DomainController.deleteDomain).put(DomainController.updateDomain);
 // Whitelist words
-router.use("/whitelistwords", WhitelistWords)
 
-router.use("/test", TestRouter)
 
 module.exports = router

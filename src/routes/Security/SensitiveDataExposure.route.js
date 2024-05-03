@@ -5,9 +5,6 @@ const SensitiveDataExposure = require("../../controllers/Security/SensitiveDataE
 const { DomainValidationSchema } = require("../../helpers/Validators");
 const GetFileCOntentMiddleware = require("../../middlewares/GetFileCOntentMiddleware");
 
-router.get("/email-harvesting", verifyToken,
-    ValidationMiddlewareQuery(DomainValidationSchema),
-    SensitiveDataExposure.emailHarvesting)
 router.get("/sensitive-data", verifyToken,
     // ValidationMiddlewareQuery(DomainValidationSchema),
     // AuthDomainMiddleware,
@@ -28,5 +25,17 @@ router.post("/critical-info-url", verifyToken,
 router.get("/fingerprint-detection", verifyToken,
     ValidationMiddlewareQuery(DomainValidationSchema),
     SensitiveDataExposure.FingerprintDetection)
+router.get("/server-path-disclosure", verifyToken,
+    ValidationMiddlewareQuery(DomainValidationSchema),
+    SensitiveDataExposure.ServerPathDisclosure),
+router.get("/ServerFileAvailbleInCLearText", verifyToken,
+    ValidationMiddlewareQuery(DomainValidationSchema),
+    GetFileCOntentMiddleware,
+    SensitiveDataExposure.ServerFileAvailbleInCLearText)
+router.get("/server-plain-text", verifyToken, ValidationMiddlewareQuery(DomainValidationSchema),
+    SensitiveDataExposure.SensitiveDataInPlainText)
+router.get("/server-crendetial-plain-text", verifyToken, ValidationMiddlewareQuery(DomainValidationSchema),
+    SensitiveDataExposure.SensitiveDataInPlainText)
+router.get("/clear-password-text-response", verifyToken, ValidationMiddlewareQuery(DomainValidationSchema),SensitiveDataExposure.ClearPasswordtext)
 
 module.exports = router

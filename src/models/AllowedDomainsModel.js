@@ -10,5 +10,14 @@ const AllowedDomainsModelSchema = mongoose.Schema({
     versionKey: false,
 }
 )
+const AllowedWebDomainsModelSchema = mongoose.Schema({
+    domain: { type: String, trim: true,unique:true },
+    type: { type: String,enum:["nodejs","web","android","ios"] ,default:"web",trim: true},
+    appid: { type: String, trim: true,ref: "users" },
+}, {
+    versionKey: false,
+}
+)
 const AllowedDomainsModel = mongoose.model("AllowedDomainsModel", AllowedDomainsModelSchema)
-module.exports = { AllowedDomainsModel }
+const AllowedWebDomainsModel = mongoose.model("AllowedWebDomainsModel", AllowedWebDomainsModelSchema)
+module.exports = { AllowedDomainsModel ,AllowedWebDomainsModel}

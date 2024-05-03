@@ -3,7 +3,7 @@ const {
   sensitivedata,
 } = require("../sensitive/availableapikeys");
 const staticFolders = require("../data/json/staticFolders.json");
-const { SessionVulnurability } = require("../helpers/SessionVulnurabiltyChecker");
+const puppeteer = require('puppeteer');
 // regular expression paterns
 // OPTIONS method
 async function scanDirectoryOptionMethod(response) {
@@ -46,7 +46,7 @@ async function ScanDangerousMethods(response) {
       // Iterate through the data and process each item
       response.forEach(async (item) => {
         try {
-          const regex = /\.(eval|exec|setTimeout|setInterval|Function|XMLHttpRequest|fetch)\(/ig; // Regex pattern
+          const regex = /(eval|exec|setTimeout|setInterval|Function|XMLHttpRequest|fetch)\(/ig; // Regex pattern
           let modifiedContent = item.content.replace(/"/g, "'");
           const matches = modifiedContent.match(regex);
           if (matches && matches.length > 0) {
@@ -72,41 +72,44 @@ async function ScanDangerousMethods(response) {
   })
 }
 const ScanArbitaryMethods = async (response) => {
+  let results = [];
+  let isAccessControlAllowMethods= false;
   return new Promise(async (resolve, reject) => {
     try {
-      function isStandardMethod(method) {
-        const standardMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE"];
-        return standardMethods.includes(method.toUpperCase());
-      }
-      let results = []
+      const standardMethods = ["GET", "POST", "PUT", "PATCH", "DELETE"];
+     
+
       // Iterate through the data and process each item
       response.forEach(async (item) => {
         try {
-          const regex = /\.(get|post|put|delete|patch|head|options|trace)\(/ig; // Regex pattern
           let modifiedContent = item.content.replace(/"/g, "'");
-          const matches = modifiedContent.match(regex);
-          if (matches && matches.length > 0) {
-            matches.forEach(match => {
-              const arbitraryMethod = match.replace(/\(|\./g, ''); // Remove "(" and "."
-              if (!isStandardMethod(arbitraryMethod)) {
-                results.push({ method: match.replace(/\(|\./g, ''), filename: item.name });
-              }
-            });
+      
+          const allowedMethodsRegex = /\.(header|setHeader)\s*\(\s*['"]Access-Control-Allow-Methods['"][\s,]*['"]([^'"]+)['"][\s,]*\)/i
+          const match = modifiedContent.match(allowedMethodsRegex);
+            console.log({match})
+          if (match && match[2]) {
+            isAccessControlAllowMethods=true
+            const allowedMethods = match[2].split(',').map(method => method.trim().toUpperCase());
+            console.log({allowedMethods})
+            const extraMethods = allowedMethods.filter(method => !standardMethods.includes(method));
+          
+
+            if (extraMethods.length > 0) {
+              results.push(extraMethods?.toString());
+            }
           }
-
-
         } catch (error) {
           console.error("Error processing file content:", error);
-          reject(error)
-          // Handle error if necessary
+          reject(error); // Handle error if necessary
         }
       });
+
       // Resolve results
-      resolve(results);
+      resolve({results,isAccessControlAllowMethods});
     } catch (error) {
-      reject(error)
+      reject(error);
     }
-  })
+  });
 };
 function containsSequelizeCode(fileContent) {
   // Check if the file content contains Sequelize-related code
@@ -141,58 +144,70 @@ function containsMySQLCode(fileContent) {
 
   return false;
 }
-async function scanHardCodedData(content, file) {
-  const results = ["Hard Coded Data Not Found in the Project"];
-  content = content.replace(/"/g, "'"); // Replace double quotes with single quotes
-  const sensitiveFields = sensitivedata;
-
-  for (const field of sensitiveFields) {
-    const regexIsEqualTo = new RegExp(`${field}\\s*=\\s*['"](.*?)['"]`, "g");
+async function scanHardCodedData(response) {
+  const results = [];
+  const sensitiveData = sensitivedata;
+  // Iterate through the data and process each item
+  for (const item of response) {
+    try {
+      let modifiedContent = item.content.replace(/"/g, "'");
+      modifiedContent = modifiedContent.toLowerCase();
+      // Check for sensitive data in the content
+      for (const field of sensitiveData) {
+        const regexIsEqualTo = new RegExp(`${field}\\s*=\\s*['"](.*?)['"]`, "g");
     const regexIsObject = new RegExp(`${field}\\s*:\\s*['"]([^'"]*)['"]`, "g");
 
     let match;
-    if ((match = regexIsEqualTo.exec(content)) !== null) {
+    if ((match = regexIsEqualTo.exec(modifiedContent)) !== null) {
       const hardcodedValue = match[1];
-      const lineNumber = getLineNumber(content, match.index);
-      results.splice(0, 1);
-      results.push(`find ${hardcodedValue}  in a ${field} at line ${lineNumber} in ${file}`);
+      const lineNumber = getLineNumber(modifiedContent, match.index);
+      results.push(`find ${hardcodedValue}  in a ${field} at line ${lineNumber} in ${item.directoryPath +"/"+item.name+item.extension}`);
     }
 
-    if ((match = regexIsObject.exec(content)) !== null) {
-      results.splice(0, 1);
+    if ((match = regexIsObject.exec(modifiedContent)) !== null) {
+
       const hardcodedValue = match[1];
-      const lineNumber = getLineNumber(content, match.index);
-      results.push(`find ${hardcodedValue}  in a ${field} at line ${lineNumber} in ${file}`);
+      const lineNumber = getLineNumber(modifiedContent, match.index);
+      results.push(`find ${hardcodedValue}  in a ${field} at line ${lineNumber} in ${item.directoryPath +"/"+item.name+item.extension}`);
+    }
+      }
+    } catch (error) {
+      console.error("Error processing file content:", error);
+      // Handle error if necessary
     }
   }
+  
   return results;
 
 }
 
-async function scanRedirectvulnerability(content, file) {
-  const results = ["Redirect Vulnerability Not Found in the file"];
-  content = content.toLowerCase();
-  //  redirect vunurability
-  const redirectmatches = content.match(/\.redirect\s*\(([^)]+)\)/g);
-  if (redirectmatches && Array.isArray(redirectmatches)) {
-    for (const match of redirectmatches) {
-      const dataMatch = match.match(/\(([^)]+)\)/);
-      if (dataMatch && dataMatch[1]) {
-        const data = dataMatch[1];
-        // Check if third-party URLs are used in the redirection
-        const thirdPartyURLs = data.match(/(?:https?:\/\/)?([^\s\/]+)/g);
-        if (thirdPartyURLs && thirdPartyURLs.length > 0) {
-          for (const url of thirdPartyURLs) {
-            if (url.includes("http") || url.includes("https")) {
-              results.splice(0, 1);
-              results.push(`Found a third-party URL: ${url} at file ${file}`);
-              // Perform further actions or checks as needed
+async function scanRedirectvulnerability(response) {
+  const results = ["Redirect Vulnerability Not Found in the Project"];
+  response.forEach((item) => {
+    let modifiedContent = item.content.replace(/"/g, "'");
+     modifiedContent = modifiedContent.toLowerCase();
+    //  redirect vunurability
+    const redirectmatches = modifiedContent.match(/\.redirect\s*\(([^)]+)\)/g);
+    if (redirectmatches && Array.isArray(redirectmatches)) {
+      for (const match of redirectmatches) {
+        const dataMatch = match.match(/\(([^)]+)\)/);
+        if (dataMatch && dataMatch[1]) {
+          const data = dataMatch[1];
+          // Check if third-party URLs are used in the redirection
+          const thirdPartyURLs = data.match(/(?:https?:\/\/)?([^\s\/]+)/g);
+          if (thirdPartyURLs && thirdPartyURLs.length > 0) {
+            for (const url of thirdPartyURLs) {
+              if (url.includes("http") || url.includes("https")) {
+                results.splice(0, 1);
+                let lineNumber = getLineNumber(modifiedContent, modifiedContent.indexOf(match));
+                results.push(`Redirect Vulnerability Found in the file at line ${lineNumber} in ${item.directoryPath}/${item.name}${item.extension}`);
+              }
             }
           }
         }
       }
     }
-  }
+  });
 
   return results;
 }
@@ -308,7 +323,7 @@ async function getLatestNodeVersion(version) {
     version = parseInt(version)
     if (version < 20) {
       return { older_version_support: true }
-    } else {
+    } else if(version>=20) {
       return { older_version_support: false }
     }
   } catch (error) {
@@ -460,53 +475,39 @@ let robottxtIsExist=async (response)=>{
     }
   )
 }
-// All the function data in one function
-async function getDashboardData(response){
-  const data = await SessionVulnurability(response);
-  // Initialize an object to store all possibilities
-  const possibilities = {};
 
-  // Check if session expires on closing the browser
-  possibilities["Session Does Not Expire On Closing The Browser"] = data.sessionExpireOnClose_data.length > 0 ? "Yes" : "No";
 
-  // Check if session timeout is high or not implemented
-  const sessionTimeoutImplemented = data.sessionTimeout_data.length > 0;
-  possibilities["Session Time-Out Is High (Or) Not Implemented"] = !sessionTimeoutImplemented ? "Not IMplemented" :data.sessionTimeout_data.toString();
+async function findCssFiles(url) {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: 'networkidle2' });
 
-  // Check if session token is passed in areas other than cookies
-  possibilities["Session Token Being Passed In Other Areas Apart From Cookies"] = data.sessionToken_data.length > 0 ?data.sessionToken_data.toString() : "No";
+  const cssFiles = await page.evaluate(() => {
+    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+    return links.map(link => link.href);
+  });
 
-  // Check if an adversary can hijack user sessions by session fixation
-  const sessionFixationPossible = data.sessionFixation_data.length>0
-  possibilities["An Adversary Can Hijack User Sessions By Session Fixation"] = sessionFixationPossible ? data.sessionFixation_data.toString() : "No";
-
-  // Check if the application is vulnerable to session hijacking attack
-  const sessionHijackingPossible = data.sessionHijacking_data.length>0
-  possibilities["Application Is Vulnerable To Session Hijacking Attack"] = sessionHijackingPossible ? data.sessionHijacking_data.toString() : "No";
-
-  let results=[]
-  if(Object.keys(possibilities).length>0){
-     results= Object.keys(possibilities).map((key) => {
-      return {
-          [key]: possibilities[key]
-      }
-     })
-  }
-
-  let data2 = {
-    directoryOptionMethod: await scanDirectoryOptionMethod(response),
-    dangerousMethods: await ScanDangerousMethods(response),
-    arbitaryMethods: await ScanArbitaryMethods(response),
-    sessionVulnerability:results,
-    httpErrorMessages: await getHttpErrorMessages(response),
-    loginErrorMessages: await getLoginErrorMessages(response),
-    robotsTxt:await robottxtIsExist(response),
-
-  };
-  return data2;
-
+  await browser.close();
+  return cssFiles;
 }
+const getLineNumberAndContent = (content, index) => {
+  // Split the content into lines
+  const lines = content.split('\n');
+  // Find the line number containing the index
+  let lineNumber = 1;
+  let totalChars = 0;
+  for (let i = 0; i < lines.length; i++) {
+    totalChars += lines[i].length + 1; // Add 1 for the newline character
+    if (totalChars > index) {
+      lineNumber = i + 1;
+      break;
+    }
+  }
+  return { lineNumber, lineContent: lines[lineNumber - 1] };
+};
+
+
 module.exports = {
-  scanDirectoryOptionMethod, scanSessionvulnerability,getDashboardData,
+  scanDirectoryOptionMethod, scanSessionvulnerability,
   ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanHardCodedData, scanRedirectvulnerability, scanSQLvulnerability, get403ErrorMessage, getHttpErrorMessages, getLoginErrorMessages
 };

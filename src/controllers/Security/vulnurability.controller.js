@@ -45,19 +45,18 @@ module.exports = {
             console.log("RawBody", RawBody)
             const { _id } = req.user;
             // Sensitve data transfer in plain text
-            const passworddata = await CheckPasswordKeyText(RawBody, passwordkeys,passwordTestHashes); // Check for password keys in the data
+            const passworddata = await CheckPasswordKeyText(responseData, passwordkeys); // Check for password keys in the data
             console.log("passworddata",passworddata)
             // Check if domain exists in the database and update the password key
             const existingRecord = await PasswordValidateModel.findOne({ domain,appid });
-            console.log("existingRecord", existingRecord)
-            console.log("passwordkeyavailable", passworddata)
+    
             // Check if password key is available in the data
             if (!existingRecord && passworddata.ispassword) {
                 await PasswordValidateModel.create({
                     domain,
                     HashedPassword: passworddata.isHashedPassword,
                     appid,
-                    passwordkeyavailable: passworddata.ispassword
+                    password: passworddata.ispassword
                 });
             } else if (existingRecord && passworddata.ispassword) {
                 await PasswordValidateModel.updateOne(
@@ -66,7 +65,7 @@ module.exports = {
                         $set: {
                             HashedPassword: passworddata.isHashedPassword,
                             appid,
-                            passwordkeyavailable: passworddata.ispassword
+                            password: passworddata.ispassword
                         }
                     }
                 );

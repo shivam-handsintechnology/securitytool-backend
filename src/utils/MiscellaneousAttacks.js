@@ -1,51 +1,89 @@
-const puppeteer = require('puppeteer');
+const playwright = require('playwright');
+async function checkAutoComplete(url, connection) {
+  const parsedUrl = new URL(url);
+  const pathname = parsedUrl.pathname;
+  const pathSegments = pathname.split('/').filter(segment => segment !== '');
+  const pageName = pathSegments[pathSegments.length - 1] || 'index';
 
-async function checkAutoComplete(url,connection) {
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
+  connection.send("Please Wait Scanning..." + url)
+  const browser = await playwright.chromium.launch({ headless: true });
+  const context = await browser.newContext();
+  const page = await context.newPage();
 
   try {
     // Set navigation timeout to 30 seconds
-    await page.setDefaultNavigationTimeout(30000);
+    page.setDefaultNavigationTimeout(60000);
 
     // Navigate to the web application
     await page.goto(url);
 
-    // Find input fields within a specific section of the page
-    const inputFields = await page.$$eval('.login-form input', inputs => inputs.map(input => input.outerHTML));
-    // Check if the page contains any iframes
-    const iframes = await page.$$eval('iframe', iframes => iframes.map(iframe => iframe.outerHTML));
-    const sensitiveFields = [];
+    // Locate form submission elements
+    const forms = await page.$$('form');
 
-    for (const field of inputFields) {
-      // Check if the field is a sensitive field (e.g., password, credit card)
-      const isSensitiveField = /type="(password|text)"|name="(password|creditcard)"/i.test(field);
+    // Submit a test form
+    if (forms.length > 0) {
+      for (const form of forms) {
+        // Get all input fields within each form
+        const inputFields = await form.$$eval('input', inputs => inputs.map(input => input.outerHTML));
 
-      if (isSensitiveField) {
-        // Check if auto-complete is enabled for the sensitive field
-        const autoCompleteEnabled = !/autocomplete="off"/i.test(field);
+        if (inputFields.length > 0) {
+          // Wait for 5 seconds for any CAPTCHA-related changes
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          const sensitiveFields = [];
 
-        if (autoCompleteEnabled) {
-          sensitiveFields.push(field);
+          for (const field of inputFields) {
+            // Check if the field is a sensitive field (e.g., password, credit card)
+            const isSensitiveField = /type="(password|text)"|name="(password|creditcard)"/i.test(field);
+
+            if (isSensitiveField) {
+              // Check if auto-complete is enabled for the sensitive field
+              const autoCompleteEnabled = !/autocomplete="off"/i.test(field);
+
+              if (autoCompleteEnabled) {
+                sensitiveFields.push(field);
+              }
+            }
+          }
+
+          if (sensitiveFields.length > 0) {
+           
+             sensitiveFields.forEach(field => connection.send(`Auto-complete is enabled for the  sensitive fields ${field} on the Page ${pageName}`))
+
+          } else {
+            connection.send('Auto-complete is disabled for all sensitive fields in :' + pageName);
+          }
+        } else {
+          connection.send('No input fields found i page'+pageName);
         }
       }
-    }
 
-    if (sensitiveFields.length > 0) {
-      connection.send('Auto-complete is enabled for the following sensitive fields:');
-      sensitiveFields.forEach(field => connection.send(field));
-    } else {
-      console.log('Auto-complete is disabled for all sensitive fields.');
+
+
+      // Check for CAPTCHA elements
+      const captchaElements = await page.$$('*[class*=captcha]');
+      if (captchaElements.length > 0) {
+        connection.send('CAPTCHA is implemented for publicly available forms on page.'+pageName);
+      } 
     }
+    // Find input fields within a specific section of the page
+    const iframes = await page.$$eval('iframe', iframes => iframes.map(iframe => iframe.outerHTML));
+
     if (iframes.length > 0) {
-      connection.send('The page contains iframes which may be indicative of clickjacking vulnerability.');
-      iframes.forEach(iframe => connection.send(iframe));
-    } else {
-      connection.send('The page does not contain any iframes.');
+      connection.send();
+      iframes.forEach(iframe => connection.send(`The page ${pageName} contains iframes which may be indicative of clickjacking vulnerability.`));
     }
+    // return {
+    //     captchaElements: captchaElements.length > 0,
+    //     sensitiveFields: sensitiveFields.length > 0,
+    //     iframes: iframes.length > 0,
+    // }
 
   } catch (error) {
-    connection.send('Error occurred:');
+    if (error.name === 'TimeoutError') {
+      connection.send(`The page  ${pageName}  took too long to load.`);
+    } else {
+      console.error('Error occurred:', error);
+    }
   } finally {
     await browser.close();
   }
@@ -55,7 +93,7 @@ async function checkAutoComplete(url,connection) {
 
 const url = require('url');
 
-async function scrapWebsite(url,connection, visited = new Set(), isFirstPage = true) {
+async function scrapWebsite(url, connection, visited = new Set(), isFirstPage = true) {
   if (visited.has(url)) {
     // console.log(`Skipping already visited link: ${url}`);
     return visited;
@@ -66,10 +104,13 @@ async function scrapWebsite(url,connection, visited = new Set(), isFirstPage = t
   connection.send(`Scanning ${url}...`);
   visited.add(url);
 
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
+  const browser = await playwright.chromium.launch({ headless: true });
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  page.setDefaultNavigationTimeout(60000);
 
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  // Navigate to the web application
+  await page.goto(url);
 
   const uniqueLinks = new Set();
   const baseUrl = new URL(url);
@@ -96,7 +137,7 @@ async function scrapWebsite(url,connection, visited = new Set(), isFirstPage = t
   // Recursively scrap each unique link
   for (const link of uniqueLinks) {
     if (!link.includes("#") && !link.includes("mailto") && !link.includes("tel") && !link.includes("javascript") && !link.includes("pdf") && !link.includes("jpg") && !link.includes("png") && !link.includes("jpeg") && !link.includes("doc") && !link.includes("docx") && !link.includes("xls") && !link.includes("xlsx") && !link.includes("ppt") && !link.includes("pptx") && !link.includes("csv") && !link.includes("xml") && !link.includes("json") && !link.includes("zip") && !link.includes("rar") && !link.includes("tar") && !link.includes("gz") && !link.includes("7z") && !link.includes("mp3") && !link.includes("mp4") && !link.includes("avi") && !link.includes("mov") && !link.includes("wmv") && !link.includes("flv") && !link.includes("ogg") && !link.includes("webm") && !link.includes("wav") && !link.includes("wma") && !link.includes("aac") && !link.includes("flac") && !link.includes("alac") && !link.includes("aiff") && !link.includes("ape") && !link.includes("m4a") && !link.includes("mid") && !link.includes("midi") && !link.includes("amr") && !link.includes("mka") && !link.includes("opus") && !link.includes("ra") && !link.includes("rm") && !link.includes("vqf") && !link.includes("wv") && !link.includes("webp") && !link.includes("svg") && !link.includes("gif") && !link.includes("bmp") && !link.includes("ico") && !link.includes("tiff") && !link.includes("psd") && !link.includes("eps") && !link.includes("ai") && !link.includes("indd") && !link.includes("raw") && !link.includes("cr2") && !link.includes("nef") && !link.includes("orf") && !link.includes("sr2") && !link.includes("pef") && !link.includes("dng") && !link.includes("x3f") && !link.includes("arw") && !link.includes("rw2") && !link.includes("rwl")) {
-      await scrapWebsite(link,connection, visited, false);
+      await scrapWebsite(link, connection, visited, false);
     }
 
   }
@@ -104,14 +145,18 @@ async function scrapWebsite(url,connection, visited = new Set(), isFirstPage = t
   return visited;
 }
 
-module.exports = async (websiteUrl,connection) => {
-  const visitedLinks = await scrapWebsite(websiteUrl,connection);
-  let links = Array.from(visitedLinks);
-  links.forEach(async link => {
-   await  checkAutoComplete(link,connection).catch(error => console.error(error));
+module.exports = async (websiteUrl, connection) => {
+  try {
+    const visitedLinks = await scrapWebsite(websiteUrl, connection);
+    let links = Array.from(visitedLinks);
+    links.forEach(async link => {
+      await checkAutoComplete(link, connection).catch(error => console.error(error));
+    }
+    )
+    console.log('Visited links:', visitedLinks);
+  } catch (error) {
+    console.log("error", error)
   }
-  )
-  console.log('Visited links:', visitedLinks);
 }
 
 // Example usage

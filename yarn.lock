@@ -3241,6 +3241,20 @@ pidusage@~3.0:
   dependencies:
     safe-buffer "^5.2.1"
 
+playwright-core@1.43.1:
+  version "1.43.1"
+  resolved "https://registry.npmjs.org/playwright-core/-/playwright-core-1.43.1.tgz"
+  integrity sha512-EI36Mto2Vrx6VF7rm708qSnesVQKbxEWvPrfA1IPY6HgczBplDx7ENtx+K2n4kJ41sLLkuGfmb0ZLSSXlDhqPg==
+
+playwright@^1.43.1:
+  version "1.43.1"
+  resolved "https://registry.npmjs.org/playwright/-/playwright-1.43.1.tgz"
+  integrity sha512-V7SoH0ai2kNt1Md9E3Gwas5B9m8KR2GVvwZnAI6Pg0m3sh7UvgiYhRrhsziCmqMJNouPckiOhk8T+9bSAK0VIA==
+  dependencies:
+    playwright-core "1.43.1"
+  optionalDependencies:
+    fsevents "2.3.2"
+
 pm2-axon-rpc@~0.7.0, pm2-axon-rpc@~0.7.1:
   version "0.7.1"
   resolved "https://registry.npmjs.org/pm2-axon-rpc/-/pm2-axon-rpc-0.7.1.tgz"
@@ -3979,6 +3993,11 @@ universalify@^2.0.0:
   version "2.0.1"
   resolved "https://registry.npmjs.org/universalify/-/universalify-2.0.1.tgz"
   integrity sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==
+
+unpack@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.npmjs.org/unpack/-/unpack-0.0.1.tgz"
+  integrity sha512-kCW6m7d3fTMpXcGhJUQSYwrPY6mn3JlvQ2Fa2+4Uwf0/7NpmRr9CQIKiclYb38OLFHKezggn9aJSe72QnHwNNQ==
 
 unpipe@~1.0.0, unpipe@1.0.0:
   version "1.0.0"

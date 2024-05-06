@@ -1,9 +1,16 @@
 const Project_Security_Logs = require('.././models/Project_Security_Logs')
 const { useCustomAxios } = require('../utilities/functions/fetchUrl');
-const { default: mongoose } = require('mongoose');
 let validator=require('validator')
-const { passwordkeys } = require('./passwordlist');
+const BcryptRegX=/^\$2[ayb]\$.{56}$/i
+function checkHashedData(value,isHashedPassword) {
+  console.log("bcrypt test",BcryptRegX.test(value))
+  console.log("bcrypt test value",value)
+  if (validator.isMD5(value) || BcryptRegX.test(value) || validator.isHash(value) || validator.isStrongPassword(value)) {
+      isHashedPassword = true;
+  } 
 
+  return isHashedPassword;
+}
 
 // XSS Injection Function
 // Create Blacklistusers details function
@@ -99,29 +106,7 @@ async function CheckPasswordKeyText(data, keysToMatch,passwordhashlist) {
         Object.entries(currentData).forEach(([key, value]) => {
           if (keysToMatch.includes(key) && value) {
             ispassword = true
-            if(validator.isMD5(value)){
-              isHashedPassword=true
-          }
-         
-          else if(validator.isHash(value)){
-            isHashedPassword=true
-          }
-          else if(validator.isStrongPassword(value)){
-            isHashedPassword=true
-          }
-
-          else if(!validator.isStrongPassword(value)){
-            isHashedPassword=false
-          }
-            // If the current key matches one of the keys and the value is not falsy, set it as the matched data
-            // for (let i of passwordhashlist) {
-            //   let regx =eval(i.regex)
-            //   console.log("let check the password", regx.test(value),i.name)
-            //   if (regx.test(value)) {
-            //     isHashedPassword = true;
-            //     break;
-            //   }
-            // }
+            isHashedPassword=   checkHashedData(value,isHashedPassword)
           } else {
             recursiveSearch(value);
           }
@@ -144,22 +129,12 @@ async function CheckAllDataIsEncrypted(data, keysToMatch,passwordhashlist) {
           if (keysToMatch.includes(key) && value) {
             // If the current key matches one of the keys and the value is not falsy
             const matchedItem = { key, value,encrypted:false };
-          
-            if(validator.isMD5(value)){
-              matchedItem.encrypted=true
-          }
-           else if(validator.isHash(value)){
-            matchedItem.encrypted=true
-          }
-          else if(validator.isStrongPassword(value)){
-            matchedItem.encrypted=true
-          }
-          else if(!validator.isStrongPassword(value)){
-            matchedItem.encrypted=false
-          }
+             let encrypted=   checkHashedData(value,data=false)
+             matchedItem["encrypted"]=encrypted
             matchedData.push(matchedItem);
             
-          } else {
+          } 
+          else {
             recursiveSearch(value);
           }
         });

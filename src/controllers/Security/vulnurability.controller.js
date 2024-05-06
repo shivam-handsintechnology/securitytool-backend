@@ -46,6 +46,7 @@ module.exports = {
             const { _id } = req.user;
             // Sensitve data transfer in plain text
             const passworddata = await CheckPasswordKeyText(RawBody, passwordkeys,passwordTestHashes); // Check for password keys in the data
+            console.log("passworddata",passworddata)
             // Check if domain exists in the database and update the password key
             const existingRecord = await PasswordValidateModel.findOne({ domain,appid });
             console.log("existingRecord", existingRecord)

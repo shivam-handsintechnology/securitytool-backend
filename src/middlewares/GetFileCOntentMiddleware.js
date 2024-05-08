@@ -9,7 +9,7 @@ module.exports = async (req, res, next) => {
                     'origin': "https://securitytool.handsintechnology.in",
                 }
             }).then(response => response).catch(error => error.response)
-          
+            console.log({response:response.status})
             if (response.status == 200) {
                 if(Array.isArray(response.data.data)){
                     req.body.fileContent = response.data.data
@@ -18,8 +18,9 @@ module.exports = async (req, res, next) => {
                     throw new Error("Invalid File Content")
                 }
                 
-            }
-            if (response.status >= 400) {
+            }else if(response.status===502){
+                throw new Error("Bad Gateway")
+            }else if (response.status >= 400) {
                 throw new Error("Access Denied")
             }
             next()

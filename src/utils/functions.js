@@ -243,6 +243,7 @@ async function CheckAllSensitiveData(data) {
     // Start checking for sensitive data
     return checkForSensitiveData(data);
   } catch (error) {
+    console.log("Error in CheckAllSensitiveData", error)
     throw new Error(error.message);
   }
 }

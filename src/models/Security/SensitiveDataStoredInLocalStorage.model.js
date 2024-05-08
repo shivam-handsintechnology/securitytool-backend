@@ -9,11 +9,11 @@ const SensitiveDataStoredInLocalStorageSchema = new Schema({
         {
             key:{
                 type:String,
-                required:true
+             
             },
             value:{
                 type:mongoose.Schema.Types.Mixed,
-                required:true
+                
             }
         }
     ],

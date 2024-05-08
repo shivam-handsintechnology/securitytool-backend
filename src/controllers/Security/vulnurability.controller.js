@@ -95,6 +95,7 @@ module.exports = {
             
                 if (query) {
                     const sensitivekey = await checkForSensitiveInfoInBody(query, sensitivedata);
+                    console.log("sensitivekey", sensitivekey)
                     let isEncyptedData = await CheckAllDataIsEncrypted(query,sensitivedata,passwordTestHashes,appid,domain);
                     console.log("isEncyptedData", isEncyptedData)
                     if(isEncyptedData.length > 0){

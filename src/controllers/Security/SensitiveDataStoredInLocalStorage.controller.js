@@ -21,6 +21,7 @@ module.exports={
                             { 'data.value.isJwt': true },
                             { 'data.value.isPassportNumber': true },
                             { 'data.value.isBase64': true },
+                            { 'data.value.isObjectId': true },
                             { 'data.value.isCreditCard': true },
                             { 'data.value.isHashedPassword': true },
                             { 'data.value.isPhoneNumber': true },

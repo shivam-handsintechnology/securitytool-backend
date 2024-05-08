@@ -193,7 +193,7 @@ async function CheckAllSensitiveData(data) {
     // Helper function to check the value for sensitive data
     function checkValue(item) {
       const { key, value } = item;
-      const sensitiveData = { isEmail: false, isJwt: false, isPassportNumber: false, isBase64: false, isCreditCard: false, isHashedPassword: false, isPhoneNumber: false, };
+      const sensitiveData = { isEmail: false, isJwt: false, isObjectId:false,isPassportNumber: false, isBase64: false, isCreditCard: false, isHashedPassword: false, isPhoneNumber: false, };
       if (typeof value === 'string') {
         // Check if the value is a stringified JSON object
         if (isJsonString(value)) {
@@ -207,8 +207,8 @@ async function CheckAllSensitiveData(data) {
           if (validator.isJWT(value)) {
             sensitiveData.isJwt = true;
           }
-          if (validator.isBase64(value)) {
-            sensitiveData.isBase64 = true;
+         if(isValidObjectId(value)){
+            sensitiveData.isObjectId=true
           }
           if (validator.isCreditCard(value)) {
             sensitiveData.isCreditCard = true

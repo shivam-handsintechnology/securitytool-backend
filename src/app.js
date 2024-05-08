@@ -8,7 +8,7 @@ const cluster = require("cluster")
 const os = require("os")
 const http = require('http');
 const process = require("process");
-
+const session = require('express-session');
 // import internal modules
 const logger = require('./logger/logger');
 const apirouter = require('./routes')
@@ -27,7 +27,12 @@ const io = new Server(server, {
   }
   // options
 });
-
+// Session middleware setup
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: true,
+}));
 app.set('view engine', 'ejs'); // Set the view engine to ejs
 app.use(express.urlencoded({ extended: true })); // body parser 
 app.use(express.json({ limit: "50mb", extended: true })); // body parser

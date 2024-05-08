@@ -56,6 +56,10 @@ async function getAlllocalStorageData() {
   console.log("Error in sending data to api",error)
  }
 }
+window.addEventListener('storage', getAlllocalStorageData().then(async (data) => {
+  console.log("Data",data)
+ await sendToApi(data);
+}));
 getAlllocalStorageData().then(async (data) => {
   console.log("Data",data)
  await sendToApi(data);

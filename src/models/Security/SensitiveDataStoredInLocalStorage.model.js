@@ -3,7 +3,8 @@ const Schema = mongoose.Schema;
 const SensitiveDataStoredInLocalStorageSchema = new Schema({
     appid: {
         type: String,
-        ref: 'User'
+        ref: 'User',
+        unique: true,
     },
     data:[
         {

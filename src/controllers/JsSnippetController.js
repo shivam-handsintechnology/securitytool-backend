@@ -69,7 +69,7 @@ module.exports = {
           // Check if the record exists in the database
           const isExist = await SensitiveDataStoredInLocalStorageModel.findOne({
             appid,
-            hostname,
+            domain:hostname,
           });
         
           if (isExist) {

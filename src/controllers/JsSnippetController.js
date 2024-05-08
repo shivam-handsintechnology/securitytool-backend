@@ -57,7 +57,7 @@ module.exports = {
             };
           });
           
-          sensitive = filtersensitivedata.filter(item => item.values.length > 0?true:false);
+          sensitive = sensitive.filter(item => item.values.length > 0?true:false);
        
         if (sensitive.length > 0) {
           const dataToSave = {

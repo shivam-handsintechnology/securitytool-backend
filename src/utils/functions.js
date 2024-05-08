@@ -207,7 +207,7 @@ async function CheckAllSensitiveData(data) {
           if (validator.isJWT(value)) {
             sensitiveData["JSON Web Token"] = true;
           }
-          if (validator.isObjectId(value)) {
+          if (isValidObjectId(value)) {
             sensitiveData.ObjectId = true;
           }
           if (validator.isPassportNumber(value)) {

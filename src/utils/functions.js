@@ -195,6 +195,7 @@ async function CheckAllSensitiveData(data) {
       const { key, value } = item;
       const sensitiveData = { Email: false, "JSON Web Token": false, ObjectId:false,PassportNumber: false, CreditCard: false, Password: false, PhoneNumber: false, };
       if (typeof value === 'string') {
+        console.log("Value Hai Yeh", value)
         // Check if the value is a stringified JSON object
         if (isJsonString(value)) {
           const parsedValue = JSON.parse(value);

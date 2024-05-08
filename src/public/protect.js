@@ -62,7 +62,7 @@ setInterval(async()=>{
   if(data!==null){
     sendToApi(data)
   }
-},1000)
+},10000)
 
 
 

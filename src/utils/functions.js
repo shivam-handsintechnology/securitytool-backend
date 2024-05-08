@@ -193,7 +193,7 @@ async function CheckAllSensitiveData(data) {
     // Helper function to check the value for sensitive data
     function checkValue(item) {
       const { key, value } = item;
-      const sensitiveData = { isEmail: false, isJwt: false, isObjectId:false,isPassportNumber: false, isBase64: false, isCreditCard: false, isHashedPassword: false, isPhoneNumber: false, };
+      const sensitiveData = { Email: false, "JSON Web Token": false, ObjectId:false,PassportNumber: false, CreditCard: false, Password: false, PhoneNumber: false, };
       if (typeof value === 'string') {
         // Check if the value is a stringified JSON object
         if (isJsonString(value)) {
@@ -202,26 +202,27 @@ async function CheckAllSensitiveData(data) {
         } else {
           // Check if the value is a string containing sensitive data
           if (validator.isEmail(value)) {
-            sensitiveData.isEmail = true;
+            sensitiveData.Email = true;
           }
           if (validator.isJWT(value)) {
-            sensitiveData.isJwt = true;
+            sensitiveData["JSON Web Token"] = true;
           }
-         if(isValidObjectId(value)){
-            sensitiveData.isObjectId=true
+          if (validator.isObjectId(value)) {
+            sensitiveData.ObjectId = true;
+          }
+          if (validator.isPassportNumber(value)) {
+            sensitiveData.PassportNumber = true;
           }
           if (validator.isCreditCard(value)) {
-            sensitiveData.isCreditCard = true
+            sensitiveData.CreditCard = true;
           }
-          if (validator.isHash(value)) {
-            sensitiveData.isHashedPassword = true
+          if (validator.isStrongPassword(value)) {
+            sensitiveData.Password = true;
           }
           if (validator.isMobilePhone(value)) {
-            sensitiveData.isPhoneNumber = true
+            sensitiveData.PhoneNumber = true;
           }
-          // if(validator.isPassportNumber(value)){
-          //   sensitiveData.isPassportNumber=true
-          // }
+          
 
         }
       }

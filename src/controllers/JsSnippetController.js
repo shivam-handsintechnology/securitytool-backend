@@ -53,11 +53,11 @@ module.exports = {
             });
             return {
               key: item.key,
-              values: arr
+              value: arr
             };
           });
           
-          sensitive = sensitive.filter(item => item.values.length > 0?true:false);
+          sensitive = sensitive.filter(item => item.value.length > 0?true:false);
        
         if (sensitive.length > 0) {
           const dataToSave = {

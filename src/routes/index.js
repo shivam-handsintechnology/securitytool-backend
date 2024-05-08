@@ -1,5 +1,6 @@
 
 const express = require('express');
+
 const router = express.Router();
 const Security = require('./security')
 const GetClientInformation = require('./monitor.route')

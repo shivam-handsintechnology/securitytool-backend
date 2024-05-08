@@ -1,11 +1,11 @@
 const playwright = require('playwright');
-async function checkAutoComplete(url, connection) {
+async function checkAutoComplete(url, socket) {
   const parsedUrl = new URL(url);
   const pathname = parsedUrl.pathname;
   const pathSegments = pathname.split('/').filter(segment => segment !== '');
   const pageName = pathSegments[pathSegments.length - 1] || 'index';
 
-  connection.send("Please Wait Scanning..." + url)
+  socket.emit('message', "Please Wait Scanning..." + url);
   const browser = await playwright.chromium.launch({ headless: true });
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -46,41 +46,31 @@ async function checkAutoComplete(url, connection) {
           }
 
           if (sensitiveFields.length > 0) {
-           
-             sensitiveFields.forEach(field => connection.send(`Auto-complete is enabled for the  sensitive fields ${field} on the Page ${pageName}`))
-
+            sensitiveFields.forEach(field => socket.emit('message', `Auto-complete is enabled for the sensitive field ${field} on the Page ${pageName}`));
           } else {
-            connection.send('Auto-complete is disabled for all sensitive fields in :' + pageName);
+            socket.emit('message', 'Auto-complete is disabled for all sensitive fields in :' + pageName);
           }
         } else {
-          connection.send('No input fields found i page'+pageName);
+          socket.emit('message', 'No input fields found in page ' + pageName);
         }
       }
-
-
 
       // Check for CAPTCHA elements
       const captchaElements = await page.$$('*[class*=captcha]');
       if (captchaElements.length > 0) {
-        connection.send('CAPTCHA is implemented for publicly available forms on page.'+pageName);
-      } 
+        socket.emit('message', 'CAPTCHA is implemented for publicly available forms on page.' + pageName);
+      }
     }
+
     // Find input fields within a specific section of the page
     const iframes = await page.$$eval('iframe', iframes => iframes.map(iframe => iframe.outerHTML));
 
     if (iframes.length > 0) {
-      connection.send();
-      iframes.forEach(iframe => connection.send(`The page ${pageName} contains iframes which may be indicative of clickjacking vulnerability.`));
+      iframes.forEach(iframe => socket.emit('message', `The page ${pageName} contains iframes which may be indicative of clickjacking vulnerability.`));
     }
-    // return {
-    //     captchaElements: captchaElements.length > 0,
-    //     sensitiveFields: sensitiveFields.length > 0,
-    //     iframes: iframes.length > 0,
-    // }
-
   } catch (error) {
     if (error.name === 'TimeoutError') {
-      connection.send(`The page  ${pageName}  took too long to load.`);
+      socket.emit('message', `The page ${pageName} took too long to load.`);
     } else {
       console.error('Error occurred:', error);
     }
@@ -89,19 +79,16 @@ async function checkAutoComplete(url, connection) {
   }
 }
 
-
-
 const url = require('url');
 
-async function scrapWebsite(url, connection, visited = new Set(), isFirstPage = true) {
+async function scrapWebsite(url, socket, visited = new Set(), isFirstPage = true) {
   if (visited.has(url)) {
-    // console.log(`Skipping already visited link: ${url}`);
     return visited;
   }
 
   const startTime = new Date();
 
-  connection.send(`Scanning ${url}...`);
+  socket.emit('message', `Scanning ${url}...`);
   visited.add(url);
 
   const browser = await playwright.chromium.launch({ headless: true });
@@ -132,12 +119,12 @@ async function scrapWebsite(url, connection, visited = new Set(), isFirstPage = 
 
   const endTime = new Date();
   const timeElapsed = (endTime - startTime) / 1000;
-  connection.send(`Scanning ${url} complete. Time elapsed: ${timeElapsed} seconds`);
+  socket.send(`Scanning ${url} complete. Time elapsed: ${timeElapsed} seconds`);
 
   // Recursively scrap each unique link
   for (const link of uniqueLinks) {
     if (!link.includes("#") && !link.includes("mailto") && !link.includes("tel") && !link.includes("javascript") && !link.includes("pdf") && !link.includes("jpg") && !link.includes("png") && !link.includes("jpeg") && !link.includes("doc") && !link.includes("docx") && !link.includes("xls") && !link.includes("xlsx") && !link.includes("ppt") && !link.includes("pptx") && !link.includes("csv") && !link.includes("xml") && !link.includes("json") && !link.includes("zip") && !link.includes("rar") && !link.includes("tar") && !link.includes("gz") && !link.includes("7z") && !link.includes("mp3") && !link.includes("mp4") && !link.includes("avi") && !link.includes("mov") && !link.includes("wmv") && !link.includes("flv") && !link.includes("ogg") && !link.includes("webm") && !link.includes("wav") && !link.includes("wma") && !link.includes("aac") && !link.includes("flac") && !link.includes("alac") && !link.includes("aiff") && !link.includes("ape") && !link.includes("m4a") && !link.includes("mid") && !link.includes("midi") && !link.includes("amr") && !link.includes("mka") && !link.includes("opus") && !link.includes("ra") && !link.includes("rm") && !link.includes("vqf") && !link.includes("wv") && !link.includes("webp") && !link.includes("svg") && !link.includes("gif") && !link.includes("bmp") && !link.includes("ico") && !link.includes("tiff") && !link.includes("psd") && !link.includes("eps") && !link.includes("ai") && !link.includes("indd") && !link.includes("raw") && !link.includes("cr2") && !link.includes("nef") && !link.includes("orf") && !link.includes("sr2") && !link.includes("pef") && !link.includes("dng") && !link.includes("x3f") && !link.includes("arw") && !link.includes("rw2") && !link.includes("rwl")) {
-      await scrapWebsite(link, connection, visited, false);
+      await scrapWebsite(link, socket, visited, false);
     }
 
   }
@@ -145,12 +132,12 @@ async function scrapWebsite(url, connection, visited = new Set(), isFirstPage = 
   return visited;
 }
 
-module.exports = async (websiteUrl, connection) => {
+module.exports = async (websiteUrl, socket) => {
   try {
-    const visitedLinks = await scrapWebsite(websiteUrl, connection);
+    const visitedLinks = await scrapWebsite(websiteUrl, socket);
     let links = Array.from(visitedLinks);
     links.forEach(async link => {
-      await checkAutoComplete(link, connection).catch(error => console.error(error));
+      await checkAutoComplete(link, socket).catch(error => console.error(error));
     }
     )
     console.log('Visited links:', visitedLinks);

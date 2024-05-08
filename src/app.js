@@ -1,30 +1,41 @@
 // Import external modules
 const fileUpload = require('express-fileupload')
+const cookieParser = require('cookie-parser')
 const express = require("express");
 const helmet = require('helmet')
 const dotenv = require('dotenv')
 const cluster = require("cluster")
 const os = require("os")
 const http = require('http');
-const WebSocket = require('ws');
 const process = require("process");
+
 // import internal modules
 const logger = require('./logger/logger');
 const apirouter = require('./routes')
 const { DBConnection } = require("./config/connection"); // Database connection
+const { Server } = require('socket.io');
 const numCPUs = os.cpus().length // Get the number of CPU cores
 // Connected to mongodb
 dotenv.config(); // Load environment variables
 DBConnection(process.env.MONGO_URI) // Connect to MongoDB
 const app = express(); // Create Express APP
 const server = http.createServer(app);
-const wsServer = new WebSocket.Server({ server });
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+  // options
+});
+
 app.set('view engine', 'ejs'); // Set the view engine to ejs
 app.use(express.urlencoded({ extended: true })); // body parser 
 app.use(express.json({ limit: "50mb", extended: true })); // body parser
+app.use(cookieParser()); // Cookie parser
 app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 },   // File Upload Functionality
 }));
+
 app.set('trust proxy', 1) // trust first proxy
 app.use(helmet()) // Secure your app by setting various HTTP headers
 app.use(apirouter) // Use the API router
@@ -60,7 +71,7 @@ if (cluster.isPrimary) {
     console.log(`Server is running on port ${PortNumber}`);
   });
 }
-require("./utils/Websocket")(wsServer)
+require("./utils/Websocket")(io); // Websocket connection
 
 
 

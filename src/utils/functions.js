@@ -1,13 +1,19 @@
+const { isValidObjectId } = require('mongoose');
 const Project_Security_Logs = require('.././models/Project_Security_Logs')
 const { useCustomAxios } = require('../utilities/functions/fetchUrl');
-let validator=require('validator')
-const BcryptRegX=/^\$2[ayb]\$.{56}$/i
-function checkHashedData(value,isHashedPassword) {
-  console.log("bcrypt test",BcryptRegX.test(value))
-  console.log("bcrypt test value",value)
-  if (validator.isMD5(value) || BcryptRegX.test(value) || validator.isHash(value) || validator.isStrongPassword(value)) {
-      isHashedPassword = true;
-  } 
+let validator = require('validator')
+
+const BcryptRegX = /^\$2[ayb]\$.{56}$/i
+function checkHashedData(value, isHashedPassword) {
+  console.log("bcrypt test", BcryptRegX.test(value))
+  console.log("bcrypt test value", value)
+  if (validator.isMD5(value)
+    || BcryptRegX.test(value)
+    || validator.isHash(value)
+    || validator.isStrongPassword(value)
+  ) {
+    isHashedPassword = true;
+  }
 
   return isHashedPassword;
 }
@@ -67,7 +73,7 @@ const CreateuserDetails = async (req, res, message, type) => {
 }
 
 
-async function checkForSensitiveInfoInBody(data, keysToMatch,passwordTestHashes) {
+async function checkForSensitiveInfoInBody(data, keysToMatch, passwordTestHashes) {
   try {
     let result = []
     let matchedData = null; // Initialize variable to store matched data
@@ -88,15 +94,15 @@ async function checkForSensitiveInfoInBody(data, keysToMatch,passwordTestHashes)
 
     recursiveSearch(data);
     console.log("result", result)
-    return matchedData ;
+    return matchedData;
   } catch (error) {
     throw new Error(error.message);
   }
 }
 
 
-async function CheckPasswordKeyText(data, keysToMatch,passwordhashlist) {
-  
+async function CheckPasswordKeyText(data, keysToMatch, passwordhashlist) {
+
   try {
     let isHashedPassword = false; // Initialize variable to store matched data
     let ispassword = false
@@ -106,7 +112,7 @@ async function CheckPasswordKeyText(data, keysToMatch,passwordhashlist) {
         Object.entries(currentData).forEach(([key, value]) => {
           if (keysToMatch.includes(key) && value) {
             ispassword = true
-            isHashedPassword=   checkHashedData(value,isHashedPassword)
+            isHashedPassword = checkHashedData(value, isHashedPassword)
           } else {
             recursiveSearch(value);
           }
@@ -119,7 +125,7 @@ async function CheckPasswordKeyText(data, keysToMatch,passwordhashlist) {
     throw new Error(error.message);
   }
 }
-async function CheckAllDataIsEncrypted(data, keysToMatch,passwordhashlist) {
+async function CheckAllDataIsEncrypted(data, keysToMatch, passwordhashlist) {
   try {
     const matchedData = []; // Initialize array to store matched data
     const recursiveSearch = (currentData) => {
@@ -128,12 +134,12 @@ async function CheckAllDataIsEncrypted(data, keysToMatch,passwordhashlist) {
         Object.entries(currentData).forEach(([key, value]) => {
           if (keysToMatch.includes(key) && value) {
             // If the current key matches one of the keys and the value is not falsy
-            const matchedItem = { key, value,encrypted:false };
-             let encrypted=   checkHashedData(value,data=false)
-             matchedItem["encrypted"]=encrypted
+            const matchedItem = { key, value, encrypted: false };
+            let encrypted = checkHashedData(value, data = false)
+            matchedItem["encrypted"] = encrypted
             matchedData.push(matchedItem);
-            
-          } 
+
+          }
           else {
             recursiveSearch(value);
           }
@@ -187,7 +193,7 @@ async function CheckAllSensitiveData(data) {
     // Helper function to check the value for sensitive data
     function checkValue(item) {
       const { key, value } = item;
-      const sensitiveData = { isEmail: false, isJwt: false,isPassportNumber:false, isBase64: false,isCreditCard:false,isHashedPassword:false,isPhoneNumber:false,};
+      const sensitiveData = { isEmail: false, isJwt: false, isPassportNumber: false, isBase64: false, isCreditCard: false, isHashedPassword: false, isPhoneNumber: false, };
       if (typeof value === 'string') {
         // Check if the value is a stringified JSON object
         if (isJsonString(value)) {
@@ -204,23 +210,23 @@ async function CheckAllSensitiveData(data) {
           if (validator.isBase64(value)) {
             sensitiveData.isBase64 = true;
           }
-          if(validator.isCreditCard(value)){
-            sensitiveData.isCreditCard=true
+          if (validator.isCreditCard(value)) {
+            sensitiveData.isCreditCard = true
           }
-          if(validator.isHash(value)){
-            sensitiveData.isHashedPassword=true
+          if (validator.isHash(value)) {
+            sensitiveData.isHashedPassword = true
           }
-          if(validator.isMobilePhone(value)){
-            sensitiveData.isPhoneNumber=true
+          if (validator.isMobilePhone(value)) {
+            sensitiveData.isPhoneNumber = true
           }
           // if(validator.isPassportNumber(value)){
           //   sensitiveData.isPassportNumber=true
           // }
-         
+
         }
       }
 
-      result.push({ key,value:sensitiveData });
+      result.push({ key, value: sensitiveData });
     }
 
     // Helper function to check if a string is a valid JSON string
@@ -242,7 +248,7 @@ async function CheckAllSensitiveData(data) {
 
 module.exports = {
   CreateuserDetails,
-  checkForSensitiveInfoInBody,CheckAllSensitiveData,
-  CheckPasswordKeyText,CheckAllDataIsEncrypted
+  checkForSensitiveInfoInBody, CheckAllSensitiveData,
+  CheckPasswordKeyText, CheckAllDataIsEncrypted
   // checkForSensitiveInfo
 }

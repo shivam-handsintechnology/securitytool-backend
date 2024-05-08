@@ -3,7 +3,7 @@ const {
   sensitivedata,
 } = require("../sensitive/availableapikeys");
 const staticFolders = require("../data/json/staticFolders.json");
-const puppeteer = require('puppeteer');
+const MYSQLCSVDATA = require("../data/json/mysqldata.json");
 // regular expression paterns
 // OPTIONS method
 async function scanDirectoryOptionMethod(response) {
@@ -111,39 +111,6 @@ const ScanArbitaryMethods = async (response) => {
     }
   });
 };
-function containsSequelizeCode(fileContent) {
-  // Check if the file content contains Sequelize-related code
-  // You can implement your own logic based on your project's coding patterns
-  // This can include checking for import/require statements, specific function calls, etc.
-  const sequelizeImportRegex =
-    /require\(['"]sequelize['"]\)|import.*['"]sequelize['"]/;
-  const sequelizeFunctionRegex =
-    /Sequelize\.(define|query|findAll|findOne|create|update|destroy)/;
-
-  if (
-    sequelizeImportRegex.test(fileContent) ||
-    sequelizeFunctionRegex.test(fileContent)
-  ) {
-    return true;
-  }
-
-  return false;
-}
-function containsMySQLCode(fileContent) {
-  // Check if the file content contains MySQL-related code
-  // You can implement your own logic based on your project's coding patterns
-  // This can include checking for import/require statements, specific function calls, etc.
-  const mysqlImportRegex = /require\(['"]mysql['"]\)|import.*['"]mysql['"]/;
-  const mysqlFunctionRegex = /mysql\.(connect|query|execute|prepare|escape)/;
-  if (
-    mysqlImportRegex.test(fileContent) ||
-    mysqlFunctionRegex.test(fileContent)
-  ) {
-    return true;
-  }
-
-  return false;
-}
 async function scanHardCodedData(response) {
   const results = [];
   const sensitiveData = sensitivedata;
@@ -180,7 +147,6 @@ async function scanHardCodedData(response) {
   return results;
 
 }
-
 async function scanRedirectvulnerability(response) {
   const results = ["Redirect Vulnerability Not Found in the Project"];
   response.forEach((item) => {
@@ -193,16 +159,11 @@ async function scanRedirectvulnerability(response) {
         const dataMatch = match.match(/\(([^)]+)\)/);
         if (dataMatch && dataMatch[1]) {
           const data = dataMatch[1];
-          // Check if third-party URLs are used in the redirection
-          const thirdPartyURLs = data.match(/(?:https?:\/\/)?([^\s\/]+)/g);
-          if (thirdPartyURLs && thirdPartyURLs.length > 0) {
-            for (const url of thirdPartyURLs) {
-              if (url.includes("http") || url.includes("https")) {
-                results.splice(0, 1);
-                let lineNumber = getLineNumber(modifiedContent, modifiedContent.indexOf(match));
-                results.push(`Redirect Vulnerability Found in the file at line ${lineNumber} in ${item.directoryPath}/${item.name}${item.extension}`);
-              }
-            }
+          console.log(data)
+          if (data.includes("http") || data.includes("https")) {
+            results.splice(0, 1);
+            let lineNumber = getLineNumber(modifiedContent, modifiedContent.indexOf(match));
+            results.push(`Redirect Vulnerability Found in the file at line ${lineNumber} in ${item.directoryPath}/${item.name}${item.extension} with value of ${data}`);
           }
         }
       }
@@ -276,46 +237,31 @@ async function scanSessionvulnerability(content, file, middlewares) {
   return results; // Returning an array to match the structure of other vulnerability scanning functions
 }
 
-async function scanSQLvulnerability(content, file) {
-  const results = [];
-  content = content.toLowerCase();
-  //  sql vunurability
-  if (containsSequelizeCode(content)) {
-    results.push(`Sequalize methods are Found it is good for block sql injections`);
-  } else if (containsMySQLCode(content)) {
-    results.push(`Mysql methods are Found it is not  good for prevent sql injections please use Sequalize Orm Function For Prevent Sql Injections/n but if you are use mysql queris then please use paramterize queries like this
-    const userId = 1;
-    const query = 'SELECT * FROM users WHERE id = ?';
-
-    connection.query(query, [userId], (error, results) => {
-      if (error) {
-        console.error('Error executing query:', error);
-        return;
-      }
-
-      //console.log('Query results:', results);
+async function scanSQLvulnerability(hostname,connection) {
+  for (let i = 0; i < MYSQLCSVDATA.length; i++) {
+    let data = MYSQLCSVDATA[i];
+    let response =await fetch(hostname, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
     });
- // Do not use queries like this because this will be dangerous 
- const query = 'SELECT * FROM users';
-  connection.query(query, (error, results) => {
-    if (error) {
-      console.error('Error executing query:', error);
-      return;
+    if(response.status === 200 || response.status === 201 || response.status === 202 || response.status === 204 || response.status === 304 || response.status===404){
+      console.log(`Sql Injection Detected`)
+      connection.emit('sql-injection',`Sql Injection Detected`)
     }
+    else if(response.status>400 && response.status<500 && response.status!==404){
+      console.log("Bad Request")
+      connection.emit('sql-injection',`Pass Sql Injection Test`)
 
-    consoleColorText('Query results:', results);
-  });
-    `);
-  } else if (!containsMySQLCode(content) || !containsSequelizeCode(content)) {
-    results.push(`Mysql Not Found`);
-  }
-  return results;
+    }
+}
 }
 function getLineNumber(content, index) {
   const lines = content.substr(0, index).split("\n");
   return lines.length;
 }
-
 
 async function getLatestNodeVersion(version) {
   try {
@@ -458,54 +404,6 @@ const getLoginErrorMessages = async (response) => {
   }
   )
 }
-let robottxtIsExist=async (response)=>{
-  return new Promise(async (resolve, reject) => {
-    try {
-      let isRobotsTxt=false
-      let filecontent=response
-       if(filecontent.length>0 && filecontent.find((item)=>item.name==="robots")){
-        isRobotsTxt=true
-       }
-        
-        resolve(isRobotsTxt)
-     } catch (error) {
-      console.log(error)
-      reject(error)
-     }
-    }
-  )
-}
-
-
-async function findCssFiles(url) {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.goto(url, { waitUntil: 'networkidle2' });
-
-  const cssFiles = await page.evaluate(() => {
-    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
-    return links.map(link => link.href);
-  });
-
-  await browser.close();
-  return cssFiles;
-}
-const getLineNumberAndContent = (content, index) => {
-  // Split the content into lines
-  const lines = content.split('\n');
-  // Find the line number containing the index
-  let lineNumber = 1;
-  let totalChars = 0;
-  for (let i = 0; i < lines.length; i++) {
-    totalChars += lines[i].length + 1; // Add 1 for the newline character
-    if (totalChars > index) {
-      lineNumber = i + 1;
-      break;
-    }
-  }
-  return { lineNumber, lineContent: lines[lineNumber - 1] };
-};
-
 
 module.exports = {
   scanDirectoryOptionMethod, scanSessionvulnerability,

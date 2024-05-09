@@ -404,6 +404,60 @@ const getLoginErrorMessages = async (response) => {
   }
   )
 }
+const { chromium } = require('playwright');
+
+const checkNonHTMLContentAccessibility=async (hostname,connection) => {
+    const browser = await chromium.launch();
+    const context = await browser.newContext();
+
+    // List of URLs to test
+    const urls = [
+        'https://securitytool-front.handsintechnology.in/dashboard',
+        'https://securitytool-front.handsintechnology.in/profile',
+        // Add more URLs to test here
+    ];
+
+    for (const url of urls) {
+        // Open a new page for each URL
+        const page = await context.newPage();
+        let navigationSuccessful = false;
+        let attempts = 0;
+
+        while (!navigationSuccessful && attempts < 3) {
+            try {
+                // Navigate to the page
+                await page.goto(url, { timeout: 60000 }); // Increase the timeout to 60 seconds
+
+                // Wait for the page to load completely
+                await page.waitForLoadState('networkidle', { timeout: 60000 }); // Increase the timeout to 60 seconds
+
+                // Get the final URL after any redirects
+                const finalUrl = page.url();
+
+                if (finalUrl === url) {
+                    console.log(`Page "${url}" is not redirected.`);
+                } else {
+                    console.log(`Page "${url}" is redirected to: ${finalUrl}`);
+                }
+
+                navigationSuccessful = true;
+            } catch (error) {
+                console.error(`Error occurred while testing page "${url}":`, error);
+                attempts++;
+            }
+        }
+
+        if (!navigationSuccessful) {
+            console.error(`Failed to navigate to page "${url}" after multiple attempts.`);
+        }
+
+        // Close the page
+        await page.close();
+    }
+
+    // Close the browser
+    await browser.close();
+}
 
 module.exports = {
   scanDirectoryOptionMethod, scanSessionvulnerability,

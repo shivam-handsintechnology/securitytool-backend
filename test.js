@@ -1,8 +1,9 @@
 const {chromium} = require('playwright');
+
 const checkNonHTMLContentAccessibility = async () => {
   const browser = await chromium.launch();
   const context = await browser.newContext();
-
+  let isRedirected = false;
   const urls = [
       'https://securitytool-front.handsintechnology.in/dashboard',
       'https://securitytool-front.handsintechnology.in/profile',
@@ -25,25 +26,19 @@ const checkNonHTMLContentAccessibility = async () => {
           let pageContent = await page.content();
           pageContent = pageContent.replace(/\s/g, ''); // Remove all white spaces
           pageContent = pageContent.toLowerCase(); // Convert the content to lower case
-         
-           url.includes('profile') &&  console.log(pageContent)
-           
-
-          if (pageContent.includes("404") && pageContent.includes("not found")) {
-              console.log(`Page "${url}" contains 404 Not Found. Skipping redirection check.`);
-          } else {
+      
               // Get the final URL after any redirects
               const finalUrl = page.url();
 
-              if (finalUrl === url) {
+              if (finalUrl!==url) {
                   console.log(`Page "${url}" is not redirected.`);
-              } else {
-                  console.log(`Page "${url}" is redirected to: ${finalUrl}`);
-              }
-          }
-
+                  isRedirected = true;
+              } 
+          
+         
           // Close the page
           await page.close();
+          return isRedirected;
       } catch (error) {
           console.error(`Error occurred while testing page "${url}":`, error);
       }
@@ -52,6 +47,15 @@ const checkNonHTMLContentAccessibility = async () => {
   // Close the browser
   await browser.close();
 }
+checkNonHTMLContentAccessibility().then((isRedirected) => {
+    if (isRedirected) {
+        console.log('Some pages are redirected.');
+    } else {
+        console.log('No pages are redirected.');
+    }
+    });
+    
+
 
 
 const Blank = async () => {
@@ -63,56 +67,74 @@ const Blank = async () => {
     try {
         // Open a new page for each URL
         const page = await context.newPage();
-   // Enable request interception
-   await page.route('**', route => {
-    console.log('Request URL:', route.request().url());
-    console.log('Request Method:', route.request().method());
-    route.continue();
-});
+
+        // Enable request interception
+        await page.route('**', route => {
+            if (route.request().url().includes('https://securitytool.handsintechnology.in/api/client/protection')) {
+                // Bypass the interception for this URL
+                route.continue();
+            } else {
+                if (route.request().method() === 'POST') {
+                    console.log('Request URL:', route.request().url());
+                }
+                route.continue();
+            }
+        });
+
         // Navigate to the page
-        await page.goto(url, { timeout: 60000 }); // Increase the timeout to 60 seconds
+        await page.goto(url, { timeout: 60000 });
+
+        // Wait for the page to load completely
+        await page.waitForLoadState('networkidle', { timeout: 60000 });
 
         // Capture initial page state
         const initialText = await page.evaluate(() => document.body.innerText);
-        
+
         let getEmailInput = await page.$('input[type="email"]');
-        let usernameInput= await page.$('input[type="text"]')
+        let usernameInput = await page.$('input[type="text"]');
         let getPasswordInput = await page.$('input[type="password"]');
-        let getSubmitButton = await page.$('button:text("Sign Up")');
-        const getsubmitInput = await page.$('input[type="submit"]');
-        const Submitbutton = await page.$('button:text("Sign Up")');
-        
+
+
         if (getEmailInput) {
             await getEmailInput.fill('input[type="email"]', 'shivam@example.com')
         }
-        if(usernameInput){
+        if (usernameInput) {
             await usernameInput.fill('input[type="text"]', 'shivam')
         }
         if (getPasswordInput) {
             await getPasswordInput.fill('input[type="password"]', '')
         }
-        if (getSubmitButton) {
-         await Promise.all([
-            await getSubmitButton.click(),
-           await   page.waitForNavigation({ waitUntil: 'domcontentloaded' })
-         ])
+
+        // Get all buttons on the page
+        const buttons = await page.$$('button, input[type="submit"]');
+
+        // Define the possible button text variations
+        const buttonVariations = ['Sign Up', 'Create Account', 'Register', 'Submit'];
+
+        // Find the button with one of the possible text variations
+        let submitButton = null;
+        for (const button of buttons) {
+            for (const text of buttonVariations) {
+                const buttonText = await button.textContent();
+                if (buttonText.includes(text)) {
+                    submitButton = button;
+                    break;
+                }
+            }
+            if (submitButton) break;
         }
-        if (!getsubmitInput && getsubmitInput) {
-         await Promise.all([
-            await getsubmitInput.click(),
-           await  page.waitForNavigation({ waitUntil: 'domcontentloaded' })
-         ])
-        }
-        if (!getsubmitInput && !getsubmitInput && Submitbutton) {
-        await Promise.all([
-            await Submitbutton.click(),
-           await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
-         ])
+
+        if (submitButton) {
+            await Promise.all([
+                submitButton.click(),
+                page.waitForNavigation({ waitUntil: 'load', timeout: 60000 }) // Increase timeout to 60 seconds
+            ]);
+        } else {
+            console.error('Submit button not found.');
         }
 
         // Wait for some time for the next action or page to load
         // await page.waitForTimeout(2000);
-      // Check if any URL is hit
 
         // Capture page state after login
         const changedText = await page.evaluate(() => document.body.innerText);
@@ -137,7 +159,7 @@ const Blank = async () => {
     await browser.close();
 };
 
-// Call the function to execute the automation
-Blank();
+Blank()
+
 
 

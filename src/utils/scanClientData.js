@@ -35,7 +35,7 @@ async function scanDirectoryOptionMethod(response) {
   });
 }
 async function ScanDangerousMethods(response) {
- 
+
   const isDangerousMethod = (method) => {
     const dangerousMethods = ["eval", "exec", "setTimeout", "setInterval", "Function", "XMLHttpRequest", "fetch"];
     return dangerousMethods.includes(method);
@@ -73,26 +73,26 @@ async function ScanDangerousMethods(response) {
 }
 const ScanArbitaryMethods = async (response) => {
   let results = [];
-  let isAccessControlAllowMethods= false;
+  let isAccessControlAllowMethods = false;
   return new Promise(async (resolve, reject) => {
     try {
       const standardMethods = ["GET", "POST", "PUT", "PATCH", "DELETE"];
-     
+
 
       // Iterate through the data and process each item
       response.forEach(async (item) => {
         try {
           let modifiedContent = item.content.replace(/"/g, "'");
-      
+
           const allowedMethodsRegex = /\.(header|setHeader)\s*\(\s*['"]Access-Control-Allow-Methods['"][\s,]*['"]([^'"]+)['"][\s,]*\)/i
           const match = modifiedContent.match(allowedMethodsRegex);
-            console.log({match})
+          console.log({ match })
           if (match && match[2]) {
-            isAccessControlAllowMethods=true
+            isAccessControlAllowMethods = true
             const allowedMethods = match[2].split(',').map(method => method.trim().toUpperCase());
-            console.log({allowedMethods})
+            console.log({ allowedMethods })
             const extraMethods = allowedMethods.filter(method => !standardMethods.includes(method));
-          
+
 
             if (extraMethods.length > 0) {
               results.push(extraMethods?.toString());
@@ -105,7 +105,7 @@ const ScanArbitaryMethods = async (response) => {
       });
 
       // Resolve results
-      resolve({results,isAccessControlAllowMethods});
+      resolve({ results, isAccessControlAllowMethods });
     } catch (error) {
       reject(error);
     }
@@ -122,28 +122,28 @@ async function scanHardCodedData(response) {
       // Check for sensitive data in the content
       for (const field of sensitiveData) {
         const regexIsEqualTo = new RegExp(`${field}\\s*=\\s*['"](.*?)['"]`, "g");
-    const regexIsObject = new RegExp(`${field}\\s*:\\s*['"]([^'"]*)['"]`, "g");
+        const regexIsObject = new RegExp(`${field}\\s*:\\s*['"]([^'"]*)['"]`, "g");
 
-    let match;
-    if ((match = regexIsEqualTo.exec(modifiedContent)) !== null) {
-      const hardcodedValue = match[1];
-      const lineNumber = getLineNumber(modifiedContent, match.index);
-      results.push(`find ${hardcodedValue}  in a ${field} at line ${lineNumber} in ${item.directoryPath +"/"+item.name+item.extension}`);
-    }
+        let match;
+        if ((match = regexIsEqualTo.exec(modifiedContent)) !== null) {
+          const hardcodedValue = match[1];
+          const lineNumber = getLineNumber(modifiedContent, match.index);
+          results.push(`find ${hardcodedValue}  in a ${field} at line ${lineNumber} in ${item.directoryPath + "/" + item.name + item.extension}`);
+        }
 
-    if ((match = regexIsObject.exec(modifiedContent)) !== null) {
+        if ((match = regexIsObject.exec(modifiedContent)) !== null) {
 
-      const hardcodedValue = match[1];
-      const lineNumber = getLineNumber(modifiedContent, match.index);
-      results.push(`find ${hardcodedValue}  in a ${field} at line ${lineNumber} in ${item.directoryPath +"/"+item.name+item.extension}`);
-    }
+          const hardcodedValue = match[1];
+          const lineNumber = getLineNumber(modifiedContent, match.index);
+          results.push(`find ${hardcodedValue}  in a ${field} at line ${lineNumber} in ${item.directoryPath + "/" + item.name + item.extension}`);
+        }
       }
     } catch (error) {
       console.error("Error processing file content:", error);
       // Handle error if necessary
     }
   }
-  
+
   return results;
 
 }
@@ -151,7 +151,7 @@ async function scanRedirectvulnerability(response) {
   const results = ["Redirect Vulnerability Not Found in the Project"];
   response.forEach((item) => {
     let modifiedContent = item.content.replace(/"/g, "'");
-     modifiedContent = modifiedContent.toLowerCase();
+    modifiedContent = modifiedContent.toLowerCase();
     //  redirect vunurability
     const redirectmatches = modifiedContent.match(/\.redirect\s*\(([^)]+)\)/g);
     if (redirectmatches && Array.isArray(redirectmatches)) {
@@ -237,27 +237,69 @@ async function scanSessionvulnerability(content, file, middlewares) {
   return results; // Returning an array to match the structure of other vulnerability scanning functions
 }
 
-async function scanSQLvulnerability(hostname,connection) {
-  for (let i = 0; i < MYSQLCSVDATA.length; i++) {
-    let data = MYSQLCSVDATA[i];
-    let response =await fetch(hostname, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    });
-    if(response.status === 200 || response.status === 201 || response.status === 202 || response.status === 204 || response.status === 304 || response.status===404){
-      console.log(`Sql Injection Detected`)
-      connection.emit('sql-injection',`Sql Injection Detected`)
-    }
-    else if(response.status>400 && response.status<500 && response.status!==404){
-      console.log("Bad Request")
-      connection.emit('sql-injection',`Pass Sql Injection Test`)
+async function scanSQLvulnerability(hostname, connection) {
+  return new Promise(async (resolve, reject) => {
+    const numRequests = MYSQLCSVDATA.length;
+    const averageResponseTime = 0.5; // Assuming 0.5 seconds average response time per request in a batch
+    const estimatedTime = numRequests * averageResponseTime;
+    console.log(`Estimated time to complete: ${estimatedTime} seconds`);
+    connection.emit('sql-injection-count', { count: numRequests, estimatedTime, message: `Total Number of SQL Injection Tests: ${numRequests}` });
 
+    let count = 0;
+    try {
+
+
+      for (let batchIndex = 0; batchIndex < numRequests; batchIndex++) {
+        try {
+          let data = MYSQLCSVDATA[batchIndex];
+          const response = await fetch(hostname, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+          });
+          
+          count++;
+          let percentageCompleted = ((count / numRequests) * 100).toFixed(2);
+          percentageCompleted=Math.round(percentageCompleted)
+          if (response.status === 200 || response.status === 201 || response.status === 202 || response.status === 204 || response.status === 304 || response.status === 404) {
+            connection.emit('sql-injection', { count,percentageCompleted, message: `Sql Injection Detected with this query: ${data.Query}` });
+          } else if (response.status > 400 && response.status < 500 && response.status !== 404) {
+            // Handle client-side errors
+          
+            connection.emit('sql-injection', { percentageCompleted,count, message: `` });
+          } else {
+            // Handle other statuses if needed
+         
+            connection.emit('sql-injection', { percentageCompleted,count, message: `` });
+          }
+
+          // Calculate percentage completed
+      
+       
+        } catch (error) {
+          count++;
+          let percentageCompleted = ((count / numRequests) * 100).toFixed(2);
+          percentageCompleted=Math.round(percentageCompleted)
+          connection.emit('sql-injection', {percentageCompleted, count, message: `` });
+          console.error("Error occurred during request:", error);
+        }
+      }
+      count++;
+       
+      connection.emit('sql-injection', { count:numRequests,percentageCompleted:100, message: "Sql Injection Test Completed" });
+      resolve({ message: "Sql Injection Test Completed" });
+    } catch (error) {
+      count++;
+      connection.emit('sql-injection', { count, message: `` });
+      reject(error);
     }
+  });
 }
-}
+
+
+
 function getLineNumber(content, index) {
   const lines = content.substr(0, index).split("\n");
   return lines.length;
@@ -269,7 +311,7 @@ async function getLatestNodeVersion(version) {
     version = parseInt(version)
     if (version < 20) {
       return { older_version_support: true }
-    } else if(version>=20) {
+    } else if (version >= 20) {
       return { older_version_support: false }
     }
   } catch (error) {
@@ -332,14 +374,14 @@ const getHttpErrorMessages = async (response) => {
           // Check for 400, 401, 403, 404, and 500 status codes
           if (modifiedContent.match(/400|401|403|404|500/g)) {
             const matchedCodes = modifiedContent.match(/400|401|403|404|500/g);
-            
-            let uniqureCodes=matchedCodes.filter((v, i, a) => a.indexOf(v) === i)
-            uniqureCodes=uniqureCodes.length>0?uniqureCodes.toString():"No Error Codes Found"
-              results.push({
-                name: item.name,
-                code: uniqureCodes
-              });
-          
+
+            let uniqureCodes = matchedCodes.filter((v, i, a) => a.indexOf(v) === i)
+            uniqureCodes = uniqureCodes.length > 0 ? uniqureCodes.toString() : "No Error Codes Found"
+            results.push({
+              name: item.name,
+              code: uniqureCodes
+            });
+
           }
         } catch (error) {
           console.error("Error processing file content:", error);
@@ -371,7 +413,7 @@ const getLoginErrorMessages = async (response) => {
           let filename = item.name.toLowerCase()
           let extension = item.extension.toLowerCase()
           let filenameswithloginbasedterms = baseLoginTerms.some(term => filename.includes(term))
-         
+
           // Ignore static files based on directory path
           if (!filenameswithloginbasedterms) {
             continue;
@@ -384,12 +426,12 @@ const getLoginErrorMessages = async (response) => {
             // Check for 400, 401, 403, 404, and 500 status codes
             if (modifiedContent.match(/400|401|403|404|500/g)) {
               const matchedCodes = modifiedContent.match(/400|401|403|404|500/g);
-              let uniqureCodes=matchedCodes.filter((v, i, a) => a.indexOf(v) === i)
-              uniqureCodes=uniqureCodes.length>0?uniqureCodes.toString():"No Error Codes Found"
-                results.push({
-                  name: item.name,
-                  code: uniqureCodes
-                });
+              let uniqureCodes = matchedCodes.filter((v, i, a) => a.indexOf(v) === i)
+              uniqureCodes = uniqureCodes.length > 0 ? uniqureCodes.toString() : "No Error Codes Found"
+              results.push({
+                name: item.name,
+                code: uniqureCodes
+              });
             }
           }
         } catch (error) {
@@ -406,60 +448,66 @@ const getLoginErrorMessages = async (response) => {
 }
 const { chromium } = require('playwright');
 
-const checkNonHTMLContentAccessibility=async (hostname,connection) => {
-    const browser = await chromium.launch();
-    const context = await browser.newContext();
+const checkNonHTMLContentAccessibility = async (hostname, connection) => {
+ try {
+  const browser = await chromium.launch();
+  const context = await browser.newContext();
+  let isRedirected = false;
+  // List of URLs to test
+  const urls = [
+    `http://${hostname}/dashboard`,
+    `http://${hostname}/profile`,
+    // Add more URLs to test here
+  ];
 
-    // List of URLs to test
-    const urls = [
-        'https://securitytool-front.handsintechnology.in/dashboard',
-        'https://securitytool-front.handsintechnology.in/profile',
-        // Add more URLs to test here
-    ];
+  for (const url of urls) {
+    // Open a new page for each URL
+    const page = await context.newPage();
+    let navigationSuccessful = false;
+    let attempts = 0;
+    
+    while (!navigationSuccessful && attempts < 3) {
+      try {
+        // Navigate to the page
+        await page.goto(url, { timeout: 60000 }); // Increase the timeout to 60 seconds
 
-    for (const url of urls) {
-        // Open a new page for each URL
-        const page = await context.newPage();
-        let navigationSuccessful = false;
-        let attempts = 0;
+        // Wait for the page to load completely
+        await page.waitForLoadState('networkidle', { timeout: 60000 }); // Increase the timeout to 60 seconds
 
-        while (!navigationSuccessful && attempts < 3) {
-            try {
-                // Navigate to the page
-                await page.goto(url, { timeout: 60000 }); // Increase the timeout to 60 seconds
+        // Get the final URL after any redirects
+        const finalUrl = page.url();
 
-                // Wait for the page to load completely
-                await page.waitForLoadState('networkidle', { timeout: 60000 }); // Increase the timeout to 60 seconds
-
-                // Get the final URL after any redirects
-                const finalUrl = page.url();
-
-                if (finalUrl === url) {
-                    console.log(`Page "${url}" is not redirected.`);
-                } else {
-                    console.log(`Page "${url}" is redirected to: ${finalUrl}`);
-                }
-
-                navigationSuccessful = true;
-            } catch (error) {
-                console.error(`Error occurred while testing page "${url}":`, error);
-                attempts++;
-            }
+        if (finalUrl === url) {
+          console.log(`Page "${url}" is not redirected.`);
+        } else {
+          isRedirected = true;
+          console.log(`Page "${url}" is redirected to: ${finalUrl}`);
         }
-
-        if (!navigationSuccessful) {
-            console.error(`Failed to navigate to page "${url}" after multiple attempts.`);
-        }
-
-        // Close the page
-        await page.close();
+         isRedirected && connection.emit('non-html-content-accessibility', { message: `No`,time:Date.now() });
+        navigationSuccessful = true;
+      } catch (error) {
+        console.error(`Error occurred while testing page "${url}":`, error);
+        attempts++;
+      }
     }
 
-    // Close the browser
-    await browser.close();
+    if (!navigationSuccessful) {
+     connection.emit('non-html-content-accessibility',{message:`Failed to navigate to page "${url}" after multiple attempts.`,time:Date.now()});
+    }
+
+    // Close the page
+    await page.close();
+  }
+
+  // Close the browser
+  await browser.close();
+ } catch (error) {
+  console.log('Error:', error);
+  connection.emit('non-html-content-accessibility', { message: error.message || "Error occurred while testing non-HTML content accessibility",time:Date.now()});
+ }
 }
 
 module.exports = {
-  scanDirectoryOptionMethod, scanSessionvulnerability,
+  scanDirectoryOptionMethod, scanSessionvulnerability,checkNonHTMLContentAccessibility,
   ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanHardCodedData, scanRedirectvulnerability, scanSQLvulnerability, get403ErrorMessage, getHttpErrorMessages, getLoginErrorMessages
 };

@@ -10,7 +10,27 @@ const sessionExpireOnClose = async (response) => {
                 try {
                     // Replace double quotes with single quotes for consistency
                     let modifiedContent = item.content.replace(/"/g, "'");
-
+                     // Regular expression to match patterns indicative of jwt.verify usage
+                    
+                     // const jwtVerifyRegex = /jwt\.sign\s*\([^)]*\)/g;
+                    // const matches = modifiedContent.match(jwtVerifyRegex);
+                 
+                    // if (matches && matches.length > 0) {
+                    //     // Extract configuration used in jwt.verify
+                    //     matches.forEach(match => {
+                    //         console.log("match",match)
+                    //         // Regular expression to extract configuration object inside jwt.verify
+                    //         const configRegex = /\{[^{}]*\}/;
+                    //         const configMatch = match.match(configRegex);
+                    //         if (configMatch) {
+                    //             // Parse the configuration object to JSON
+                    //             const config = JSON.parse(configMatch[0]);
+                    //             // Push configuration along with file name to results
+                    //             results.push({ fileName: item.name, config: config });
+                    //         }
+                    //     });
+                    // }
+                     // Regular expression to match patterns indicative of jwt.verify usage
                     // Regular expression to match session configuration pattern for cookie
                     const cookieRegex = /cookie:\s*{\s*[\s\S]*?\s*}/;
 

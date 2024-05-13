@@ -12,6 +12,8 @@ router.route("/blacklist").post(IpController.AddBlackListIp).get(IpController.Bl
 // End Ips
 // Domains
 router.route('/domain').post(DomainController.addDomain).get(DomainController.getAllDomains).delete(DomainController.deleteDomain).put(DomainController.updateDomain);
+router.route('/webdomain').get(DomainController.getAllWebDomains).post(DomainController.addWebDomain).delete(DomainController.deleteWebDomain);
+// End Domains
 // Whitelist words
 
 

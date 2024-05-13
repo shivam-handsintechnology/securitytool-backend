@@ -12,6 +12,7 @@ const InsecureObjectRefGuard=require("./Security/Insecure_Direct_Object_Referenc
 const InjectionsRoute=require("./Security/Injection.routes")
 const WeekCrossDomainPolicy=require("./Security/WeakCrossDomainPolicy.route")
 const Authrouter = require('./UserRoutes');
+const MissingFunctionalLevelAccessControlrouter=require("./Security/MissingFunctionLevelAccessControl.routes")
 const { ValidationMiddleware, ValidationMiddlewareQuery} = require('../middlewares/ValidationMiddleware');
 const verifytoken = require('../middlewares/VerifyUser')
 const { DomainValidationSchema } = require('../helpers/Validators');
@@ -55,6 +56,8 @@ router.use("/ErrorMessage",IncomingDataHashFormat,CorsMiddleware,IncomingDataHas
 router.use("/InsecureObjectRefGuard",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, InsecureObjectRefGuard)
 // SecurityMisconfiguration
 router.use("/SecurityMisconfiguration",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, SecurityMisconfiguration)
+// Missing Function Level Access Control
+router.use("/MissingFunctionLevelAccessControl",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat,verifyToken,MissingFunctionalLevelAccessControlrouter)
 // SensitiveDataExposure
 router.use("/SensitiveDataExposure",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, SensitiveDataExposure)
 // Unvalidated Redirects and Forwards

@@ -1,60 +1,6 @@
-const {chromium} = require('playwright');
+const { chromium } = require('playwright');
 
-const checkNonHTMLContentAccessibility = async () => {
-  const browser = await chromium.launch();
-  const context = await browser.newContext();
-  let isRedirected = false;
-  const urls = [
-      'https://securitytool-front.handsintechnology.in/dashboard',
-      'https://securitytool-front.handsintechnology.in/profile',
-      'https://securitytool-front.handsintechnology.in/admin',
-      'https://securitytool-front.handsintechnology.in/master',
-  ];
 
-  for (const url of urls) {
-      try {
-          // Open a new page for each URL
-          const page = await context.newPage();
-
-          // Navigate to the page
-          await page.goto(url, { timeout: 60000 }); // Increase the timeout to 60 seconds
-
-          // Wait for the page to load completely
-          await page.waitForLoadState('networkidle', { timeout: 60000 }); // Increase the timeout to 60 seconds
-
-          // Check if the page contains text related to "404 Not Found"
-          let pageContent = await page.content();
-          pageContent = pageContent.replace(/\s/g, ''); // Remove all white spaces
-          pageContent = pageContent.toLowerCase(); // Convert the content to lower case
-      
-              // Get the final URL after any redirects
-              const finalUrl = page.url();
-
-              if (finalUrl!==url) {
-                  console.log(`Page "${url}" is not redirected.`);
-                  isRedirected = true;
-              } 
-          
-         
-          // Close the page
-          await page.close();
-          return isRedirected;
-      } catch (error) {
-          console.error(`Error occurred while testing page "${url}":`, error);
-      }
-  }
-
-  // Close the browser
-  await browser.close();
-}
-checkNonHTMLContentAccessibility().then((isRedirected) => {
-    if (isRedirected) {
-        console.log('Some pages are redirected.');
-    } else {
-        console.log('No pages are redirected.');
-    }
-    });
-    
 
 
 
@@ -159,7 +105,84 @@ const Blank = async () => {
     await browser.close();
 };
 
-Blank()
+// Blank()
 
 
 
+async function extractRoutes(url) {
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+  let isReact = '';
+  // Navigate to the website
+  await page.goto(url, { waitUntil: 'networkidle' });
+
+  // Find source files
+  const sourceFiles = await page.evaluate(() => {
+    const scripts = Array.from(document.getElementsByTagName('script'));
+    return scripts
+      .map(script => script.src)
+      .filter(src => src.endsWith('.js') || src.endsWith('.jsx'));
+  });
+
+  await browser.close();
+    // Check if any source file includes 'main' or 'index'
+    for (const file of sourceFiles) {
+      if (file.includes('main') || file.includes('index')) {
+        // If a source file contains 'main' or 'index', it's likely a main file of the application
+        // You can perform additional checks or actions here
+        isReact = await fetch(file)
+        .then(response => response.text())
+        .catch(error => '');
+        break;
+      }
+    }
+    return isReact ;
+}
+
+// Usage example
+const websiteUrl = 'https://www.muscleblaze.com/';
+
+extractRoutes(websiteUrl)
+  .then((data) => {
+    // find routes in the react file data where to: is used 
+    let routes = data.match(/to:"([^"]+)"/g);
+     routes = routes ? routes.map(route => route.replace('to:', '')) : null;
+     routes = routes ? routes.map(route => route.replace(/^['"]|['"]$/g, '')) : null;
+    //  remove some route which internaly regitered of react
+    routes = routes ? routes.filter(route => route.includes("/") ) : null;
+    //  remove duplicates 
+    routes = routes ? [...new Set(routes)] : null;
+    if (routes) {
+      routes.forEach((route, index) => {
+        console.log(`Route ${index + 1}:`, route);
+      });
+    } else {
+      console.log('No routes found.');
+    }
+
+  })
+  .catch(error => {
+    console.error('Error extracting routes:', error);
+  });
+extractRoutes(websiteUrl)
+  .then((data) => {
+    // find routes in the react file data where to: is used 
+    let routes = data.match(/href="([^"]+)"/g);
+     routes = routes ? routes.map(route => route.replace('href=', '')) : null;
+     routes = routes ? routes.map(route => route.replace(/^['"]|['"]$/g, '')) : null;
+    //  remove some route which internaly regitered of react
+    routes = routes ? routes.filter(route => route.includes("/") ) : null;
+    //  remove duplicates 
+    routes = routes ? [...new Set(routes)] : null;
+    if (routes) {
+      routes.forEach((route, index) => {
+        console.log(`Route ${index + 1}:`, route);
+      });
+    } else {
+      console.log('No routes found.');
+    }
+
+  })
+  .catch(error => {
+    console.error('Error extracting routes:', error);
+  });

@@ -1,11 +1,11 @@
 
-const axios = require("axios");
 const router = require("express").Router()
 const { errorHandler } = require("../../utils/errorHandler");
-const { sendResponse } = require("../../utils/dataHandler");
 const { sessionExpireOnClose, sessionTimeoutWithObject, sessionFixationWithobject, sessionHijackingWithObject, sessionTokenWithObject, SessionVulnurability } = require("../../helpers/SessionVulnurabiltyChecker");
+const { checkNonHTMLContentAccessibility } = require("./Scan/checkNonHtmlAccccesability");
+const GetFileCOntentMiddleware = require("../../middlewares/GetFileCOntentMiddleware");
 
-router.get("/session-vulnurability", async (req, res) => {
+router.get("/session-vulnurability",GetFileCOntentMiddleware, async (req, res) => {
     try {
         // Call the respective controller function
         const response =req.body.fileContent
@@ -46,7 +46,7 @@ router.get("/session-vulnurability", async (req, res) => {
     }
 });
 
-router.get("/session-expire-on-close", async (req, res) => {
+router.get("/session-expire-on-close",GetFileCOntentMiddleware, async (req, res) => {
     try {
         // Call the respective controller function
         const response =req.body.fileContent
@@ -59,7 +59,7 @@ router.get("/session-expire-on-close", async (req, res) => {
 });
 
 // Route for checking session timeout
-router.get("/session-timeout", async (req, res) => {
+router.get("/session-timeout",GetFileCOntentMiddleware, async (req, res) => {
     try {
         // Call the respective controller function
         const response =req.body.fileContent
@@ -71,7 +71,7 @@ router.get("/session-timeout", async (req, res) => {
 });
 
 // Route for checking session token being passed in other areas apart from cookie
-router.get("/session-token", async (req, res) => {
+router.get("/session-token",GetFileCOntentMiddleware, async (req, res) => {
     try {
         // Call the respective controller function
         const response =req.body.fileContent
@@ -83,7 +83,7 @@ router.get("/session-token", async (req, res) => {
 });
 
 // Route for checking session fixation vulnerability
-router.get("/session-fixation", async (req, res) => {
+router.get("/session-fixation",GetFileCOntentMiddleware, async (req, res) => {
     try {
         // Call the respective controller function
         const response =req.body.fileContent
@@ -95,7 +95,7 @@ router.get("/session-fixation", async (req, res) => {
 });
 
 // Route for checking session hijacking vulnerability
-router.get("/session-hijacking", async (req, res) => {
+router.get("/session-hijacking",GetFileCOntentMiddleware, async (req, res) => {
     try {
         // Call the respective controller function
         const response =req.body.fileContent
@@ -105,6 +105,44 @@ router.get("/session-hijacking", async (req, res) => {
         return errorHandler(res, 500, error.message);
     }
 });
+// Route for checking session hijacking vulnerability
+router.get("/non-html-content-accessability", async (req, res) => {
+    try {
+      
+        const domain = "mlsdev.sblcorp.com";
+        const headers = {
+            'Content-Type': 'text/event-stream',
+            'Connection': 'keep-alive',
+            'Cache-Control': 'no-cache'
+          };
+          res.writeHead(200, headers);
+          const SerEnventData=(data,res=res)=>{
+            res.write(`data:${JSON.stringify(data)} \n\n`);
+        }
+          SerEnventData({ message: "Scanning started", time: Date.now() },res);
+        const results = await checkNonHTMLContentAccessibility(`https://${domain}`, res,SerEnventData);
+        console.log('Scanning completed:', results);
+
+       SerEnventData({ message: "Scanning completed", time: Date.now() },res);
+        res.end(); // End the response after sending all data
+    } catch (error) {
+        console.error('Error occurred while scanning:', error);
+        res.end(); // Ensure response is ended in case of error
+    }
+});
+
+router.get("Second-factor-authentication-could-be-bypassed", async (req, res) => {
+    try {
+        // Call the respective controller function
+        const response =req.body.fileContent
+        const results = await sessionHijackingWithObject(response);
+        return sendResponse(res,200,"dsad",results)
+    } catch (error) {
+        return errorHandler(res, 500, error.message);
+    }
+}
+);
+
 // 
 
 module.exports = router

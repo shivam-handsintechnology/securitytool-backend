@@ -1,0 +1,94 @@
+[
+    {
+      "category": "Business Applications",
+      "examples": [
+        "Customer Relationship Management (CRM) systems",
+        "Enterprise Resource Planning (ERP) systems",
+        "Human Resource Management Systems (HRMS)",
+        "Project Management Tools",
+        "Supply Chain Management Systems",
+        "Accounting and Finance Systems"
+      ]
+    },
+    {
+      "category": "E-commerce Applications",
+      "examples": [
+        "Online Stores",
+        "Marketplaces",
+        "Shopping Carts",
+        "Payment Gateways",
+        "Inventory Management Systems"
+      ]
+    },
+    {
+      "category": "Social Media Applications",
+      "examples": [
+        "Social Networking Platforms",
+        "Microblogging Platforms",
+        "Content Sharing Platforms",
+        "Social Media Management Tools"
+      ]
+    },
+    {
+      "category": "Communication Applications",
+      "examples": [
+        "Email Clients",
+        "Instant Messaging Apps",
+        "Video Conferencing Tools",
+        "Collaboration Platforms"
+      ]
+    },
+    {
+      "category": "Entertainment Applications",
+      "examples": [
+        "Streaming Services (Video, Music, Podcasts)",
+        "Online Gaming Platforms",
+        "Virtual Reality (VR) and Augmented Reality (AR) Applications"
+      ]
+    },
+    {
+      "category": "Education and Learning Applications",
+      "examples": [
+        "Online Course Platforms",
+        "Virtual Classrooms",
+        "Learning Management Systems (LMS)",
+        "Tutoring and Mentoring Platforms"
+      ]
+    },
+    {
+      "category": "Healthcare Applications",
+      "examples": [
+        "Electronic Health Records (EHR) Systems",
+        "Telemedicine Platforms",
+        "Patient Portals",
+        "Medical Imaging and Diagnostic Tools"
+      ]
+    },
+    {
+      "category": "Finance and Banking Applications",
+      "examples": [
+        "Online Banking Platforms",
+        "Mobile Banking Apps",
+        "Investment and Trading Platforms",
+        "Cryptocurrency Exchanges"
+      ]
+    },
+    {
+      "category": "Travel and Hospitality Applications",
+      "examples": [
+        "Online Travel Booking Platforms",
+        "Hotel Reservation Systems",
+        "Ride-Sharing Apps",
+        "Travel Planning and Review Platforms"
+      ]
+    },
+    {
+      "category": "Government and Public Sector Applications",
+      "examples": [
+        "E-governance Portals",
+        "Tax Filing and Payment Systems",
+        "Citizen Services and Information Platforms",
+        "Law Enforcement and Emergency Response Systems"
+      ]
+    }
+   ]

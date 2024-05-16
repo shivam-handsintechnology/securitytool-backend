@@ -7,7 +7,8 @@ try {
   // Set specific CORS headers
   res.header("Access-Control-Allow-Origin", Origin);
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE")
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header("Access-Control-Allow-Headers", "Content-Type,Authorization,Origin, X-Requested-With,Accept");
   // Check if the request has an origin header
  if (!req.headers.origin) {
     return errorHandler(res, 403, "Forbidden");

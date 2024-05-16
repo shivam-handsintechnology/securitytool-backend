@@ -43,7 +43,22 @@ module.exports = {
           console.log("All Data",alldata)
         
           let sensitive=await CheckAllSensitiveData(alldata)
-        console.log("Sensitive Data",sensitive)
+           sensitive = sensitive.map((item) => {
+            let arr = [];
+            Object.keys(item.value).forEach((v) => {
+              console.log("V", item.value[v]);
+              if (item.value[v] === true) {
+                arr.push(v);
+              }
+            });
+            return {
+              key: item.key,
+              value: arr
+            };
+          });
+          
+          sensitive = sensitive.filter(item => item.value.length > 0?true:false);
+       
         if (sensitive.length > 0) {
           const dataToSave = {
             appid,
@@ -54,7 +69,7 @@ module.exports = {
           // Check if the record exists in the database
           const isExist = await SensitiveDataStoredInLocalStorageModel.findOne({
             appid,
-            hostname,
+            domain:hostname,
           });
         
           if (isExist) {

@@ -1,5 +1,6 @@
 
 const express = require('express');
+
 const router = express.Router();
 const Security = require('./security')
 const GetClientInformation = require('./monitor.route')
@@ -11,6 +12,7 @@ const InsecureObjectRefGuard=require("./Security/Insecure_Direct_Object_Referenc
 const InjectionsRoute=require("./Security/Injection.routes")
 const WeekCrossDomainPolicy=require("./Security/WeakCrossDomainPolicy.route")
 const Authrouter = require('./UserRoutes');
+const MissingFunctionalLevelAccessControlrouter=require("./Security/MissingFunctionLevelAccessControl.routes")
 const { ValidationMiddleware, ValidationMiddlewareQuery} = require('../middlewares/ValidationMiddleware');
 const verifytoken = require('../middlewares/VerifyUser')
 const { DomainValidationSchema } = require('../helpers/Validators');
@@ -32,7 +34,7 @@ router.use("/client",allowall, GetClientInformation)
 router.use("/auth",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, Authrouter)
 // Broken Authentication and Session Management
 router.use("/AuthSessionGuardian",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, verifyToken,
-ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware,AuthSessionGuardian
+ValidationMiddleware(DomainValidationSchema),AuthSessionGuardian
 )
 // Injections
 router.use("/injections",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat,InjectionsRoute)
@@ -54,6 +56,8 @@ router.use("/ErrorMessage",IncomingDataHashFormat,CorsMiddleware,IncomingDataHas
 router.use("/InsecureObjectRefGuard",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, InsecureObjectRefGuard)
 // SecurityMisconfiguration
 router.use("/SecurityMisconfiguration",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, SecurityMisconfiguration)
+// Missing Function Level Access Control
+router.use("/MissingFunctionLevelAccessControl",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat,verifyToken,MissingFunctionalLevelAccessControlrouter)
 // SensitiveDataExposure
 router.use("/SensitiveDataExposure",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, SensitiveDataExposure)
 // Unvalidated Redirects and Forwards

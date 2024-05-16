@@ -4,16 +4,17 @@ const SensitiveDataStoredInLocalStorageSchema = new Schema({
     appid: {
         type: String,
         ref: 'User'
+        
     },
     data:[
         {
             key:{
                 type:String,
-                required:true
+             
             },
             value:{
                 type:mongoose.Schema.Types.Mixed,
-                required:true
+                
             }
         }
     ],

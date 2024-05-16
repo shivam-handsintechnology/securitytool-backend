@@ -120,7 +120,7 @@ Register = async (req, res) => {
       return sendResponse(res, 200, "register successfully", { appid: user.appid });
     }
   } catch (error) {
-  
+
     return errorHandler(res)
   }
 }
@@ -128,28 +128,39 @@ Register = async (req, res) => {
 
 // Login
 
-Login = async (req, res) => {
+Login = async (req, res, next) => {
   try {
     const error = ValidateUserLogin(req.body)
     if (error) {
-      throw new Error("user does not exist") 
+      throw new Error("user does not exist")
     }
 
     const user = await User.findOne({ email: req.body.email })
     if (!user) {
       throw new Error("user does not exist")
     }
-   
-      var bytes = CryptoJS.AES.decrypt(user.password, key);
-      var decrypted = bytes.toString(CryptoJS.enc.Utf8);
-      if (decrypted !== req.body.password) {
-        throw new Error("please enter valid credentials")
-      } 
+
+    var bytes = CryptoJS.AES.decrypt(user.password, key);
+    var decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    if (decrypted !== req.body.password) {
+      throw new Error("please enter valid credentials")
+    }
     const token = jwt.sign({ id: user._id, appid: user.appid }, process.env.JWT_SECRET, { expiresIn: "365d" })
+
+    var date = new Date();
+    var tokenExpire = date.setTime(date.getTime() + (360 * 1000));
+    res
+      .cookie("access_token", token, {
+        httpOnly: true,
+        maxAge: tokenExpire,
+        // secure: process.env.NODE_ENV === "production",
+        // sameSite: "None",
+        // path: "/"
+      })
     return sendResponse(res, 200, "login successfully", { token, appid: user.appid });
 
   } catch (error) {
-    return errorHandler(res,500,error.message,)
+    return errorHandler(res, 500, error.message,)
   }
 
 }
@@ -231,7 +242,7 @@ Logout = async (req, res) => {
     jwt.destroy(token)
     sendResponse(res, 200, "logout successfully")
   } catch (error) {
-   
+
     return errorHandler(res)
   }
 }
@@ -317,7 +328,7 @@ FBCustomerLogin = async function (req, res, next) {
 //   
 const Profile = async (req, res) => {
   try {
-
+    console.log("Cookies", req.cookies.access_token)
     const user = await User.findById(req.user.id).select("userType email id")
     if (user) {
       return sendResponse(res, 200, "Fetch user", user);
@@ -326,7 +337,7 @@ const Profile = async (req, res) => {
     }
   }
   catch (error) {
-   
+
     return errorHandler(res)
   }
 }

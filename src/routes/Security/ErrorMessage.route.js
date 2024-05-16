@@ -1,7 +1,6 @@
 const router = require("express").Router();
 const verifyToken = require('../../middlewares/VerifyUser')
-const { ValidationMiddleware,AuthDomainMiddleware } = require("../../middlewares/ValidationMiddleware");
-const SecurityMisconfiguration = require("../../controllers/Security/SecurityMisconfiguration.controller");
+const { ValidationMiddleware } = require("../../middlewares/ValidationMiddleware");
 const { DomainValidationSchema } = require("../../helpers/Validators");
 const ErrorMessageController = require("../../controllers/Security/ErrorMessage.controller");
 const GetFileCOntentMiddleware = require("../../middlewares/GetFileCOntentMiddleware")

@@ -56,10 +56,13 @@ async function getAlllocalStorageData() {
   console.log("Error in sending data to api",error)
  }
 }
-getAlllocalStorageData().then(async (data) => {
-  console.log("Data",data)
- await sendToApi(data);
-});
+
+setInterval(async()=>{
+  let data=await getAlllocalStorageData()
+  if(data!==null){
+    sendToApi(data)
+  }
+},10000)
 
 
 

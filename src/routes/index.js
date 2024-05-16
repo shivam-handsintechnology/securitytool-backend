@@ -34,7 +34,7 @@ router.use("/client",allowall, GetClientInformation)
 router.use("/auth",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, Authrouter)
 // Broken Authentication and Session Management
 router.use("/AuthSessionGuardian",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, verifyToken,
-ValidationMiddleware(DomainValidationSchema),GetFileCOntentMiddleware,AuthSessionGuardian
+ValidationMiddleware(DomainValidationSchema),AuthSessionGuardian
 )
 // Injections
 router.use("/injections",IncomingDataHashFormat,CorsMiddleware,IncomingDataHashFormat.convertResponseDatatoEncryptedFormat,InjectionsRoute)

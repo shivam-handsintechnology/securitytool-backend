@@ -101,11 +101,11 @@ const SSLverifier = async (hostname) => {
             // Handle authorization error
             const errorMessage = `Authorization error: ${authorizationError}`;
             console.error(errorMessage);
-            resolve({ message: errorMessage });
+            reject({ message: errorMessage });
             return;
           } else {
             // Handle other cases where certificate information is incomplete
-            resolve({ message: "Certificate information is incomplete" });
+            reject({ message: "Certificate information is incomplete" });
             return;
           }
         }

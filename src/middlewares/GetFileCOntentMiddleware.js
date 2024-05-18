@@ -15,7 +15,7 @@ module.exports = async (req, res, next) => {
                     req.body.fileContent = response.data.data
                 }
                 if(!Array.isArray(response.data.data)){
-                    throw new Error("Invalid File Content")
+                    throw new Error("Invalid  Content")
                 }
                 
             }else if(response.status===502){

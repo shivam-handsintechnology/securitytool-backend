@@ -79,106 +79,192 @@ const retryWithDelay = (delay) => {
     setTimeout(resolve, delay);
   });
 };
+const tls = require('tls');
+
 const SSLverifier = async (hostname) => {
   return new Promise((resolve, reject) => {
     try {
       const result = {};
       const options = {
-        hostname: hostname,
+        host: hostname,
         port: 443,
         rejectUnauthorized: false,
       };
-      const req = https.request(options, (res) => {
-        const certificate = res.socket.getPeerCertificate();
-        const negotiatedProtocol = res.socket.getProtocol();
+
+      const socket = tls.connect(options, () => {
+        const certificate = socket.getPeerCertificate();
+        const negotiatedProtocol = socket.getProtocol();
 
         if (!certificate || !certificate.subject || !certificate.issuer) {
-          // Check the reason behind the missing certificate information
-          const { socket } = res;
           const { authorized, authorizationError } = socket;
-
           if (!authorized && authorizationError) {
-            // Handle authorization error
-            const errorMessage = `Authorization error: ${authorizationError}`;
-            console.error(errorMessage);
-            reject({ message: errorMessage });
-            return;
+            reject({ message: `Authorization error: ${authorizationError}` });
           } else {
-            // Handle other cases where certificate information is incomplete
             reject({ message: "Certificate information is incomplete" });
-            return;
           }
+          socket.end();
+          return;
         }
 
-        const {
-          subject,
-          issuer,
-          valid_from: validFrom,
-          valid_to: validTo,
-          fingerprint,
-          serialNumber,
-          subjectaltname: subjectAltName,
-        } = certificate;
+        const { subject, issuer, valid_from: validFrom, valid_to: validTo, fingerprint, serialNumber, subjectaltname: subjectAltName } = certificate;
         const valid = moment(validTo, 'MMM DD HH:mm:ss YYYY GMT');
         const currentDate = moment();
 
         try {
-          // Check for self-signed certificate
-          let s = JSON.stringify(certificate.subject);
-          let i = JSON.stringify(certificate.issuer);
-          s = JSON.parse(s);
-          i = JSON.parse(i);
-          if (_.isEqual(s, i)) {
+          const s = JSON.stringify(subject);
+          const i = JSON.stringify(issuer);
+          if (s === i) {
             result.self = 'Self-signed certificate detected';
           } else {
             result.self = 'Certificate is not self-signed';
           }
         } catch (error) {
-          console.log(error);
           resolve({ message: "Invalid JSON" });
+          socket.end();
           return;
         }
 
-        // Check for expired certificate
         if (valid.isBefore(currentDate)) {
           result.valid = 'Certificate is not valid';
           result.expired = 'Certificate has expired';
         } else {
           result.valid = 'Certificate is valid';
-          result.expired = 'Certificate is expired on the ' + validTo;
+          result.expired = 'Certificate expires on ' + validTo;
         }
 
-        // Check for obsolete SSL/TLS protocol
         if (negotiatedProtocol === 'TLSv1' || negotiatedProtocol === 'SSLv3') {
           result.negotiatedProtocol = 'Obsolete SSL/TLS protocol detected';
         } else {
           result.negotiatedProtocol = 'No obsolete SSL/TLS protocol detected';
         }
 
-        // Check for SSL Cookie without secure flag set
-        const setCookieHeader = res.headers['set-cookie'];
-        if (setCookieHeader && !setCookieHeader.includes('Secure')) {
-          result.cookieSecureFlag = 'SSL Cookie without secure flag set';
-        } else {
-          result.cookieSecureFlag = 'SSL Cookie secure flag is set';
-        }
-
-        resolve(result);
+        fetch(`https://${hostname}`).then((res) => {
+          const setCookieHeader = res.headers.get('set-cookie');
+          if (setCookieHeader && !setCookieHeader.includes('Secure')) {
+            result.cookieSecureFlag = 'SSL Cookie without secure flag set';
+          } else {
+            result.cookieSecureFlag = 'SSL Cookie secure flag is set';
+          }
+          resolve(result);
+          socket.end();
+        }).catch((error) => {
+          reject(error);
+          socket.end();
+        });
       });
 
-      req.on('error', (error) => {
+      socket.on('error', (error) => {
         if (error.code === 'ENOTFOUND') {
           reject({ message: "Domain Not Found" });
         }
         reject(error);
+        socket.end();
       });
-
-      req.end();
     } catch (error) {
       reject(error);
     }
   });
 };
+// const SSLverifier = async (hostname) => {
+//   return new Promise((resolve, reject) => {
+//     try {
+//       const result = {};
+//       const options = {
+//         hostname: hostname,
+//         port: 443,
+//         rejectUnauthorized: false,
+//       };
+//       const req = https.request(options, (res) => {
+//         const certificate = res.socket.getPeerCertificate();
+//         const negotiatedProtocol = res.socket.getProtocol();
+
+//         if (!certificate || !certificate.subject || !certificate.issuer) {
+//           // Check the reason behind the missing certificate information
+//           const { socket } = res;
+//           const { authorized, authorizationError } = socket;
+
+//           if (!authorized && authorizationError) {
+//             // Handle authorization error
+//             const errorMessage = `Authorization error: ${authorizationError}`;
+//             console.error(errorMessage);
+//             reject({ message: errorMessage });
+//             return;
+//           } else {
+//             // Handle other cases where certificate information is incomplete
+//             reject({ message: "Certificate information is incomplete" });
+//             return;
+//           }
+//         }
+
+//         const {
+//           subject,
+//           issuer,
+//           valid_from: validFrom,
+//           valid_to: validTo,
+//           fingerprint,
+//           serialNumber,
+//           subjectaltname: subjectAltName,
+//         } = certificate;
+//         const valid = moment(validTo, 'MMM DD HH:mm:ss YYYY GMT');
+//         const currentDate = moment();
+
+//         try {
+//           // Check for self-signed certificate
+//           let s = JSON.stringify(certificate.subject);
+//           let i = JSON.stringify(certificate.issuer);
+//           s = JSON.parse(s);
+//           i = JSON.parse(i);
+//           if (_.isEqual(s, i)) {
+//             result.self = 'Self-signed certificate detected';
+//           } else {
+//             result.self = 'Certificate is not self-signed';
+//           }
+//         } catch (error) {
+//           console.log(error);
+//           resolve({ message: "Invalid JSON" });
+//           return;
+//         }
+
+//         // Check for expired certificate
+//         if (valid.isBefore(currentDate)) {
+//           result.valid = 'Certificate is not valid';
+//           result.expired = 'Certificate has expired';
+//         } else {
+//           result.valid = 'Certificate is valid';
+//           result.expired = 'Certificate is expired on the ' + validTo;
+//         }
+
+//         // Check for obsolete SSL/TLS protocol
+//         if (negotiatedProtocol === 'TLSv1' || negotiatedProtocol === 'SSLv3') {
+//           result.negotiatedProtocol = 'Obsolete SSL/TLS protocol detected';
+//         } else {
+//           result.negotiatedProtocol = 'No obsolete SSL/TLS protocol detected';
+//         }
+
+//         // Check for SSL Cookie without secure flag set
+//         const setCookieHeader = res.headers['set-cookie'];
+//         if (setCookieHeader && !setCookieHeader.includes('Secure')) {
+//           result.cookieSecureFlag = 'SSL Cookie without secure flag set';
+//         } else {
+//           result.cookieSecureFlag = 'SSL Cookie secure flag is set';
+//         }
+
+//         resolve(result);
+//       });
+
+//       req.on('error', (error) => {
+//         if (error.code === 'ENOTFOUND') {
+//           reject({ message: "Domain Not Found" });
+//         }
+//         reject(error);
+//       });
+
+//       req.end();
+//     } catch (error) {
+//       reject(error);
+//     }
+//   });
+// };
 
 module.exports = { SSLverifier }
 

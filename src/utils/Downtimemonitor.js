@@ -66,11 +66,19 @@ function sendEmailAlert(websiteName, alertMessage) {
 function startMonitoring() {
   console.log('Monitoring started...');
   setInterval(() => {
-  websites.forEach((website) => {
-    checkWebsiteAvailability(website);
-  });
-  }, 5000); 
+    websites.forEach((website) => {
+      checkWebsiteAvailability(website);
+    });
+  }, 5000);
 }
+const MAX_RETRIES = 3; // Set the maximum number of retries
+let retries = 0;
+
+const retryWithDelay = (delay) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, delay);
+  });
+};
 const SSLverifier = async (hostname) => {
   return new Promise((resolve, reject) => {
     try {
@@ -83,6 +91,25 @@ const SSLverifier = async (hostname) => {
       const req = https.request(options, (res) => {
         const certificate = res.socket.getPeerCertificate();
         const negotiatedProtocol = res.socket.getProtocol();
+
+        if (!certificate || !certificate.subject || !certificate.issuer) {
+          // Check the reason behind the missing certificate information
+          const { socket } = res;
+          const { authorized, authorizationError } = socket;
+
+          if (!authorized && authorizationError) {
+            // Handle authorization error
+            const errorMessage = `Authorization error: ${authorizationError}`;
+            console.error(errorMessage);
+            resolve({ message: errorMessage });
+            return;
+          } else {
+            // Handle other cases where certificate information is incomplete
+            resolve({ message: "Certificate information is incomplete" });
+            return;
+          }
+        }
+
         const {
           subject,
           issuer,
@@ -92,23 +119,24 @@ const SSLverifier = async (hostname) => {
           serialNumber,
           subjectaltname: subjectAltName,
         } = certificate;
-
         const valid = moment(validTo, 'MMM DD HH:mm:ss YYYY GMT');
         const currentDate = moment();
 
-       try{
-        // Check for self-signed certificate
-        let s = JSON.stringify(certificate.subject);
-        let i = JSON.stringify(certificate.issuer);
-        s = JSON.parse(s);
-        i = JSON.parse(i);
-        if (_.isEqual(s, i)) {
-          result.self = 'Self-signed certificate detected';
-        } else {
-          result.self = 'Certificate is not self-signed';
-        }}
-        catch(error){
-        reject({ message: "Something is Wrong" });
+        try {
+          // Check for self-signed certificate
+          let s = JSON.stringify(certificate.subject);
+          let i = JSON.stringify(certificate.issuer);
+          s = JSON.parse(s);
+          i = JSON.parse(i);
+          if (_.isEqual(s, i)) {
+            result.self = 'Self-signed certificate detected';
+          } else {
+            result.self = 'Certificate is not self-signed';
+          }
+        } catch (error) {
+          console.log(error);
+          resolve({ message: "Invalid JSON" });
+          return;
         }
 
         // Check for expired certificate

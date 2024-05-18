@@ -269,4 +269,4 @@ const checkNonHTMLContentAccessibility = async (websiteUrl, res, SerEnventData) 
   });
 };
 
-module.exports = { checkNonHTMLContentAccessibility };
+module.exports = { checkNonHTMLContentAccessibility, directoryListingPatterns };

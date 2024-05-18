@@ -1,9 +1,11 @@
 
 const router = require("express").Router()
 const { errorHandler } = require("../../utils/errorHandler");
+
 const { sessionExpireOnClose, sessionTimeoutWithObject, sessionFixationWithobject, sessionHijackingWithObject, sessionTokenWithObject, SessionVulnurability } = require("../../helpers/SessionVulnurabiltyChecker");
 const { checkNonHTMLContentAccessibility } = require("./Scan/checkNonHtmlAccccesability");
 const GetFileCOntentMiddleware = require("../../middlewares/GetFileCOntentMiddleware");
+const { sendResponse } = require("../../utils/dataHandler");
 
 router.get("/session-vulnurability", GetFileCOntentMiddleware, async (req, res) => {
     try {

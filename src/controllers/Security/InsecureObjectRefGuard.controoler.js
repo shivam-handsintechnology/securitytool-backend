@@ -3,6 +3,7 @@ const axios = require("axios");
 const { errorHandler } = require("../../utils/errorHandler");
 const { hashttpParametersPollutionavailable } = require("../../utilities/functions/functions");
 const { AllowedWebDomainsModel } = require("../../models/AllowedDomainsModel");
+const { directoryListingPatterns } = require("../../routes/Security/Scan/checkNonHtmlAccccesability");
 
 module.exports = {
   DirectoryListingEnable: async (req, res) => {
@@ -87,19 +88,19 @@ module.exports = {
   },
   post: async (req, res) => {
     try {
-      let paterns=[
+      let paterns = [
         /require\s*\(\s*['"](.+?)['"]\s*\)/g,
         /import\s*\(\s*['"](.+?)['"]\s*\)/g,
 
       ]
       let url = req.body.url;
       let response = await axios.get(url).then((res) => res).catch((e) => e.response);
-     
+
       if (response.status === 200) {
-         let data= response.data.match(/require\s*\(\s*['"](.+?)['"]\s*\)/g) || response.data.match(/import\s+.+?\s+from\s+['"](.+?)['"]/g)
-          if(data){
-            return sendResponse(res, 200, "success", "Yes", "No")
-          }
+        let data = response.data.match(/require\s*\(\s*['"](.+?)['"]\s*\)/g) || response.data.match(/import\s+.+?\s+from\s+['"](.+?)['"]/g)
+        if (data) {
+          return sendResponse(res, 200, "success", "Yes", "No")
+        }
         return sendResponse(res, 400, "success", "No", "No")
       } else {
         return sendResponse(res, 400, "No", "No")
@@ -107,12 +108,17 @@ module.exports = {
     } catch (error) {
       return errorHandler(res, 500, error.message)
     }
-  },fetch: async (req, res) => {
+  }, fetch: async (req, res) => {
     try {
       let { url } = req.body;
       let response = await axios.get(url).then((res) => res).catch((e) => e.response);
       if (response.status === 200) {
-        return sendResponse(res, 200, "success", "Yes", "No")
+        const isDirectoryListing = directoryListingPatterns.some(pattern => pageContent.includes(pattern));
+        if (isDirectoryListing) {
+          return sendResponse(res, 200, "success", "Yes", "Yes")
+        } else {
+          return sendResponse(res, 200, "success", "No", "No")
+        }
       } else {
         return sendResponse(res, 400, "No", "No")
       }

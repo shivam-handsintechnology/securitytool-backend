@@ -669,11 +669,11 @@ const scanNonHTMLContentAccessibility = async (url, connection) => {
             const hasForm = await page.$('form') !== null;
             // Check for any element with a class name containing "modal"
             const hasModalClass = await page.evaluate(() => {
-              return Array.from(document.querySelectorAll('*')).some(element => 
+              return Array.from(document.querySelectorAll('*')).some(element =>
                 element.className && element.className.toLowerCase().includes('modal')
               );
             });
-  
+
             if (hasForm) {
               console.log(`Form found on page "${url}".`);
               connection.emit('non-html-content-accessibility', { message: `Page "${url}" has a form.`, time: Date.now() });
@@ -681,7 +681,7 @@ const scanNonHTMLContentAccessibility = async (url, connection) => {
               console.log(`No form found on page "${url}".`);
               connection.emit('non-html-content-accessibility', { message: `Page "${url}" does not have a form.`, time: Date.now() });
             }
-  
+
             if (hasModalClass) {
               console.log(`Element with class containing "modal" found on page "${url}".`);
               connection.emit('non-html-content-accessibility', { message: `Page "${url}" has an element with a class containing "modal".`, time: Date.now() });
@@ -695,7 +695,7 @@ const scanNonHTMLContentAccessibility = async (url, connection) => {
           }
 
           navigationSuccessful = true;
-        }else{
+        } else {
           connection.emit('non-html-content-accessibility', { message: `Page "${url}" is not found for scan`, time: Date.now() });
         }
 

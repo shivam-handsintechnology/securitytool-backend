@@ -33,10 +33,6 @@ module.exports = {
       console.log("Request", req.user)
       let WebDomain = await AllowedWebDomainsModel.find({ appid: req.user.appid });
       let isRobotsTxt = false
-      let filecontent = req.body.fileContent
-      if (filecontent.length > 0 && filecontent.find((item) => item.name === "robots")) {
-        isRobotsTxt = true
-      }
       if (WebDomain.length > 0) {
 
         for (let i = 0; i < WebDomain.length; i++) {
@@ -53,7 +49,6 @@ module.exports = {
           })
         }
       }
-
       data = isRobotsTxt ? "Yes" : "No"
 
       return sendResponse(res, 200, "success", data)

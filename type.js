@@ -1,42 +1,41 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+const { chromium } = require('playwright');
 
+(async () => {
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
 
-async function crawl(url) {
-    return new Promise(async (resolve, reject) => {
-        const baseURL = 'https://example.com';  // Replace with your website's base URL
-        const visitedUrls = new Set();
-        const sitemapUrls = new Set();
-        if (visitedUrls.has(url) || !url.startsWith(baseURL)) return;
+    // Navigate to the website's home page
+    await page.goto('https://www.muscleblaze.com/');
+    await page.waitForLoadState('networkidle', { timeout: 60000 });
 
-        try {
-            visitedUrls.add(url);
+    // Check if there's a login text on the home page
+    const loginText = await page.$('text=Login');
 
-            const { data } = await axios.get(url);
-            const $ = cheerio.load(data);
+    if (loginText) {
+        // Click on the login text
+        await loginText.click();
 
-            $('a[href]').each((_, element) => {
-                const link = $(element).attr('href');
-                const absoluteLink = new URL(link, baseURL).href;
-                if (!visitedUrls.has(absoluteLink) && absoluteLink.startsWith(baseURL)) {
-                    crawl(absoluteLink);
-                }
-            });
+        // Wait for the login page or pop-up to appear
+        await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
 
-            let response = sitemapUrls.add(url);
-            resolve(response)
+        // Wait for 1 second to ensure the content is fully loaded
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Extract all visible text content on the page
+        const pageContent = await page.evaluate(() => {
+            return document.body.innerText;
+        });
 
-        } catch (error) {
-            console.error(`Error crawling ${url}: ${error.message}`);
-            reject(error)
+        // Check the extracted text for OTP or verification mention
+        const otpOrVerificationMentioned = pageContent.toLowerCase().includes('otp') || pageContent.toLowerCase().includes('verification');
+
+        if (otpOrVerificationMentioned) {
+            console.log('The website uses two-factor authentication or OTP.');
+        } else {
+            console.log('The website does not use two-factor authentication or OTP.');
         }
-    })
-}
-let test = async () => {
-    await crawl('https://www.udemy.com/').then((data) => {
-        console.log(data)
-    }).catch((err) => {
-        console.log("error ", err)
-    })
-}
-test()
+    } else {
+        console.log('No login text found on the home page.');
+    }
+
+    await browser.close();
+})();

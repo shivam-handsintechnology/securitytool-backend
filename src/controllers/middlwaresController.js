@@ -1,36 +1,28 @@
 
-const { default: mongoose } = require('mongoose')
+
+const { default: axios } = require('axios')
 const { middlewareModel } = require('../models/midlwaresModel')
 const { sendResponse } = require('../utils/dataHandler')
 const { errorHandler } = require('../utils/errorHandler')
 const getMiddlewareController = async (req, res) => {
   try {
-    const data = await middlewareModel.aggregate([
-      {
-        $match: {
-          user: mongoose.Types.ObjectId(req.user.id)
-        }
-      },
-      {
-        $project: {
-          appid: 0,
-          _id: 0,
-          user: 0,
-          createdAt: 0,
-          updatedAt: 0,
-          BlockUserMiddlware: 0,
-          ldapInjectionDetectorMiddlware: 0,
-          __v: 0
-        }
+    await axios.get(`http://${req.query.domain}/middleware`, {
+      headers: {
+        'origin': "https://securitytool.handsintechnology.in",
       }
-    ])
-    if (data) {
-     return  sendResponse(res, 200, "data fetch successfully", data[0])
-    } else {
-      return sendResponse(res, 404, "data Not Found")
-    }
+    })
+      .then((response) => {
+        if (response.data && response.data.data) {
+          return sendResponse(res, 200, "success", response.data.data)
+        } else {
+          return sendResponse(res, 404, "No data found")
+        }
+      })
+      .catch((error) => {
+        return errorHandler(res, 500, error.message)
+      })
   } catch (error) {
-   return errorHandler(res,500,error.message)
+    return errorHandler(res, 500, error.message)
   }
 }
 const getMiddlewareControllerForClient = async (req, res) => {
@@ -39,9 +31,9 @@ const getMiddlewareControllerForClient = async (req, res) => {
 
       const data = await middlewareModel.findOne({ appid: req.query.appid })
       if (data) {
-        return  sendResponse(res, 200, "data fetch successfully", data)
+        return sendResponse(res, 200, "data fetch successfully", data)
       } else {
-        return  sendResponse(res, 404, "Your App id Not matched")
+        return sendResponse(res, 404, "Your App id Not matched")
       }
     } else {
       return sendResponse(res, 404, "Please enter appid")
@@ -49,7 +41,7 @@ const getMiddlewareControllerForClient = async (req, res) => {
 
   } catch (error) {
     console.error(error)
-    return errorHandler(res,500,error.message)
+    return errorHandler(res, 500, error.message)
   }
 }
 const findAndUpdateMiddlewareController = async (req, res) => {
@@ -62,13 +54,13 @@ const findAndUpdateMiddlewareController = async (req, res) => {
       setTimeout(() => {
         process.exit()
       }, 5000);
-      return  sendResponse(res, 200, message, data)
+      return sendResponse(res, 200, message, data)
     } else {
-     return sendResponse(res, 404, "data Not Found")
+      return sendResponse(res, 404, "data Not Found")
     }
 
   } catch (error) {
-    return errorHandler(res,500,error.message)
+    return errorHandler(res, 500, error.message)
   }
 }
 const middlwareController = {

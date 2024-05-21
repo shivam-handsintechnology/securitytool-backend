@@ -19,7 +19,7 @@ const { DomainValidationSchema } = require('../helpers/Validators');
 const verifyToken = require('../middlewares/VerifyUser');
 const GetFileCOntentMiddleware = require('../middlewares/GetFileCOntentMiddleware');
 
-const { SSLverifier } = require('../utils/Downtimemonitor');
+const { SSLverifier } = require('../utils/SSLverifier');
 const { sendResponse } = require('../utils/dataHandler');
 const { errorHandler } = require('../utils/errorHandler');
 const CorsMiddleware = require('../middlewares/CorsMiddleware').cors;

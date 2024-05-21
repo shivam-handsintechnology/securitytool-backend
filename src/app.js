@@ -69,6 +69,7 @@ if (cluster.isPrimary) {
   });
 }
 require("./utils/Websocket")(io); // Websocket connection
+console.log(process.env)
 
 
 

@@ -6,6 +6,7 @@ const { sessionExpireOnClose, sessionTimeoutWithObject, sessionFixationWithobjec
 const { checkNonHTMLContentAccessibility } = require("./Scan/checkNonHtmlAccccesability");
 const GetFileCOntentMiddleware = require("../../middlewares/GetFileCOntentMiddleware");
 const { sendResponse } = require("../../utils/dataHandler");
+const { SecondFactorAuthBypassed } = require("./Scan/checkSecondFactorAuthentication");
 
 router.get("/session-vulnurability", GetFileCOntentMiddleware, async (req, res) => {
     try {
@@ -134,14 +135,29 @@ router.get("/non-html-content-accessability", async (req, res) => {
     }
 });
 
-router.get("Second-factor-authentication-could-be-bypassed", async (req, res) => {
+router.get("/SecondFactorAuth", async (req, res) => {
     try {
-        // Call the respective controller function
-        const response = req.body.fileContent
-        const results = await sessionHijackingWithObject(response);
-        return sendResponse(res, 200, "dsad", results)
+
+        const domain = req.query.domain
+        const headers = {
+            'Content-Type': 'text/event-stream',
+            'Connection': 'keep-alive',
+            'Cache-Control': 'no-cache'
+        };
+        res.writeHead(200, headers);
+        const SerEnventData = (data, res = res) => {
+            res.write(`data:${JSON.stringify(data)} \n\n`);
+        }
+        SerEnventData({ message: "Scanning started", complete: false, time: Date.now() }, res);
+        const results = await SecondFactorAuthBypassed(`https://${domain}`, res, SerEnventData);
+        console.log('Scanning completed:', results);
+
+        SerEnventData({ message: "Scanning completed", time: Date.now(), complete: true }, res);
+        res.end(); // End the response after sending all data
     } catch (error) {
-        return errorHandler(res, 500, error.message);
+        console.error('Error occurred while scanning:', error);
+        res.write(`data: ${JSON.stringify({ message: error.message, complete: true })} \n\n`)
+        res.end(); // Ensure response is ended in case of error
     }
 }
 );

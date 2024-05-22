@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const middlwareController = require('../controllers/middlwaresController')
 const IpController = require('../controllers/IP.controller')
-const DomainController = require('../controllers/DomainController')
+const DomainController = require('../controllers/DomainController');
+const { ValidationMiddleware } = require('../middlewares/ValidationMiddleware');
+const { DomainValidationSchema } = require('../helpers/Validators');
 // middlewares
-router.get('/middlwares', middlwareController.getMiddlewareController);
-router.post('/middlwares/switch', middlwareController.findAndUpdateMiddlewareController);
+router.route('/middlwares', ValidationMiddleware(DomainValidationSchema)).get(middlwareController.getMiddlewareController).post(middlwareController.findAndUpdateMiddlewareController);
 // Start Ips
 router.route('/ip').post(IpController.addIP).get(IpController.getAllIPs).delete(IpController.deleteIP);
 router.route("/blacklist").post(IpController.AddBlackListIp).get(IpController.BlackList).delete(IpController.DeleteBlackListip);

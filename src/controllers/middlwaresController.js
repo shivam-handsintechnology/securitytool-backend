@@ -6,58 +6,48 @@ const { sendResponse } = require('../utils/dataHandler')
 const { errorHandler } = require('../utils/errorHandler')
 const getMiddlewareController = async (req, res) => {
   try {
-    await axios.get(`http://${req.query.domain}/middleware`, {
+    const { type } = req.query
+    await axios.get(`http://${req.query.domain}/middleware?type=${type}`, {
       headers: {
         'origin': "https://securitytool.handsintechnology.in",
       }
     })
       .then((response) => {
-        if (response.data && response.data.data) {
-          return sendResponse(res, 200, "success", response.data.data)
+        console.log(response.data)
+        if (response.data) {
+          return sendResponse(res, 200, "success", { middleware: response.data.data })
         } else {
           return sendResponse(res, 404, "No data found")
         }
       })
       .catch((error) => {
+        console.log(error.message)
         return errorHandler(res, 500, error.message)
       })
   } catch (error) {
     return errorHandler(res, 500, error.message)
   }
 }
-const getMiddlewareControllerForClient = async (req, res) => {
-  try {
-    if (req.query.appid) {
 
-      const data = await middlewareModel.findOne({ appid: req.query.appid })
-      if (data) {
-        return sendResponse(res, 200, "data fetch successfully", data)
-      } else {
-        return sendResponse(res, 404, "Your App id Not matched")
-      }
-    } else {
-      return sendResponse(res, 404, "Please enter appid")
-    }
-
-  } catch (error) {
-    console.error(error)
-    return errorHandler(res, 500, error.message)
-  }
-}
 const findAndUpdateMiddlewareController = async (req, res) => {
-
-  const body = req.body
+  const { domain, value, type } = req.body
+  console.log(type, value)
   try {
-    const data = await middlewareModel.findOneAndUpdate({ user: req.user.id }, body, { new: true }).select("-__v -appid -_id -user -createdAt -updatedAt -BlockUserMiddlware -ldapInjectionDetectorMiddlware")
-    if (data) {
-      const message = Object.keys(req.body).toString().replace('Middlware', '') + " " + "updated successfully"
-      setTimeout(() => {
-        process.exit()
-      }, 5000);
-      return sendResponse(res, 200, message, data)
-    } else {
-      return sendResponse(res, 404, "data Not Found")
-    }
+    await axios.post(`https://${domain}/middleware`, {
+      [type]: value
+    }, {
+      headers: {
+        'origin': "https://securitytool.handsintechnology.in",
+      }
+    })
+      .then((response) => {
+        console.log(response.status, response.data)
+        if (response.status === 200) {
+          return sendResponse(res, 200, `${type} Protection is ${value ? "On" : "Off"}`,
+            Date.now()
+          )
+        }
+      })
 
   } catch (error) {
     return errorHandler(res, 500, error.message)
@@ -65,7 +55,6 @@ const findAndUpdateMiddlewareController = async (req, res) => {
 }
 const middlwareController = {
   findAndUpdateMiddlewareController,
-  getMiddlewareController,
-  getMiddlewareControllerForClient
+  getMiddlewareController
 }
 module.exports = middlwareController

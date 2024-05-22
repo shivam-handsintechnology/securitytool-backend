@@ -94,7 +94,7 @@ async function checkForSensitiveInfoInBody(data, keysToMatch, passwordTestHashes
 
     recursiveSearch(data);
     console.log("result", result)
-    return matchedData;
+    return result;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -193,9 +193,9 @@ async function CheckAllSensitiveData(data) {
     // Helper function to check the value for sensitive data
     function checkValue(item) {
       const { key, value } = item;
-      const sensitiveData = { Email: false, "JSON Web Token": false, ObjectId:false,PassportNumber: false, CreditCard: false, Password: false, PhoneNumber: false, };
+      const sensitiveData = { Email: false, "JSON Web Token": false, ObjectId: false, PassportNumber: false, CreditCard: false, Password: false, PhoneNumber: false, };
       if (typeof value === 'string') {
-       
+
         // Check if the value is a stringified JSON object
         if (isJsonString(value)) {
           const parsedValue = JSON.parse(value);
@@ -211,7 +211,7 @@ async function CheckAllSensitiveData(data) {
           if (isValidObjectId(value)) {
             sensitiveData.ObjectId = true;
           }
-        
+
           if (validator.isCreditCard(value)) {
             sensitiveData.CreditCard = true;
           }
@@ -221,7 +221,7 @@ async function CheckAllSensitiveData(data) {
           if (validator.isMobilePhone(value)) {
             sensitiveData.PhoneNumber = true;
           }
-          
+
 
         }
       }

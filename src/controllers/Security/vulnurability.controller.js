@@ -171,10 +171,10 @@ module.exports = {
                 // Sensitive information revealed in HTTP response
                 const sensitivekey = await checkForSensitiveInfoInBody(responseData, sensitivedata);
                 console.log("sensitivekey", sensitivekey, "responseData", responseData)
-                if (!sensitivekey.length === 0) {
+                if (sensitivekey.length === 0) {
                     successMessage = "No sensitive key found in the Data.";
                 }
-                sensitivekey.length === 0 && await CreatData(sensitivekey, domain, appid, "response")
+                sensitivekey.length > 0 && await CreatData(sensitivekey, domain, appid, "response")
             }
 
             return res.status(200).json({ success: true, message: successMessage });

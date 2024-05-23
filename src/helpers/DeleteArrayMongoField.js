@@ -51,11 +51,12 @@ async function GetPaginatedSensitiveKeys(domain, appid, type, page = 1, limit = 
                 });
 
                 if (!document) {
-                    return {
+                    resolve({
                         success: false,
                         message: "No document found.",
                         data: []
-                    };
+                    })
+
                 }
 
                 // Get the sensitivekeys array and apply pagination

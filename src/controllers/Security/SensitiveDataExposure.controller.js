@@ -143,7 +143,7 @@ module.exports = {
             if (!req.query.type) {
                 throw new Error("Type is required")
             }
-            console.log(req.user)
+
             let { appid, id: _id } = req.user;
             let data = await DeleteKeys(domain, appid, type, _id, key, CrticalInformationInurl, "sensitivekeys")
             return sendResponse(res, 200, "fetch", data);

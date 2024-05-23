@@ -6,6 +6,7 @@ const { checkServerFingerprinting, Full_Path_Disclosure } = require("../../utils
 const { scanHardCodedData } = require("../../utils/scanClientData");
 const { ServerDataInPlaintextModel } = require("../../models/Security/SecurityMisconfiguration.model");
 const { PasswordValidateModel } = require("../../models/PasswordVaildateModel");
+const { GetPaginatedSensitiveKeys, DeleteKeys } = require("../../helpers/DeleteArrayMongoField");
 function isPrivateIPAddress(headers) {
     return new Promise((resolve, reject) => {
         try {
@@ -24,48 +25,8 @@ function isPrivateIPAddress(headers) {
     })
 
 }
-async function GetPaginatedSensitiveKeys(domain, appid, type, page = 1, limit = 10, _id) {
-    try {
-        console.log("domain", domain, "appid", appid, "type", type, "page", page, "limit", limit, "_id", _id)
-        // Calculate the number of documents to skip based on the current page and limit
-        const skip = (page - 1) * limit;
 
-        // Find the document with the matching criteria
-        const document = await CrticalInformationInurl.findOne({
-            user: _id,
-            domain,
-            appid,
-            type
-        });
 
-        if (!document) {
-            return {
-                success: false,
-                message: "No document found.",
-                data: []
-            };
-        }
-
-        // Get the sensitivekeys array and apply pagination
-        const paginatedKeys = document.sensitivekeys.slice(skip, skip + limit);
-
-        return {
-            success: true,
-            message: "Paginated sensitive keys fetched successfully.",
-            data: paginatedKeys,
-            page,
-            limit,
-            total: document.sensitivekeys.length
-        };
-    } catch (error) {
-        console.error("Error fetching paginated sensitive keys:", error);
-        return {
-            success: false,
-            message: "An error occurred while fetching paginated sensitive keys.",
-            data: []
-        };
-    }
-}
 
 module.exports = {
     sourcecodeDisclousoure: async (req, res) => {
@@ -165,7 +126,26 @@ module.exports = {
             limit = parseInt(limit) || 5
             console.log(req.user)
             let { appid, id: _id } = req.user;
-            let data = await GetPaginatedSensitiveKeys(domain, appid, type, page, limit, _id)
+            let data = await GetPaginatedSensitiveKeys(domain, appid, type, page, limit, _id, CrticalInformationInurl, "sensitivekeys")
+            return sendResponse(res, 200, "fetch", data);
+
+        } catch (error) {
+            return errorHandler(res, 500, "fetch", error.message);
+        }
+    }
+    ,
+    SensitiveKeysinUrlDelete: async (req, res) => {
+        try {
+            let { domain, type, key } = req.query;
+            if (!req.query.key) {
+                throw new Error("Key is required")
+            }
+            if (!req.query.type) {
+                throw new Error("Type is required")
+            }
+            console.log(req.user)
+            let { appid, id: _id } = req.user;
+            let data = await DeleteKeys(domain, appid, type, _id, key, CrticalInformationInurl, "sensitivekeys")
             return sendResponse(res, 200, "fetch", data);
 
         } catch (error) {

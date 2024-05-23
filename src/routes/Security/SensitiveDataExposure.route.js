@@ -5,10 +5,8 @@ const SensitiveDataExposure = require("../../controllers/Security/SensitiveDataE
 const { DomainValidationSchema } = require("../../helpers/Validators");
 const GetFileCOntentMiddleware = require("../../middlewares/GetFileCOntentMiddleware");
 
-router.get("/sensitive-data", verifyToken,
-    // ValidationMiddlewareQuery(DomainValidationSchema),
-    // AuthDomainMiddleware,
-    SensitiveDataExposure.SensitiveKeysinUrl)
+router.route("/sensitive-data",
+).get(verifyToken, ValidationMiddlewareQuery(DomainValidationSchema), SensitiveDataExposure.SensitiveKeysinUrl).delete(verifyToken, ValidationMiddlewareQuery(DomainValidationSchema), SensitiveDataExposure.SensitiveKeysinUrlDelete)
 router.get("/sourcecode-disclosoure", verifyToken,
     ValidationMiddlewareQuery(DomainValidationSchema),
     GetFileCOntentMiddleware,

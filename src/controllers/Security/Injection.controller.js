@@ -6,16 +6,18 @@ const { default: mongoose } = require('mongoose')
 const getAllLogs = async (req, res) => {
     try {
         // Get total count of users
-        const { page, limit,question, ...rest } = req.query;
+        const { page, limit, question, ...rest } = req.query;
         let obj = {}
-        let restdata=Object.keys(rest)
-        for (let i of restdata){
-            obj[i]=rest[i]
+        let restdata = Object.keys(rest)
+        for (let i of restdata) {
+            if (rest[i]) {
+                obj[i] = rest[i]
+            }
         }
-        obj["user"]=mongoose.Types.ObjectId(req.user.id)
-     
+        obj["user"] = mongoose.Types.ObjectId(req.user.id)
+
         const totalCount = await Project_Security_Logs.countDocuments(obj);
-   
+
         // Convert page and limit to numbers
         const pageNumber = totalCount > 10 ? parseInt(page) || 1 : 1;
         const limitNumber = parseInt(limit) || 10;
@@ -39,7 +41,7 @@ const getAllLogs = async (req, res) => {
             totalPages: Math.ceil(totalCount / limitNumber)
         })
     } catch (error) {
-        return   errorHandler(res,500,error.message)
+        return errorHandler(res, 500, error.message)
     }
 }
 const getLogs = async (req, res) => {
@@ -52,7 +54,7 @@ const getLogs = async (req, res) => {
             return sendResponse(res, 404, "plesae enter valid id")
         }
     } catch (error) {
-        return   errorHandler(res,500,error.message)
+        return errorHandler(res, 500, error.message)
     }
 }
 const getLogsCount = async (req, res) => {
@@ -77,7 +79,7 @@ const getLogsCount = async (req, res) => {
                 }
             }
         ]);
-       
+
         if (data.length > 0) {
             data.forEach(entry => {
                 result[entry._id] = entry.count;
@@ -85,10 +87,10 @@ const getLogsCount = async (req, res) => {
             typeTitles.forEach(title => {
                 if (title !== "VPN" && title !== "Remote-FiLe-Inclusion") {
                     finalResult.push({
-                        name: title === "cmd" ? "Command Line" : 
-                              title === "xss-injection" ? "XSS" : 
-                              title === "html" ? "HTML" : 
-                              title === "XML-Injection" ? "XML" : title,
+                        name: title === "cmd" ? "Command Line" :
+                            title === "xss-injection" ? "XSS" :
+                                title === "html" ? "HTML" :
+                                    title === "XML-Injection" ? "XML" : title,
                         value: result[title] || 0,
                         color: getRandomColor(title)
                     });
@@ -116,17 +118,17 @@ const getLogsCount = async (req, res) => {
 const deleteLogs = async (req, res) => {
     try {
         const ip = req.params.ip
-      
+
 
         const data = await Project_Security_Logs.findOneAndDelete({ ip })
         if (data) {
-            return   sendResponse(res, 200, "data deleted successfully", data)
+            return sendResponse(res, 200, "data deleted successfully", data)
         } else {
-          return  sendResponse(res, 404, "please enter valid id", data)
+            return sendResponse(res, 404, "please enter valid id", data)
         }
 
     } catch (error) {
-        return   errorHandler(res,500,error.message)
+        return errorHandler(res, 500, error.message)
     }
 }
 

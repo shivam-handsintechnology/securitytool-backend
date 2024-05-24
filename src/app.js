@@ -1,4 +1,6 @@
 // Import external modules
+const path = require('path')
+const cors = require('cors');
 const fileUpload = require('express-fileupload')
 const express = require("express");
 const helmet = require('helmet')
@@ -18,6 +20,7 @@ dotenv.config(); // Load environment variables
 DBConnection(process.env.MONGO_URI) // Connect to MongoDB
 const app = express(); // Create Express APP
 const server = http.createServer(app);
+app.use(cors());
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -32,7 +35,7 @@ app.use(express.json({ limit: "50mb", extended: true })); // body parser
 app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 },   // File Upload Functionality
 }));
-
+app.use("/videos", express.static(path.join(process.cwd(), "videos"))); // Serve static files
 app.set('trust proxy', 1) // trust first proxy
 app.use(helmet()) // Secure your app by setting various HTTP headers
 app.use(apirouter) // Use the API router
@@ -70,7 +73,7 @@ if (cluster.isPrimary) {
 }
 require("./utils/Websocket")(io); // Websocket connection
 
-
+module.exports = app;
 
 
 

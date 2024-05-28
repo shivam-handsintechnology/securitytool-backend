@@ -52,10 +52,17 @@
 const fs = require('fs');
 const path = require('path');
 const { errorHandler } = require('../utils/errorHandler');
+const { sendResponse } = require('../utils/dataHandler');
 
 const VideoStream = async (req, res) => {
     try {
         const videoPath = path.join(process.cwd(), "videos", req.params.filename);
+        if (!fs.existsSync(videoPath)) {
+            let error = new Error('Video not found');
+            error.statusCode = 404;
+            throw error;
+
+        }
         const stat = fs.statSync(videoPath);
         const fileSize = stat.size;
         const range = req.headers.range;
@@ -109,9 +116,25 @@ const VideoStream = async (req, res) => {
             fs.createReadStream(videoPath).pipe(res);
         }
     } catch (error) {
-        console.error('Error in VideoStream:', error);
-        return errorHandler(res, 500, error.message);
+
+        return errorHandler(res, null, null, null, error);
     }
 };
+const DeleteVideo = async (req, res) => {
+    try {
+        const videoPath = path.join(process.cwd(), "videos", req.params.filename);
+        if (!fs.existsSync(videoPath)) {
+            let error = new Error('Video not found');
+            error.statusCode = 404;
+            throw error;
+        }
+        fs.unlinkSync(videoPath);
+        return sendResponse(res, 200, "Video deleted successfully", null);
+    }
+    catch (error) {
+        return errorHandler(res, null, null, null, error);
+    }
+}
 
-module.exports = { VideoStream };
+
+module.exports = { VideoStream, DeleteVideo };

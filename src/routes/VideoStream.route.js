@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const verifyToken = require('../middlewares/VerifyUser')
 const VIdeoStreamController = require("../controllers/VIdeoStreamController");
-router.get("/:filename", VIdeoStreamController.VideoStream)
+const verifytoken = require("../middlewares/VerifyUser");
+router.route("/:filename").get(VIdeoStreamController.VideoStream).delete(verifytoken, VIdeoStreamController.DeleteVideo)
 
 module.exports = router

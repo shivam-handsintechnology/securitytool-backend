@@ -1,11 +1,13 @@
 const mongoose = require("mongoose")
 const { default: axios } = require("axios")
-const validator=require("validator")
+const validator = require("validator")
 const { sendResponse } = require("../../utils/dataHandler")
 const { AllowedDomainsModel } = require("../../models/AllowedDomainsModel")
 const { ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanDirectoryOptionMethod } = require("../../utils/scanClientData")
 const { PasswordHashingDataModel } = require("../../models/Security/SecurityMisconfiguration.model")
 const { errorHandler } = require("../../utils/errorHandler")
+const { DefaultUserNamePasswordTest } = require("../../routes/Security/Scan/DefaultusernamePasswordTest")
+const { decryptData } = require("../../middlewares/IncomingDataHashFormat")
 
 module.exports = {
     arbitraryMethods: async (req, res) => {
@@ -88,18 +90,18 @@ module.exports = {
                 if (response.status === 200) {
                     console.log("password response", response.data.data.password)
                     let hashedPassword = response.data.data.password;
-                     if(validator.isMD5(hashedPassword)){
+                    if (validator.isMD5(hashedPassword)) {
                         return sendResponse(res, 200, "success", "Password is Md5");
                     }
-                   
-                    else if(validator.isHash(hashedPassword)){
+
+                    else if (validator.isHash(hashedPassword)) {
                         return sendResponse(res, 200, "success", "Password is Hash But we are not able to verify the algorithm");
                     }
-                    else if(validator.isStrongPassword(hashedPassword)){
+                    else if (validator.isStrongPassword(hashedPassword)) {
                         return sendResponse(res, 200, "success", "Password is Strong But we are not able to verify the algorithm");
                     }
 
-                    else if(!validator.isStrongPassword(hashedPassword)){
+                    else if (!validator.isStrongPassword(hashedPassword)) {
                         return sendResponse(res, 200, "success", "Password is Weak");
                     }
                     // let obj = "Password is not hashed"
@@ -124,7 +126,7 @@ module.exports = {
                 throw new Error("Domain Is Not exist ")
             }
         } catch (error) {
-           
+
             return errorHandler(res, 500, "success", error.message)
         }
     },
@@ -141,12 +143,12 @@ module.exports = {
                 })
                 if (response.status === 200) {
                     let hashedPassword = response.data.data.password;
-                    if(validator.isStrongPassword(hashedPassword)){
-                       return sendResponse(res, 200, "success", "Password is Strong");
-                   }
-                   else if(!validator.isStrongPassword(hashedPassword)){
-                       return sendResponse(res, 200, "success", "Password is  Weak");
-                   }
+                    if (validator.isStrongPassword(hashedPassword)) {
+                        return sendResponse(res, 200, "success", "Password is Strong");
+                    }
+                    else if (!validator.isStrongPassword(hashedPassword)) {
+                        return sendResponse(res, 200, "success", "Password is  Weak");
+                    }
                 } else {
                     throw new Error("access Denied")
                 }
@@ -164,7 +166,7 @@ module.exports = {
             let url = `http://${domain}/support-oldnodejs=version`;
             let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
             if (isExistDomain) {
-                let response = await axios.get(url,{
+                let response = await axios.get(url, {
                     headers: {
                         'origin': "https://securitytool.handsintechnology.in",
                     }
@@ -188,6 +190,33 @@ module.exports = {
             return errorHandler(res, 500, "success", error.message)
         }
     },
-   
+    defaultpasswordandusername: async (req, res) => {
+        try {
+
+            const domain = req.query.domain
+            const headers = {
+                'Content-Type': 'text/event-stream',
+                'Connection': 'keep-alive',
+                'Cache-Control': 'no-cache'
+            };
+            const { username, password } = req.query
+            const fullurl = `${req.protocol}://${req.get('host')}/api/videostream/`
+            res.writeHead(200, headers);
+            const SerEnventData = (data, res = res) => {
+                res.write(`data:${JSON.stringify(data)} \n\n`);
+            }
+            SerEnventData({ message: "Scanning started", complete: false, time: Date.now() }, res);
+            const results = await DefaultUserNamePasswordTest(`https://${domain}`, username, password, res, SerEnventData, fullurl);
+            console.log('Scanning completed:', results);
+
+            SerEnventData({ message: "Scanning completed", time: Date.now(), complete: true }, res);
+            res.end(); // End the response after sending all data
+        } catch (error) {
+            console.error('Error occurred while scanning:', error);
+            res.write(`data: ${JSON.stringify({ message: error.message, complete: true })} \n\n`)
+            res.end(); // Ensure response is ended in case of error
+        }
+    }
+
 
 }

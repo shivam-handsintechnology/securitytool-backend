@@ -14,8 +14,19 @@ async function fillInputFields(page) {
     await fillInputField(page, 'input[type="date"]', new Date().toISOString().split('T')[0]);
     await fillInputField(page, 'input[type="password"]', '');
     await fillInputField(page, 'input[name="date"]', new Date().toISOString().split('T')[0]);
-    // Click the submit button
-    await page.click('button[type="submit"]');
+    const checkSubmit = await page.$('button[type="submit"]');
+    if (checkSubmit) {
+      await checkSubmit.click();
+    } else {
+      for (const loginText of possibleLoginTexts) {
+        const loginTextElement = await page.$(`text=${loginText}`);
+        if (loginTextElement) {
+          await loginTextElement.click();
+          break;
+        }
+      }
+    }
+
   } catch (error) {
     console.error('Error occurred:', error);
   }

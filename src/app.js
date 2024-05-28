@@ -77,7 +77,9 @@ if (cluster.isPrimary) {
   });
 }
 require("./utils/Websocket")(io); // Websocket connection
-CronJob(); // Cron job for video deletion
+setInterval(() => {
+  CronJob()
+}, 600000); // Cron job for video deletion
 module.exports = app;
 
 

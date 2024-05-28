@@ -170,7 +170,7 @@ router.get("/blankpasswordandusername", async (req, res) => {
             'Connection': 'keep-alive',
             'Cache-Control': 'no-cache'
         };
-        const fullurl = `${req.protocol}://${req.get('host')}/videos/`
+        const fullurl = `${req.protocol}://${req.get('host')}/api/videostream/`
         res.writeHead(200, headers);
         const SerEnventData = (data, res = res) => {
             res.write(`data:${JSON.stringify(data)} \n\n`);

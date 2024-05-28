@@ -2,8 +2,22 @@
 const express = require('express');
 
 const router = express.Router();
-const Security = require('./security')
-const GetClientInformation = require('./monitor.route')
+
+// Import Middlewares  And Functions
+
+const { ValidationMiddleware, ValidationMiddlewareQuery } = require('../middlewares/ValidationMiddleware');
+const verifytoken = require('../middlewares/VerifyUser')
+const verifyToken = require('../middlewares/VerifyUser');
+const GetFileCOntentMiddleware = require('../middlewares/GetFileCOntentMiddleware');
+const CorsMiddleware = require('../middlewares/CorsMiddleware').cors;
+const allowall = require('../middlewares/CorsMiddleware').allowall
+const IncomingDataHashFormat = require('../middlewares/IncomingDataHashFormat')
+const { DomainValidationSchema } = require('../helpers/Validators');
+const { SSLverifier } = require('../utils/SSLverifier');
+const { sendResponse } = require('../utils/dataHandler');
+const { errorHandler } = require('../utils/errorHandler');
+const Security = require('./security.routes')
+const GetClientInformation = require('./monitor.routes')
 const SecurityMisconfiguration = require("./Security/SecurityMisconfiguration.route")
 const SensitiveDataExposure = require("./Security/SensitiveDataExposure.route")
 const SensitiveDataLocalStorage = require("../controllers/Security/SensitiveDataStoredInLocalStorage.controller")
@@ -11,22 +25,10 @@ const AuthSessionGuardian = require("./Security/AuthSessionGuardian.route")
 const InsecureObjectRefGuard = require("./Security/Insecure_Direct_Object_References.route")
 const InjectionsRoute = require("./Security/Injection.routes")
 const WeekCrossDomainPolicy = require("./Security/WeakCrossDomainPolicy.route")
-const Authrouter = require('./UserRoutes');
+const Authrouter = require('./user.routes');
 const MissingFunctionalLevelAccessControlrouter = require("./Security/MissingFunctionLevelAccessControl.routes")
-const { ValidationMiddleware, ValidationMiddlewareQuery } = require('../middlewares/ValidationMiddleware');
-const verifytoken = require('../middlewares/VerifyUser')
-const { DomainValidationSchema } = require('../helpers/Validators');
-const verifyToken = require('../middlewares/VerifyUser');
-const GetFileCOntentMiddleware = require('../middlewares/GetFileCOntentMiddleware');
-
-const { SSLverifier } = require('../utils/SSLverifier');
-const { sendResponse } = require('../utils/dataHandler');
-const { errorHandler } = require('../utils/errorHandler');
-const CorsMiddleware = require('../middlewares/CorsMiddleware').cors;
-const allowall = require('../middlewares/CorsMiddleware').allowall
-const IncomingDataHashFormat = require('../middlewares/IncomingDataHashFormat')
-
-
+const VideoStreamRouter = require("./VideoStream.route")
+// Import Routes
 router.use("/security", IncomingDataHashFormat, CorsMiddleware, IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, verifytoken, Security)
 // Get Client Information
 router.use("/client", allowall, GetClientInformation)
@@ -69,5 +71,7 @@ router.use("/CrossSiteScripting", IncomingDataHashFormat, CorsMiddleware, Incomi
 router.use("/SensitiveStorageLocalStorage", IncomingDataHashFormat, CorsMiddleware, IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, verifyToken, SensitiveDataLocalStorage.get)
 // Week Cross Domain Policy
 router.use("/WeakCrossDomainPolicy", IncomingDataHashFormat, CorsMiddleware, IncomingDataHashFormat.convertResponseDatatoEncryptedFormat, verifyToken, ValidationMiddleware(DomainValidationSchema), WeekCrossDomainPolicy)
+router.use("/videostream", VideoStreamRouter)
 router.use("/api", router)
+
 module.exports = router

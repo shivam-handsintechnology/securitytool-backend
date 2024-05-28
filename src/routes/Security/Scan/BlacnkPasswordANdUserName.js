@@ -5,13 +5,15 @@ const { takeScreenshot } = require('./checkSecondFactorAuthentication');
 const possibleLoginTexts = require("../../../data/json/ApplicationTestingData.json").possibleLoginTexts
 async function fillInputFields(page) {
   try {
+    let username = Math.random().toString(36).substring(7);
+    let email = Math.random().toString(36).substring(7) + '@example.com';
     // Fill input fields based on type
-    await fillInputField(page, 'input[type="text"]', '');
-    await fillInputField(page, 'input[type="email"]', '');
-    await fillInputField(page, 'input[type="number"]', '');
-    await fillInputField(page, 'input[type="date"]', '');
+    await fillInputField(page, 'input[type="text"]', username);
+    await fillInputField(page, 'input[type="email"]', email);
+    await fillInputField(page, 'input[type="number"]', Date.now());
+    await fillInputField(page, 'input[type="date"]', new Date().toISOString().split('T')[0]);
     await fillInputField(page, 'input[type="password"]', '');
-    await fillInputField(page, 'input[name="date"]', '');
+    await fillInputField(page, 'input[name="date"]', new Date().toISOString().split('T')[0]);
     // Click the submit button
     await page.click('button[type="submit"]');
   } catch (error) {
@@ -46,8 +48,9 @@ const videoToBase64 = (filePath) => {
   try {
     // Read the file
     const data = fs.readFileSync(filePath);
+    console.log('Data:', data)
     const base64 = data.toString('base64');
-    console.log(base64);
+    console.log("base64", base64);
     return base64;
   } catch (error) {
     console.error('Error reading the video file:', error);
@@ -60,7 +63,7 @@ const BlackPasswordValidation = async (websiteUrl, res, SerEnventData, fullurl) 
   const browser = await chromium.launch();
   const context = await browser.newContext({
     recordVideo: {
-      dir: './videos', // Specify the directory to save the video recordings
+      dir: 'videos/', // Specify the directory to save the video recordings
       size: { width: 1280, height: 720 } // Set the desired video resolution
     }
   });
@@ -122,6 +125,9 @@ const BlackPasswordValidation = async (websiteUrl, res, SerEnventData, fullurl) 
       }
       const videoPath = await page.video().path();
       const absolutePath = path.resolve(videoPath)
+      // Convert the video to base64
+      const base64Video = videoToBase64(absolutePath);
+
       console.log('Video recording saved:', absolutePath);
       // get extension of the video and that extension file name
       const ext = path.extname(absolutePath);
@@ -130,10 +136,10 @@ const BlackPasswordValidation = async (websiteUrl, res, SerEnventData, fullurl) 
       // Send the base64-encoded video data to the client
       if (fileName && ext) {
         SerEnventData({
-          message: "Video stream", time: Date.now(), video: fileName + ext
+          message: "Video stream", time: Date.now(), video: fullurl + fileName + ext
         }, res);
-      } else if (!base64Video) {
-        SerEnventData({ message: "No Video Found", time: Date.now(), video: "No Video Found" }, res);
+      } else if (!fileName && !ext) {
+        SerEnventData({ message: "No Video Found", time: Date.now(), video: null }, res);
       }
 
 

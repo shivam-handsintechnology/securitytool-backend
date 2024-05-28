@@ -10,11 +10,12 @@ const cluster = require("cluster")
 const os = require("os")
 const http = require('http');
 const process = require("process");
+const { Server } = require('socket.io');
 // import internal modules
 const logger = require('./logger/logger');
+const CronJob = require("./utils/CroNjobVIdeoDelete")
 const apirouter = require('./routes')
 const { DBConnection } = require("./config/connection"); // Database connection
-const { Server } = require('socket.io');
 const numCPUs = os.cpus().length // Get the number of CPU cores
 // Connected to mongodb
 dotenv.config(); // Load environment variables
@@ -76,7 +77,7 @@ if (cluster.isPrimary) {
   });
 }
 require("./utils/Websocket")(io); // Websocket connection
-
+CronJob(); // Cron job for video deletion
 module.exports = app;
 
 

@@ -22,13 +22,14 @@ function extractVisibleText(html) {
 
 async function CheckLoginForm(url, res, SerEnventData) {
     let data = "Scan Completed Two Factor Authentication or OTP Not Found";
+    const browser = await chromium.launch();
+
     return new Promise(async (resolve, reject) => {
         try {
             if (!url) {
                 throw new Error('Url not provided. Please provide a valid URL');
             }
 
-            const browser = await chromium.launch();
             const context = await browser.newContext();
             const page = await context.newPage();
 
@@ -80,10 +81,12 @@ async function CheckLoginForm(url, res, SerEnventData) {
     });
 }
 const scanSecondFactorAuthBypassed = async (url, res, SerEnventData) => {
+    const browser = await chromium.launch();
+    const context = await browser.newContext();
+    const page = await context.newPage();
     try {
-        const browser = await chromium.launch();
-        const context = await browser.newContext();
-        const page = await context.newPage();
+
+
         let navigationSuccessful = false;
         let attempts = 0;
         while (!navigationSuccessful && attempts < 3) {
@@ -142,13 +145,15 @@ const scanSecondFactorAuthBypassed = async (url, res, SerEnventData) => {
         if (!navigationSuccessful) {
             SerEnventData({ error: true, message: `Second factor authentication could be bypassed: No`, time: Date.now(), screenshot: await takeScreenshot(page) }, res);
         }
-        await page.close();
-        await browser.close();
+
         return { success: true, message: `Scan Completed` };
     } catch (error) {
         console.log('Error:', error);
         SerEnventData({ message: `Second factor authentication could be bypassed Failed: Error occurred while testing page ${url}`, time: Date.now(), screenshot: await takeScreenshot(page) }, res);
         return { success: false, message: `Second factor authentication could be bypassed Failed: Error occurred while testing page ${url}`, time: Date.now(), screenshot: await takeScreenshot(page) };
+    } finally {
+        await page.close();
+        await browser.close();
     }
 };
 

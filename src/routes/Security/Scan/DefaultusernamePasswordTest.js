@@ -3,9 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const { takeScreenshot } = require('./checkSecondFactorAuthentication');
 const possibleLoginTexts = require("../../../data/json/ApplicationTestingData.json").possibleLoginTexts
-async function fillInputFields(page, username, password) {
+async function fillInputFields(page, username, password, email) {
     try {
-        const email = Math.random().toString(36).substring(7) + '@example.com';
+
         const dateNow = new Date().toISOString().split('T')[0];
 
         const fillInputField = (selector, value) => {
@@ -20,8 +20,8 @@ async function fillInputFields(page, username, password) {
         };
 
         // Fill input fields based on type
-        await fillInputField('input[type="text"]', username);
-        await fillInputField('input[type="email"]', email);
+        username && await fillInputField('input[type="text"]', username);
+        email && await fillInputField('input[type="email"]', email);
         await fillInputField('input[type="number"]', Date.now());
         await fillInputField('input[type="date"]', dateNow);
         await fillInputField('input[type="password"]', password);
@@ -56,7 +56,7 @@ function getChangedLines(newText, oldText) {
     return changedLines;
 }
 
-const DefaultUserNamePasswordTest = async (websiteUrl, username, password, res, SerEnventData, fullurl) => {
+const DefaultUserNamePasswordTest = async (websiteUrl, username, password, email, res, SerEnventData, fullurl) => {
     let url = websiteUrl;
     let data = "Scan Login Page for Black Password and Username";
     const browser = await chromium.launch();
@@ -88,7 +88,7 @@ const DefaultUserNamePasswordTest = async (websiteUrl, username, password, res, 
                     await loginTextElement.click();
                     await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
                     await new Promise(resolve => setTimeout(resolve, 1000));
-                    await fillInputFields(page, username, password,);
+                    await fillInputFields(page, username, password, email);
                     // Listen for network requests
                     const requests = [];
                     page.on('request', request => {

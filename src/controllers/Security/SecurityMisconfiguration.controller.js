@@ -199,14 +199,14 @@ module.exports = {
                 'Connection': 'keep-alive',
                 'Cache-Control': 'no-cache'
             };
-            const { username, password } = req.query
+            const { username, password, email } = req.query
             const fullurl = `${req.protocol}://${req.get('host')}/api/videostream/`
             res.writeHead(200, headers);
             const SerEnventData = (data, res = res) => {
                 res.write(`data:${JSON.stringify(data)} \n\n`);
             }
             SerEnventData({ message: "Scanning started", complete: false, time: Date.now() }, res);
-            const results = await DefaultUserNamePasswordTest(`https://${domain}`, username, password, res, SerEnventData, fullurl);
+            const results = await DefaultUserNamePasswordTest(`https://${domain}`, username, password, email, res, SerEnventData, fullurl);
             console.log('Scanning completed:', results);
 
             SerEnventData({ message: "Scanning completed", time: Date.now(), complete: true }, res);

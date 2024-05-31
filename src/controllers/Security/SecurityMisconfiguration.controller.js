@@ -6,8 +6,8 @@ const { AllowedDomainsModel } = require("../../models/AllowedDomainsModel")
 const { ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanDirectoryOptionMethod } = require("../../utils/scanClientData")
 const { PasswordHashingDataModel } = require("../../models/Security/SecurityMisconfiguration.model")
 const { errorHandler } = require("../../utils/errorHandler")
-const { DefaultUserNamePasswordTest } = require("../../routes/Security/Scan/DefaultusernamePasswordTest")
 const { decryptData } = require("../../middlewares/IncomingDataHashFormat")
+const { DefaultUserNamePasswordTest } = require("../../utils/TestWithPlayWright/DefaultusernamePasswordTest")
 
 module.exports = {
     arbitraryMethods: async (req, res) => {
@@ -202,14 +202,14 @@ module.exports = {
             const { username, password, email } = req.query
             const fullurl = `${req.protocol}://${req.get('host')}/api/videostream/`
             res.writeHead(200, headers);
-            const SerEnventData = (data, res = res) => {
+            const SendEvent = (data, res = res) => {
                 res.write(`data:${JSON.stringify(data)} \n\n`);
             }
-            SerEnventData({ message: "Scanning started", complete: false, time: Date.now() }, res);
-            const results = await DefaultUserNamePasswordTest(`https://${domain}`, username, password, email, res, SerEnventData, fullurl);
+            SendEvent({ message: "Scanning started", complete: false, time: Date.now() }, res);
+            const results = await DefaultUserNamePasswordTest(`https://${domain}`, username, password, email, res, SendEvent, fullurl);
             console.log('Scanning completed:', results);
 
-            SerEnventData({ message: "Scanning completed", time: Date.now(), complete: true }, res);
+            SendEvent({ message: "Scanning completed", time: Date.now(), complete: true }, res);
             res.end(); // End the response after sending all data
         } catch (error) {
             console.error('Error occurred while scanning:', error);

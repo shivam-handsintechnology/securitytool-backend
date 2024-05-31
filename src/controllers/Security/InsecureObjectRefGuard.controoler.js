@@ -3,7 +3,7 @@ const axios = require("axios");
 const { errorHandler } = require("../../utils/errorHandler");
 const { hashttpParametersPollutionavailable } = require("../../utilities/functions/functions");
 const { AllowedWebDomainsModel } = require("../../models/AllowedDomainsModel");
-const { directoryListingPatterns } = require("../../routes/Security/Scan/checkNonHtmlAccccesability");
+const { directoryListingPatterns } = require("../../data/json/ApplicationTestingData.json")
 
 module.exports = {
   DirectoryListingEnable: async (req, res) => {

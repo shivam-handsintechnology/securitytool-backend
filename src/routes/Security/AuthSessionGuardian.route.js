@@ -3,11 +3,11 @@ const router = require("express").Router()
 const { errorHandler } = require("../../utils/errorHandler");
 
 const { sessionExpireOnClose, sessionTimeoutWithObject, sessionFixationWithobject, sessionHijackingWithObject, sessionTokenWithObject, SessionVulnurability } = require("../../helpers/SessionVulnurabiltyChecker");
-const { checkNonHTMLContentAccessibility } = require("./Scan/checkNonHtmlAccccesability");
 const GetFileCOntentMiddleware = require("../../middlewares/GetFileCOntentMiddleware");
 const { sendResponse } = require("../../utils/dataHandler");
-const { SecondFactorAuthBypassed } = require("./Scan/checkSecondFactorAuthentication");
-const { BlackPasswordValidation } = require("./Scan/BlacnkPasswordANdUserName");
+const { SecondFactorAuthBypassed } = require("../../utils/TestWithPlayWright/SecondFactorAuthBypassed");
+const { BlackPasswordValidation } = require("../../utils/TestWithPlayWright/BlacnkPasswordANdUserName");
+const { checkNonHTMLContentAccessibility } = require("../../utils/TestWithPlayWright/checkNonHtmlAccccesability");
 
 router.get("/session-vulnurability", GetFileCOntentMiddleware, async (req, res) => {
     try {
@@ -120,14 +120,14 @@ router.get("/non-html-content-accessability", async (req, res) => {
             'Cache-Control': 'no-cache'
         };
         res.writeHead(200, headers);
-        const SerEnventData = (data, res = res) => {
+        const SendEvent = (data, res = res) => {
             res.write(`data:${JSON.stringify(data)} \n\n`);
         }
-        SerEnventData({ message: "Scanning started", time: Date.now() }, res);
-        const results = await checkNonHTMLContentAccessibility(`https://${domain}`, res, SerEnventData);
+        SendEvent({ message: "Scanning started", time: Date.now() }, res);
+        const results = await checkNonHTMLContentAccessibility(`https://${domain}`, res, SendEvent);
         console.log('Scanning completed:', results);
 
-        SerEnventData({ message: "Scanning completed", time: Date.now(), complete: true }, res);
+        SendEvent({ message: "Scanning completed", time: Date.now(), complete: true }, res);
         res.end(); // End the response after sending all data
     } catch (error) {
         console.error('Error occurred while scanning:', error);
@@ -146,14 +146,14 @@ router.get("/SecondFactorAuth", async (req, res) => {
             'Cache-Control': 'no-cache'
         };
         res.writeHead(200, headers);
-        const SerEnventData = (data, res = res) => {
+        const SendEvent = (data, res = res) => {
             res.write(`data:${JSON.stringify(data)} \n\n`);
         }
-        SerEnventData({ message: "Scanning started", complete: false, time: Date.now() }, res);
-        const results = await SecondFactorAuthBypassed(`https://${domain}`, res, SerEnventData);
+        SendEvent({ message: "Scanning started", complete: false, time: Date.now() }, res);
+        const results = await SecondFactorAuthBypassed(`https://${domain}`, res, SendEvent);
         console.log('Scanning completed:', results);
 
-        SerEnventData({ message: "Scanning completed", time: Date.now(), complete: true }, res);
+        SendEvent({ message: "Scanning completed", time: Date.now(), complete: true }, res);
         res.end(); // End the response after sending all data
     } catch (error) {
         console.error('Error occurred while scanning:', error);
@@ -172,14 +172,14 @@ router.get("/blankpasswordandusername", async (req, res) => {
         };
         const fullurl = `${req.protocol}://${req.get('host')}/api/videostream/`
         res.writeHead(200, headers);
-        const SerEnventData = (data, res = res) => {
+        const SendEvent = (data, res = res) => {
             res.write(`data:${JSON.stringify(data)} \n\n`);
         }
-        SerEnventData({ message: "Scanning started", complete: false, time: Date.now() }, res);
-        const results = await BlackPasswordValidation(`https://${domain}`, res, SerEnventData, fullurl);
+        SendEvent({ message: "Scanning started", complete: false, time: Date.now() }, res);
+        const results = await BlackPasswordValidation(`https://${domain}`, res, SendEvent, fullurl);
         console.log('Scanning completed:', results);
 
-        SerEnventData({ message: "Scanning completed", time: Date.now(), complete: true }, res);
+        SendEvent({ message: "Scanning completed", time: Date.now(), complete: true }, res);
         res.end(); // End the response after sending all data
     } catch (error) {
         console.error('Error occurred while scanning:', error);

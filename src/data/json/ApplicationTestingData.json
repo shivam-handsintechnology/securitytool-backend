@@ -249,5 +249,10 @@
         "one-time password",
         "time-based one-time password",
         "topt"
+    ],
+    "directoryListingPatterns": [
+        "<title>Index of",
+        "Parent Directory",
+        "<h1>Index of"
     ]
 }

@@ -1,6 +1,4 @@
 // Import external modules
-const fs = require('fs')
-const path = require('path')
 const cors = require('cors');
 const fileUpload = require('express-fileupload')
 const express = require("express");
@@ -13,9 +11,9 @@ const process = require("process");
 const { Server } = require('socket.io');
 // import internal modules
 const logger = require('./logger/logger');
-const CronJob = require("./utils/CroNjobVIdeoDelete")
 const apirouter = require('./routes')
 const { DBConnection } = require("./config/connection"); // Database connection
+const { CronJobVIdeoDelete } = require('./utils');
 const numCPUs = os.cpus().length // Get the number of CPU cores
 // Connected to mongodb
 dotenv.config(); // Load environment variables
@@ -76,9 +74,9 @@ if (cluster.isPrimary) {
     console.log(`Server is running on port ${PortNumber}`);
   });
 }
-require("./utils/Websocket")(io); // Websocket connection
+
 setInterval(() => {
-  CronJob()
+  CronJobVIdeoDelete()
 }, 600000); // Cron job for video deletion
 module.exports = app;
 

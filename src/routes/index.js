@@ -13,9 +13,6 @@ const CorsMiddleware = require('../middlewares/CorsMiddleware').cors;
 const allowall = require('../middlewares/CorsMiddleware').allowall
 const IncomingDataHashFormat = require('../middlewares/IncomingDataHashFormat')
 const { DomainValidationSchema } = require('../helpers/Validators');
-const { SSLverifier } = require('../utils/SSLverifier');
-const { sendResponse } = require('../utils/dataHandler');
-const { errorHandler } = require('../utils/errorHandler');
 const Security = require('./security.routes')
 const GetClientInformation = require('./monitor.routes')
 const SecurityMisconfiguration = require("./Security/SecurityMisconfiguration.route")
@@ -28,6 +25,8 @@ const WeekCrossDomainPolicy = require("./Security/WeakCrossDomainPolicy.route")
 const Authrouter = require('./user.routes');
 const MissingFunctionalLevelAccessControlrouter = require("./Security/MissingFunctionLevelAccessControl.routes")
 const VideoStreamRouter = require("./VideoStream.route")
+const SSlRouter = require("./Security/SSL.routes")
+const MiscellaneousAttacksRoute = require("./Security/MisccellaneousAttacks.route")
 // Import Routes
 router.use("/security", IncomingDataHashFormat, CorsMiddleware, verifytoken, Security)
 // Get Client Information
@@ -42,16 +41,7 @@ router.use("/AuthSessionGuardian", IncomingDataHashFormat, CorsMiddleware, verif
 router.use("/injections", IncomingDataHashFormat, CorsMiddleware, InjectionsRoute)
 // SSL Verify
 router.use("/SSLVerify", IncomingDataHashFormat, CorsMiddleware, verifyToken,
-  ValidationMiddlewareQuery(DomainValidationSchema), async (req, res) => {
-    try {
-      let domain = req.query.domain
-      const response = await SSLverifier(domain).then(data => data)
-      return sendResponse(res, 200, "SSL verified successfully", response)
-    } catch (error) {
-
-      return errorHandler(res, 500, error.message)
-    }
-  })
+  ValidationMiddlewareQuery(DomainValidationSchema), SSlRouter)
 // Error Message
 router.use("/ErrorMessage", IncomingDataHashFormat, CorsMiddleware, require("./Security/ErrorMessage.route"))
 // Insecure Direct Object References
@@ -71,6 +61,9 @@ router.use("/CrossSiteScripting", IncomingDataHashFormat, CorsMiddleware, verify
 router.use("/SensitiveStorageLocalStorage", IncomingDataHashFormat, CorsMiddleware, verifyToken, SensitiveDataLocalStorage.get)
 // Week Cross Domain Policy
 router.use("/WeakCrossDomainPolicy", IncomingDataHashFormat, CorsMiddleware, verifyToken, ValidationMiddleware(DomainValidationSchema), WeekCrossDomainPolicy)
+// MiscellaneousAttacks
+router.use("/MiscellaneousAttacks", IncomingDataHashFormat, CorsMiddleware, MiscellaneousAttacksRoute)
+// vide streaming route
 router.use("/videostream", IncomingDataHashFormat, VideoStreamRouter)
 router.use("/api", router)
 

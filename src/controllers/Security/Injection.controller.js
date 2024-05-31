@@ -3,6 +3,7 @@ const { sendResponse } = require('../../utils/dataHandler')
 const { errorHandler } = require('../../utils/errorHandler')
 const getRandomColor = require('../../helpers/randomColorGenerator')
 const { default: mongoose } = require('mongoose')
+const { scanSQLvulnerability } = require('../../utils')
 const getAllLogs = async (req, res) => {
     try {
         // Get total count of users
@@ -131,12 +132,36 @@ const deleteLogs = async (req, res) => {
         return errorHandler(res, 500, error.message)
     }
 }
+const testVulnurability = async (req, res) => {
+    try {
+        const domain = req.query.domain
+        const headers = {
+            'Content-Type': 'text/event-stream',
+            'Connection': 'keep-alive',
+            'Cache-Control': 'no-cache'
+        };
+        const fullurl = `${req.protocol}://${req.get('host')}/api/videostream/`
+        res.writeHead(200, headers);
+        const SendEvent = (data, res = res) => {
+            res.write(`data:${JSON.stringify(data)} \n\n`);
+        }
+        SendEvent({ message: "Scanning started", complete: false, time: Date.now() }, res);
+        const results = await scanSQLvulnerability(`https://${domain}`, res, SendEvent, fullurl);
+        console.log('Scanning completed:', results);
 
+        SendEvent({ message: "Scanning completed", time: Date.now(), complete: true }, res);
+        res.end(); // End the response after sending all data
+    } catch (error) {
+        console.error('Error occurred while scanning:', error);
+        res.write(`data: ${JSON.stringify({ message: error.message, complete: true })} \n\n`)
+        res.end(); // Ensure response is ended in case of error
+    }
+}
 
 const Allogs = {
     getAllLogs,
     getLogs,
     deleteLogs,
-    getLogsCount
+    getLogsCount, testVulnurability
 }
 module.exports = Allogs

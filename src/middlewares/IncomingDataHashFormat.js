@@ -28,18 +28,18 @@ module.exports = async function (req, res, next) {
       return next();
     }
     if (Object.keys(req.body).length > 0) {
-      if (!req.body.encryptData) {
-        return res.status(403).json({ message: "Access Deied" });
-      }
+      // if (!req.body.encryptData) {
+      //   return res.status(403).json({ message: "Access Deied" });
+      // }
       if (req.body.encryptData) {
         console.log("Decrypting body data");
         req.body = await decryptData(req.body.encryptData);
       }
     }
     if (Object.keys(req.query).length > 0) {
-      if (!req.query.data) {
-        return res.status(403).json({ message: "Access Deied" });
-      }
+      // if (!req.query.data) {
+      //   return res.status(403).json({ message: "Access Deied" });
+      // }
       if (req.query.data) {
         let { data } = req.query;
         if (data) {

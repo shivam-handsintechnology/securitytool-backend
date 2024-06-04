@@ -14,6 +14,7 @@ const logger = require('./logger/logger');
 const apirouter = require('./routes')
 const { DBConnection } = require("./config/connection"); // Database connection
 const { CronJobVIdeoDelete } = require('./utils');
+const CLeanDatabase = require('./utils/CLeanDatabase');
 const numCPUs = os.cpus().length // Get the number of CPU cores
 // Connected to mongodb
 dotenv.config(); // Load environment variables
@@ -73,7 +74,7 @@ setInterval(() => {
   CronJobVIdeoDelete()
 }, 600000); // Cron job for video deletion
 
-
+// CLeanDatabase() // Clean the database
 module.exports = app;
 
 

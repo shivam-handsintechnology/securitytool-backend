@@ -10,7 +10,7 @@ module.exports = async (req, res, next) => {
     };
 
     try {
-        await Audit.create(sessionData);
+        sessionData.ipAddress !== "::1" && await Audit.create(sessionData);
         console.log('Session data saved successfully');
         next();
     } catch (err) {

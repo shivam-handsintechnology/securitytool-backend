@@ -1,7 +1,6 @@
 
 
 const { default: axios } = require('axios')
-const { middlewareModel } = require('../models/midlwaresModel')
 const { sendResponse } = require('../utils/dataHandler')
 const { errorHandler } = require('../utils/errorHandler')
 const getMiddlewareController = async (req, res) => {

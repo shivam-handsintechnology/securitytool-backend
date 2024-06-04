@@ -11,10 +11,13 @@ const UserSchema = new Schema({
   userType: {
     type: String, enum: ['Admin', 'User'], default: 'User'
   },
-  status: {
-    type: String, enum: ['Active', 'Inactive'], default: 'Inactive'
+  apistatus: {
+    type: Boolean, default: false
   },
-  profilepic: { type: String, default: defaultProfilePic },
+  webstatus: {
+    type: Boolean, default: false
+  },
+  profilepic: { type: String, default: null },
 
 
 }, {

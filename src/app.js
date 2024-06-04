@@ -9,8 +9,6 @@ const cluster = require("cluster")
 const os = require("os")
 const http = require('http');
 const process = require("process");
-const Ddos = require('ddos')
-const ddos = new Ddos({ whitelist: ['216.239.63.255'], burst: 10, limit: 15 });
 // import internal modules
 const logger = require('./logger/logger');
 const apirouter = require('./routes')
@@ -54,7 +52,7 @@ app.use((req, res) => {
 });
 
 // Cluster setup
-const PortNumber = 20000;
+const PortNumber = process.env.PORT || 20000;
 if (cluster.isPrimary) {
   console.log(`Primary ${process.pid} is running`);
   // Fork workers.
@@ -75,6 +73,8 @@ if (cluster.isPrimary) {
 setInterval(() => {
   CronJobVIdeoDelete()
 }, 600000); // Cron job for video deletion
+
+
 module.exports = app;
 
 

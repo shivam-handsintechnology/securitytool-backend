@@ -6,7 +6,7 @@ const { sensitivedata, passwordkeys, } = require("../../sensitive/availableapike
 const { sendResponse } = require("../../utils/dataHandler");
 const { errorHandler } = require("../../utils/errorHandler");
 const { PasswordValidateModel } = require('../../models/PasswordVaildateModel');
-const { PasswordHashingDataModel, ServerDataInPlaintextModel } = require("../../models/Security/SecurityMisconfiguration.model");
+const { ServerDataInPlaintextModel } = require("../../models/Security/SecurityMisconfiguration.model");
 module.exports = {
     createuserdetails: async (req, res) => {
         try {
@@ -38,9 +38,7 @@ module.exports = {
 
     sensitivekeysinurl: async (req, res) => {
         try {
-            const passwordTestHashes = await PasswordHashingDataModel.aggregate([
-                { $match: {} }
-            ]);
+
             const { responseData, url, query, domain, appid, RawBody } = req.body;
             console.log("RawBody", RawBody)
             const { _id } = req.user;
@@ -114,7 +112,7 @@ module.exports = {
 
             if (query) {
                 //    Sensitive data is transmitted to server in plain text
-                let isEncyptedData = await CheckAllDataIsEncrypted(query, sensitivedata, passwordTestHashes, appid, domain);
+                let isEncyptedData = await CheckAllDataIsEncrypted(query, sensitivedata);
                 console.log("isEncyptedData", isEncyptedData)
                 if (isEncyptedData.length > 0) {
                     let notencrypteddata = isEncyptedData.filter((data) => data.encrypted === false)
@@ -136,7 +134,7 @@ module.exports = {
             }
             if (RawBody) {
                 //    Sensitive data is transmitted to server in plain text
-                let isEncyptedData = await CheckAllDataIsEncrypted(RawBody, sensitivedata, passwordTestHashes, appid, domain);
+                let isEncyptedData = await CheckAllDataIsEncrypted(RawBody, sensitivedata);
                 console.log("isEncyptedData", isEncyptedData)
                 if (isEncyptedData.length > 0) {
                     let notencrypteddata = isEncyptedData.filter((data) => !data.encrypted);

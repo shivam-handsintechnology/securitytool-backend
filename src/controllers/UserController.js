@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const { sendResponse } = require("../utils/dataHandler");
 const { errorHandler } = require("../utils/errorHandler");
 const CryptoJS = require("crypto-js");
-const { middlewareModel } = require("../models/midlwaresModel");
 const { v4: uuidv4 } = require('uuid');
 const { ValidateUserSignUp, ValidateUserLogin } = require("../helpers/Validators");
 const key = process.env.SECREY_KEY

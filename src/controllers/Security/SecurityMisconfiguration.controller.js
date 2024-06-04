@@ -4,7 +4,6 @@ const validator = require("validator")
 const { sendResponse } = require("../../utils/dataHandler")
 const { AllowedDomainsModel } = require("../../models/AllowedDomainsModel")
 const { ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanDirectoryOptionMethod } = require("../../utils/scanClientData")
-const { PasswordHashingDataModel } = require("../../models/Security/SecurityMisconfiguration.model")
 const { errorHandler } = require("../../utils/errorHandler")
 const { decryptData } = require("../../middlewares/IncomingDataHashFormat")
 const { DefaultUserNamePasswordTest } = require("../../utils/TestWithPlayWright/DefaultusernamePasswordTest")
@@ -75,9 +74,7 @@ module.exports = {
     },
     passwordsInsecure: async (req, res) => {
         try {
-            const passwordTestHashes = await PasswordHashingDataModel.aggregate([
-                { $match: {} }
-            ]);
+
             let domain = req.query.domain
             let url = `http://${domain}/passwords-insecure`;
             let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });

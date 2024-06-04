@@ -125,7 +125,7 @@ async function CheckPasswordKeyText(data, keysToMatch, passwordhashlist) {
     throw new Error(error.message);
   }
 }
-async function CheckAllDataIsEncrypted(data, keysToMatch, passwordhashlist) {
+async function CheckAllDataIsEncrypted(data, keysToMatch) {
   try {
     const matchedData = []; // Initialize array to store matched data
     const recursiveSearch = (currentData) => {

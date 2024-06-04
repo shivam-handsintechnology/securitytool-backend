@@ -103,12 +103,17 @@ module.exports = {
           }
         }
       }
-      return sendResponse(res, 200, 'Data received successfully')
+      if (!res.hedersSent) {
+        return sendResponse(res, 200, 'Data received successfully')
+      }
+
 
     } catch (error) {
       console.log("Error in getALlDataFromSnippet", error.message)
-      return errorHandler(res, status, error.message);
-    }
+      if (!res.headersSent) {
+        return sendResponse(res, status, error.message)
+      }
 
+    }
   }
 }

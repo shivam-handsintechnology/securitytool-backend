@@ -69,8 +69,6 @@ router.use("/MiscellaneousAttacks", IncomingDataHashFormat, CorsMiddleware, Misc
 // vide streaming route
 router.use("/videostream", IncomingDataHashFormat, VideoStreamRouter)
 router.use("/api", router)
-router.get("/", (req, res) => {
-  res.render("index", { title: "Security Tool" })
-})
+
 
 module.exports = router

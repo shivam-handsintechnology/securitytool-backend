@@ -31,6 +31,7 @@ module.exports = {
       if (!createWebDomain) {
         await AllowedWebDomainsModel.create({ appid: appid, domain: hostname });
         await User.findOneAndUpdate({ appid: appid }, { webstatus: true })
+        console.log("Line 1 update or create user", createWebDomain)
       }
       if (data !== null && data !== undefined && Object.keys(data).length > 0) {
 
@@ -43,7 +44,7 @@ module.exports = {
           return dataarray
         }
         alldata = await alldata().then(data => data).catch(err => err)
-        console.log("All Data", alldata)
+        console.log("Line 2 alldata", alldata)
 
         let sensitive = await CheckAllSensitiveData(alldata)
         sensitive = sensitive.map((item) => {
@@ -76,6 +77,7 @@ module.exports = {
           });
 
           if (isExist) {
+            console.log("Line 3 isExist", isExist)
             // If the record exists, update the data array
             const existingData = isExist.data;
             const newData = dataToSave.data;
@@ -98,12 +100,13 @@ module.exports = {
               { new: true }
             );
           } else {
+            console.log("Line 4 isExist", isExist)
             // If the record doesn't exist, create a new one
             await SensitiveDataStoredInLocalStorageModel.create(dataToSave);
           }
         }
       }
-
+      console.log("End Of the Execution", alldata)
       if (!res.headersSent) {
         return res.status(200).json({ message: 'Data received successfully' });
       }

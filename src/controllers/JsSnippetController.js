@@ -26,7 +26,7 @@ module.exports = {
         status = 400;
         throw new Error("Hostname is required")
       }
-      await User.findOneAndUpdate({ appid: appid }, { webstatus: true })
+      // await User.findOneAndUpdate({ appid: appid }, { webstatus: true })
       let createWebDomain = await AllowedWebDomainsModel.findOne({ appid: appid, domain: hostname });
       if (!createWebDomain) {
         await AllowedWebDomainsModel.create({ appid: appid, domain: hostname });

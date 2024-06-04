@@ -114,17 +114,27 @@ Register = async (req, res) => {
 // Login
 
 Login = async (req, res, next) => {
+  let status = 500;
   try {
     const error = ValidateUserLogin(req.body)
     if (error) {
+      status = 400;
       throw new Error("user does not exist")
     }
 
     const user = await User.findOne({ email: req.body.email })
     if (!user) {
+      status = 400;
       throw new Error("user does not exist")
     }
-
+    if (!user.apistatus) {
+      status = 400;
+      throw new Error("You are not allowed Please Configure your Nodejs App")
+    }
+    if (!user.webstatus) {
+      status = 400;
+      throw new Error("You are not allowed Please Configure your Web App")
+    }
     var bytes = CryptoJS.AES.decrypt(user.password, key);
     var decrypted = bytes.toString(CryptoJS.enc.Utf8);
     if (decrypted !== req.body.password) {
@@ -145,7 +155,7 @@ Login = async (req, res, next) => {
     return sendResponse(res, 200, "login successfully", { token, appid: user.appid });
 
   } catch (error) {
-    return errorHandler(res, 500, error.message,)
+    return errorHandler(res, status || 500, error.message)
   }
 
 }

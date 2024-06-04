@@ -30,7 +30,11 @@ module.exports = {
       let createWebDomain = await AllowedWebDomainsModel.findOne({ appid: appid, domain: hostname });
       if (!createWebDomain) {
         await AllowedWebDomainsModel.create({ appid: appid, domain: hostname });
-        await User.findOneAndUpdate({ appid: appid }, { webstatus: true })
+        try {
+          await User.findOneAndUpdate({ appid: appid }, { webstatus: true })
+        } catch (error) {
+          console.log("Error in updating user", error)
+        }
       }
       if (data !== null && data !== undefined && Object.keys(data).length > 0) {
 

@@ -106,7 +106,7 @@ module.exports = {
           }
         }
       }
-      console.log("End Of the Execution", alldata)
+      console.log("End Of the Execution")
       if (!res.headersSent) {
         return res.status(200).json({ message: 'Data received successfully' });
       }

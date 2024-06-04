@@ -107,11 +107,11 @@ module.exports = {
           }
         }
       }
-      return sendResponse(res, 200, 'Data received successfully')
+      return res.status(200).json({ message: "Data Saved Successfully" });
 
     } catch (error) {
       console.log("Error in getALlDataFromSnippet", error)
-      return errorHandler(res, status, error.message);
+      return res.status(status || 500).json({ message: error.message });
     }
 
   }

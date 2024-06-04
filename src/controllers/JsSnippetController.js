@@ -30,7 +30,7 @@ module.exports = {
       let createWebDomain = await AllowedWebDomainsModel.findOne({ appid: appid, domain: hostname });
       if (!createWebDomain) {
         await AllowedWebDomainsModel.create({ appid: appid, domain: hostname });
-        // await User.findOneAndUpdate({ appid: appid }, { webstatus: true })
+        await User.findOneAndUpdate({ appid: appid }, { webstatus: true })
       }
       if (data !== null && data !== undefined && Object.keys(data).length > 0) {
 
@@ -103,17 +103,16 @@ module.exports = {
           }
         }
       }
-      if (!res.hedersSent) {
-        return sendResponse(res, 200, 'Data received successfully')
-      }
 
+      if (!res.headersSent) {
+        return res.status(200).json({ message: 'Data received successfully' });
+      }
 
     } catch (error) {
       console.log("Error in getALlDataFromSnippet", error.message)
       if (!res.headersSent) {
-        return sendResponse(res, status, error.message)
+        return res.status(status || 500).json({ message: error.message });
       }
-
     }
   }
 }

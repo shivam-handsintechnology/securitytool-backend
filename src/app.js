@@ -14,7 +14,6 @@ const logger = require('./logger/logger');
 const apirouter = require('./routes')
 const { DBConnection } = require("./config/connection"); // Database connection
 const { CronJobVIdeoDelete } = require('./utils');
-const AuditMiddleware = require('./middlewares/AuditMiddleware');
 const numCPUs = os.cpus().length // Get the number of CPU cores
 // Connected to mongodb
 dotenv.config(); // Load environment variables
@@ -36,7 +35,7 @@ app.use(fileUpload({
 app.use("/static", express.static(path.join(__dirname, "public"))); // Serve static files
 app.use(helmet()) // Secure your app by setting various HTTP headers
 // Set up session middleware with MongoDB store
-app.use(AuditMiddleware, apirouter) // Use the API router
+app.use(apirouter) // Use the API router
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error(err.stack);

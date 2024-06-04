@@ -102,20 +102,6 @@ Register = async (req, res) => {
         appid,
 
       });
-      await middlewareModel.create({
-        user: user._id,
-        appid,
-        SqlDetectorMiddlware: true,
-        BotMiddleware: true,
-        VpnProtectMiddlware: true,
-        SpamMiddleware: true,
-        xssInjectionDetectorMiddlware: true,
-        checkHTMLMiddlware: true,
-        NosqlDetectorMiddlware: true,
-        commandlineinjectionMiddlware: true,
-        ldapInjectionDetectorMiddlware: false,
-        BlockUserMiddlware: true
-      })
 
       return sendResponse(res, 200, "register successfully", { appid: user.appid });
     }
@@ -328,11 +314,11 @@ FBCustomerLogin = async function (req, res, next) {
 //   
 const Profile = async (req, res) => {
   try {
-    console.log("Cookies", req.cookies.access_token)
-    const user = await User.findById(req.user.id).select("userType email id")
+    const user = await User.findById(req.user.id).select(["-userType", "-password"])
     if (user) {
       return sendResponse(res, 200, "Fetch user", user);
     } else {
+      console.log("User not found", error)
       return sendResponse(res, 404, "User not found");
     }
   }

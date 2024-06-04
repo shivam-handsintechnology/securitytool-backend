@@ -27,6 +27,9 @@ const MissingFunctionalLevelAccessControlrouter = require("./Security/MissingFun
 const VideoStreamRouter = require("./VideoStream.route")
 const SSlRouter = require("./Security/SSL.routes")
 const MiscellaneousAttacksRoute = require("./Security/MisccellaneousAttacks.route")
+const ErrorMessagesRoute = require("./Security/ErrorMessage.route")
+const UnvalidatedRedirectsandForwardsRouter = require("../controllers/Security/UnvalidatedRedirectsandForwards.controller").get
+const CrossSiteScriptingRouer = require("./Security/CrossSiteScripting")
 // Import Routes
 router.use("/security", IncomingDataHashFormat, CorsMiddleware, verifytoken, Security)
 // Get Client Information
@@ -43,7 +46,7 @@ router.use("/injections", IncomingDataHashFormat, CorsMiddleware, InjectionsRout
 router.use("/SSLVerify", IncomingDataHashFormat, CorsMiddleware, verifyToken,
   ValidationMiddlewareQuery(DomainValidationSchema), SSlRouter)
 // Error Message
-router.use("/ErrorMessage", IncomingDataHashFormat, CorsMiddleware, require("./Security/ErrorMessage.route"))
+router.use("/ErrorMessage", IncomingDataHashFormat, CorsMiddleware, ErrorMessagesRoute)
 // Insecure Direct Object References
 router.use("/InsecureObjectRefGuard", IncomingDataHashFormat, CorsMiddleware, InsecureObjectRefGuard)
 // SecurityMisconfiguration
@@ -54,9 +57,9 @@ router.use("/MissingFunctionLevelAccessControl", IncomingDataHashFormat, CorsMid
 router.use("/SensitiveDataExposure", IncomingDataHashFormat, CorsMiddleware, SensitiveDataExposure)
 // Unvalidated Redirects and Forwards
 router.use("/UnvalidatedRedirects", IncomingDataHashFormat, CorsMiddleware, verifyToken,
-  ValidationMiddleware(DomainValidationSchema), GetFileCOntentMiddleware, require("../controllers/Security/UnvalidatedRedirectsandForwards.controller").get)
+  ValidationMiddleware(DomainValidationSchema), GetFileCOntentMiddleware, UnvalidatedRedirectsandForwardsRouter)
 // Cross-Site Scripting (XSS)
-router.use("/CrossSiteScripting", IncomingDataHashFormat, CorsMiddleware, verifyToken, require("./Security/CrossSiteScripting"))
+router.use("/CrossSiteScripting", IncomingDataHashFormat, CorsMiddleware, verifyToken, CrossSiteScriptingRouer)
 // Sensitive data is Store in Local Storage
 router.use("/SensitiveStorageLocalStorage", IncomingDataHashFormat, CorsMiddleware, verifyToken, SensitiveDataLocalStorage.get)
 // Week Cross Domain Policy
@@ -66,5 +69,8 @@ router.use("/MiscellaneousAttacks", IncomingDataHashFormat, CorsMiddleware, Misc
 // vide streaming route
 router.use("/videostream", IncomingDataHashFormat, VideoStreamRouter)
 router.use("/api", router)
+router.get("/", (req, res) => {
+  res.render("index", { title: "Security Tool" })
+})
 
 module.exports = router

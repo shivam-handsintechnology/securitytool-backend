@@ -1,5 +1,6 @@
 // Import external modules
 const cors = require('cors');
+const path = require('path');
 const fileUpload = require('express-fileupload')
 const express = require("express");
 const helmet = require('helmet')
@@ -8,40 +9,36 @@ const cluster = require("cluster")
 const os = require("os")
 const http = require('http');
 const process = require("process");
-const { Server } = require('socket.io');
+const Ddos = require('ddos')
+const ddos = new Ddos({ whitelist: ['216.239.63.255'], burst: 10, limit: 15 });
 // import internal modules
 const logger = require('./logger/logger');
 const apirouter = require('./routes')
 const { DBConnection } = require("./config/connection"); // Database connection
 const { CronJobVIdeoDelete } = require('./utils');
+const AuditMiddleware = require('./middlewares/AuditMiddleware');
 const numCPUs = os.cpus().length // Get the number of CPU cores
 // Connected to mongodb
 dotenv.config(); // Load environment variables
 DBConnection(process.env.MONGO_URI) // Connect to MongoDB
 const app = express(); // Create Express APP
 const server = http.createServer(app);
-app.use(cors());
 
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-  // options
-});
+
 // Session middleware setup
+app.set('trust proxy', 1) // trust first proxy
 app.set('view engine', 'ejs'); // Set the view engine to ejs
+app.use(cors());
 
 app.use(express.urlencoded({ extended: true })); // body parser 
 app.use(express.json({ limit: "50mb", extended: true })); // body parser
 app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 },   // File Upload Functionality
 }));
-
-app.set('trust proxy', 1) // trust first proxy
+app.use("/static", express.static(path.join(__dirname, "public"))); // Serve static files
 app.use(helmet()) // Secure your app by setting various HTTP headers
-
-app.use(apirouter) // Use the API router
+// Set up session middleware with MongoDB store
+app.use(AuditMiddleware, apirouter) // Use the API router
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error(err.stack);

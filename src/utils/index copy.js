@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 const moment = require('moment')
 const tls = require('tls');
 const MYSQLCSVDATA = require("../data/json/mysqldata.json");
-const { ignorePatterns } = require("../data/json/ApplicationTestingData.json");
+const { possibleLoginTexts } = require("../data/json/ApplicationTestingData.json");
 const SSLverifier = async (hostname) => {
     return new Promise((resolve, reject) => {
         try {
@@ -106,9 +106,6 @@ const withRetry = async (fn, retries = 3) => {
         }
     }
 };
-function shouldIgnoreURL(url) {
-    return ignorePatterns.some(pattern => url.includes(pattern));
-}
 async function scrapWebsite(url, res, sendEvent, visited = new Set(), isFirstPage = true) {
     if (visited.has(url)) {
         return visited;
@@ -146,9 +143,10 @@ async function scrapWebsite(url, res, sendEvent, visited = new Set(), isFirstPag
 
             const parsedUrl = new URL(href, baseUrl);
             if (parsedUrl.hostname === baseUrl.hostname && !(isFirstPage && parsedUrl.pathname === '/')) {
-                let testurl = parsedUrl.href;
-                if (!shouldIgnoreURL(testurl)) {
-                    uniqueLinks.add(testurl)
+                if (!parsedUrl.href.includes("#") && !parsedUrl.href.includes("mailto") && !parsedUrl.href.includes("tel") && !parsedUrl.href.includes("javascript") && !parsedUrl.href.includes("pdf") && !parsedUrl.href.includes("jpg") && !parsedUrl.href.includes("png") && !parsedUrl.href.includes("jpeg") && !parsedUrl.href.includes("doc") && !parsedUrl.href.includes("docx") && !parsedUrl.href.includes("xls") && !parsedUrl.href.includes("xlsx") && !parsedUrl.href.includes("ppt") && !parsedUrl.href.includes("pptx") && !parsedUrl.href.includes("csv") && !parsedUrl.href.includes("xml") && !parsedUrl.href.includes("json") && !parsedUrl.href.includes("zip") && !parsedUrl.href.includes("rar") && !parsedUrl.href.includes("tar") && !parsedUrl.href.includes("gz") && !parsedUrl.href.includes("7z") && !parsedUrl.href.includes("mp3") && !parsedUrl.href.includes("mp4") && !parsedUrl.href.includes("avi") && !parsedUrl.href.includes("mov") && !parsedUrl.href.includes("wmv") && !parsedUrl.href.includes("flv") && !parsedUrl.href.includes("ogg") && !parsedUrl.href.includes("webm") && !parsedUrl.href.includes("wav") && !parsedUrl.href.includes("wma") && !parsedUrl.href.includes("aac") && !parsedUrl.href.includes("flac") && !parsedUrl.href.includes("alac") && !parsedUrl.href.includes("aiff") && !parsedUrl.href.includes("ape") && !parsedUrl.href.includes("m4a") && !parsedUrl.href.includes("mid") && !parsedUrl.href.includes("midi") && !parsedUrl.href.includes("amr") && !parsedUrl.href.includes("mka") && !parsedUrl.href.includes("opus") && !parsedUrl.href.includes("ra") && !parsedUrl.href.includes("rm") && !parsedUrl.href.includes("vqf") && !parsedUrl.href.includes("wv") && !parsedUrl.href.includes("webp") && !parsedUrl.href.includes("svg") && !parsedUrl.href.includes("gif") && !parsedUrl.href.includes("bmp") && !parsedUrl.href.includes("ico") && !parsedUrl.href.includes("tiff") && !parsedUrl.href.includes("psd") && !parsedUrl.href.includes("eps") && !parsedUrl.href.includes("ai") && !parsedUrl.href.includes("indd") && !parsedUrl.href.includes("raw") && !parsedUrl.href.includes("cr2") && !parsedUrl.href.includes("nef") && !parsedUrl.href.includes("orf") && !parsedUrl.href.includes("sr2") && !parsedUrl.href.includes("pef") && !parsedUrl.href.includes("dng") && !parsedUrl.href.includes("x3f") && !parsedUrl.href.includes("arw") && !parsedUrl.href.includes("rw2") && !parsedUrl.href.includes("rwl")
+
+                ) {
+                    uniqueLinks.add(parsedUrl.href);
                 }
             }
         }
@@ -170,48 +168,47 @@ async function scrapWebsite(url, res, sendEvent, visited = new Set(), isFirstPag
 
     return visited;
 }
-const fillInputField = async (page, selector, value) => {
+async function fillInputField(page, selector, value) {
     const inputs = await page.$$(selector);
     for (const input of inputs) {
+        if (!input) {
+            console.log("No input found")
+        };
         await input.fill(value);
+
     }
-    return Promise.resolve();
+    return true;
 }
-
-
 async function fillInputFields(page, username, password, email) {
     try {
-
         const dateNow = new Date().toISOString().split('T')[0];
 
-
-
         // Fill input fields based on type
-        username && await fillInputField(page, 'input[type="text"]', username);
-        email && await fillInputField(page, 'input[type="email"]', email);
+        if (username) {
+            console.log("Filling username:", username);
+            await fillInputField(page, 'input[type="text"]', username);
+        }
+        if (email) {
+            console.log("Filling email:", email);
+            await fillInputField(page, 'input[type="email"]', email);
+        }
         await fillInputField(page, 'input[type="number"]', Date.now());
         await fillInputField(page, 'input[type="date"]', dateNow);
-        password && await fillInputField(page, 'input[type="password"]', password);
+        if (password) {
+            console.log("Filling password");
+            await fillInputField(page, 'input[type="password"]', "OR 1=1");
+        }
         await fillInputField(page, 'input[name="date"]', dateNow);
-        let buttonTypeSubmit = await page.$('button[type="submit"]')
-        let buttonTypeButton = await page.$('button[type="button"]')
-        let inputTypeSubmit = await page.$('input[type="submit"]')
-        if (buttonTypeSubmit) {
-            await buttonTypeSubmit.click();
-        }
 
-        else if (inputTypeSubmit) {
-            await inputTypeSubmit.click();
-        }
 
-        else if (buttonTypeButton) {
-            await buttonTypeButton.click();
-        }
 
     } catch (error) {
         console.error('Error occurred:', error);
     }
 }
+
+
+
 async function fillInputFieldsBlackPassword(page) {
     try {
         let username = Math.random().toString(36).substring(7);
@@ -223,24 +220,18 @@ async function fillInputFieldsBlackPassword(page) {
         await fillInputField(page, 'input[type="date"]', new Date().toISOString().split('T')[0]);
         await fillInputField(page, 'input[type="password"]', '');
         await fillInputField(page, 'input[name="date"]', new Date().toISOString().split('T')[0]);
-        let buttonTypeSubmit = await page.$('button[type="submit"]')
-        let buttonTypeButton = await page.$('button[type="button"]')
-        let inputTypeSubmit = await page.$('input[type="submit"]')
-        if (buttonTypeSubmit) {
-            await buttonTypeSubmit.click();
-            await page.waitForTimeout(2000);
+        const checkSubmit = await page.$('button[type="submit"]');
+        if (checkSubmit) {
+            await checkSubmit.click();
+        } else {
+            for (const loginText of possibleLoginTexts) {
+                const loginTextElement = await page.$(`text=${loginText}`);
+                if (loginTextElement) {
+                    await loginTextElement.click();
+                    break;
+                }
+            }
         }
-
-        else if (inputTypeSubmit) {
-            await inputTypeSubmit.click();
-            await page.waitForTimeout(2000);
-        }
-
-        else if (buttonTypeButton) {
-            await buttonTypeButton.click();
-            await page.waitForTimeout(2000);
-        }
-
 
     } catch (error) {
         console.error('Error occurred:', error);
@@ -339,5 +330,5 @@ async function scanSQLvulnerability(hostname, res, sendEvent,) {
 }
 module.exports = {
     scrapWebsite, extractVisibleText, withRetry, CronJobVIdeoDelete, SSLverifier, scanSQLvulnerability,
-    fillInputFields, takeScreenshot, fillInputFieldsBlackPassword, shouldIgnoreURL
+    fillInputFields, takeScreenshot, fillInputFieldsBlackPassword
 }

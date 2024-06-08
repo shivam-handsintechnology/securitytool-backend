@@ -1,4 +1,4 @@
-const Joi = require("joi")
+const Joi = require("joi");
 
 module.exports = {
     validateIPaddress: async (ipaddress) => {
@@ -6,6 +6,13 @@ module.exports = {
             return true;
         }
         return false;
+    },
+    MiscellaneousAttackValidation:
+    {
+        attempt: Joi.string().required().label("Attempt"),
+        duration: Joi.string().required().label("Duration"),
+        domain: Joi.string().domain().required().label("Domain")
+
     },
     ValidateUserSignUp: (data) => {
         const Schema = Joi.object({
@@ -39,5 +46,5 @@ module.exports = {
     DomainValidationSchema: {
         domain: Joi.string().domain().required().label("Domain")
     }
-    }
+}
 

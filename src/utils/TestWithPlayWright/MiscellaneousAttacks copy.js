@@ -1,18 +1,7 @@
 const { chromium } = require('playwright');
 const path = require('path');
 const { scrapWebsite, fillInputFields, takeScreenshot, withRetry } = require('..');
-const fs = require("fs");
-let requestabort = async (page) => {
-  await page.route('**', (route) => {
-    const requestUrl = route.request().url();
-    console.log(requestUrl);
-    if (requestUrl.includes("api/client/protection")) {
-      return route.abort();
-    } else {
-      return route.continue();
-    }
-  });
-}
+const { possibleLoginTexts, possibleauthapiTexts } = require("../../data/json/ApplicationTestingData.json")
 // Auto-complete is enabled for sensitive fields
 async function testAutoComplete(url, SendEvent, res) {
   const browser = await chromium.launch();
@@ -160,7 +149,6 @@ const testclickjacking = async (url, SendEvent, res) => {
 //Application accepts special characters as user inputs
 const TestSpecialCharaters = async (url, SendEvent, res, fullurl) => {
   const browser = await chromium.launch();
-
   const context = await browser.newContext({
     recordVideo: {
       dir: 'videos/', // Specify the directory to save the video recordings
@@ -168,7 +156,6 @@ const TestSpecialCharaters = async (url, SendEvent, res, fullurl) => {
     }
   });
   const page = await context.newPage();
-  requestabort(page)
   await withRetry(async () => {
     await page.goto(url, { timeout: 60000, waitUntil: 'domcontentloaded' });
   });
@@ -177,7 +164,7 @@ const TestSpecialCharaters = async (url, SendEvent, res, fullurl) => {
     await page.waitForLoadState('networkidle', { timeout: 60000 });
   });
   const username = "Test", password = "Test", email = "Test@example.com"
-  let data = "Scan Login Page for Black Password and Username";
+  let data = "Scan Login Page for Special Characters";
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -185,13 +172,53 @@ const TestSpecialCharaters = async (url, SendEvent, res, fullurl) => {
       if (!url) {
         throw new Error('Url not provided. Please provide a valid URL');
       }
-
+      console.log("url", url)
 
 
       await page.waitForLoadState('networkidle', { timeout: 90000 });
+
       await fillInputFields(page, username, password, email);
-      // Listen for network requests
-      await page.waitForTimeout(1000); // Wait for the lockout duration
+      const checkSubmit = await page.$('button[type="submit"]');
+      if (checkSubmit) {
+        console.log("Clicking submit button")
+        await checkSubmit.click();
+      } else {
+        for (const loginText of possibleLoginTexts) {
+          // Get the login text element
+          const loginTextElement = await page.$(`text=${loginText}`);
+
+          if (loginTextElement) {
+            await loginTextElement.click();
+            // show where is mouse triggered
+            await page.waitForLoadState('domcontentloaded', { timeout: 90000 });
+            // Get the bounding box of the element
+            const box = await loginTextElement.boundingBox();
+            console.log("loginText Box", box)
+            // if (box) {
+            //   // Click just below the element
+            //   await page.mouse.click(box.x + box.width / 2, box.y + box.height + 10);
+            // }
+          }
+        }
+      }
+      page.on('response', response => {
+        if (response.method() === 'POST') {
+          console.log("request", response.response(), response.method(), response.url())
+          for (const authapiText of possibleauthapiTexts) {
+            if (response.url().includes(authapiText)) {
+              let responseStatus = response.status();
+              console.log("Response status:", responseStatus);
+              break;
+            }
+          }
+        }
+        // Listen for response events
+
+        // Check if it's an XHR or Fetch request
+
+      });
+
+
       const videoPath = await page.video().path();
       const absolutePath = path.resolve(videoPath)
 
@@ -203,7 +230,78 @@ const TestSpecialCharaters = async (url, SendEvent, res, fullurl) => {
       // Send the base64-encoded video data to the client
       if (fileName && ext) {
         SendEvent({
-          message: "Application accepts special characters as user inputs", time: Date.now(), video: fullurl + fileName + ext
+          message: "Application accepts special characters as user inputs Such as @, #, $ etc", time: Date.now(), video: fullurl + fileName + ext
+        }, res);
+      } else if (!fileName && !ext) {
+        SendEvent({ message: "No Video Found", time: Date.now(), video: null }, res);
+      }
+      resolve(data);
+    } catch (error) {
+      reject(error);
+    } finally {
+      await context.close();
+      await browser.close();
+    }
+  });
+
+}
+// Temporary account lockout feature is not implemented
+const TemporaryAccountLockout = async (url, SendEvent, res, fullurl) => {
+  const browser = await chromium.launch();
+  const context = await browser.newContext({
+    recordVideo: {
+      dir: 'videos/', // Specify the directory to save the video recordings
+      size: { width: 1280, height: 720 } // Set the desired video resolution
+    }
+  });
+  const page = await context.newPage();
+  await withRetry(async () => {
+    await page.goto(url, { timeout: 60000, waitUntil: 'domcontentloaded' });
+  });
+
+  await withRetry(async () => {
+    await page.waitForLoadState('networkidle', { timeout: 60000 });
+  });
+  const username = "Test", password = "Test", email = "Test@example.com"
+  let data = "Scan Login Page for Special Characters";
+
+  return new Promise(async (resolve, reject) => {
+    try {
+
+      if (!url) {
+        throw new Error('Url not provided. Please provide a valid URL');
+      }
+
+
+      await page.waitForLoadState('networkidle', { timeout: 90000 });
+      await fillInputFields(page, username, password, email);
+      // Listen for network requests
+      const requests = [];
+      page.on('request', request => {
+        // Check if it's an XHR or Fetch request
+        if (request.resourceType() === 'xhr' || (request.resourceType() === 'fetch' && request.method() === 'POST')) {
+          requests.push(request);
+        }
+      });
+
+      // Wait for all requests to finish
+      let data = await Promise.all(requests.map(request => request.response()));
+      console.log("data", data)
+
+
+
+      const videoPath = await page.video().path();
+      const absolutePath = path.resolve(videoPath)
+
+      console.log('Video recording saved:', absolutePath);
+      // get extension of the video and that extension file name
+      const ext = path.extname(absolutePath);
+      const fileName = path.basename(absolutePath, ext);
+      console.log('File Name:', fileName);
+      // Send the base64-encoded video data to the client
+      if (fileName && ext) {
+        SendEvent({
+          message: "Application accepts special characters as user inputs Such as @, #, $ etc", time: Date.now(), video: fullurl + fileName + ext
         }, res);
       } else if (!fileName && !ext) {
         SendEvent({ message: "No Video Found", time: Date.now(), video: null }, res);
@@ -238,12 +336,13 @@ let getInoutypepasswordpage = async (link) => {
 let MiscellaneousAttacks = async (url, res, SendEvent, fullurl) => {
   try {
 
-    const visitedLinks = await scrapWebsite(url, res, SendEvent)
+    const visitedLinks = await scrapWebsite(url, res, SendEvent);
     let links = Array.from(visitedLinks);
     if (links.length > 0) {
       for (const link of links) {
-        let isAUthPage = await getInoutypepasswordpage(link)
-        isAUthPage && await TestSpecialCharaters(link, SendEvent, res, fullurl)
+        let ispassword = await getInoutypepasswordpage(link)
+        console.log("ispassword", ispassword)
+        ispassword && await TestSpecialCharaters(link, SendEvent, res, fullurl)
         await testCaptchElements(link, SendEvent, res, fullurl)
         await testAutoComplete(link, SendEvent, res, fullurl)
         await testclickjacking(link, SendEvent, res, fullurl)
@@ -251,6 +350,10 @@ let MiscellaneousAttacks = async (url, res, SendEvent, fullurl) => {
     }
   } catch (error) {
     console.log("error", error)
+    if (error.name == "TimeoutError") {
+      SendEvent({ error: true, message: `Timeout Error Occurred`, time: Date.now(), screenshot: null }, res);
+    }
+
   }
 }
 module.exports = { MiscellaneousAttacks };

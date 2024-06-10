@@ -46,6 +46,7 @@ router.get("/session-vulnurability", GetFileCOntentMiddleware, async (req, res) 
         return sendResponse(res, 200, "fetch", results)
 
     } catch (error) {
+        console.log(error)
         return errorHandler(res, 500, error.message);
     }
 });

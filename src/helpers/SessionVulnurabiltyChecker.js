@@ -75,25 +75,29 @@ const sessionExpireOnClose = async (response) => {
                     // expiresin  is value null regex
                     const expiresInRegex = /expiresIn:\s*['"](null|Infinity|\d+[smhd]{1})['"]/g;
                     let findtime = modifiedContent.match(expiresInRegex)
-                    const value = findtime[0].split(":")[1].trim().replace(/['"]/, '')
-                    if (value === 'null') {
-                        results.push(`session_does_not_expire on closing browser in ${item.name}`);
-                    } else if (value === 'Infinity') {
-                        results.push(`session_does_not_expire on closing browser in ${item.name}`);
-                    } else if (value === '0') {
-                        results.push(`session_does_not_expire on closing browser in ${item.name}`);
-                    } else if (value === 'undefined') {
-                        results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                    console.log(findtime)
+                    if (findtime) {
+                        const value = findtime[0].split(":")[1].trim().replace(/['"]/, '')
+                        if (value === 'null') {
+                            results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                        } else if (value === 'Infinity') {
+                            results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                        } else if (value === '0') {
+                            results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                        } else if (value === 'undefined') {
+                            results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                        }
+                        else if (value === 'NaN') {
+                            results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                        }
+                        else if (value === 'false') {
+                            results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                        }
+                        else if (value === 'true') {
+                            results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                        }
                     }
-                    else if (value === 'NaN') {
-                        results.push(`session_does_not_expire on closing browser in ${item.name}`);
-                    }
-                    else if (value === 'false') {
-                        results.push(`session_does_not_expire on closing browser in ${item.name}`);
-                    }
-                    else if (value === 'true') {
-                        results.push(`session_does_not_expire on closing browser in ${item.name}`);
-                    }
+
 
 
 
@@ -480,6 +484,7 @@ const sessionTimeoutWithObject = async (response) => {
 
 
         } catch (error) {
+            console.log(error)
             reject(error)
         }
     })

@@ -1,0 +1,9 @@
+{
+	"id": "gBZgg05nwaplpYl",
+	"json": "{\"id\":\"gBZgg05nwaplpYl\",\"url\":\"https://mlsadmin.sblcorp.com/\",\"loadedUrl\":\"https://mlsadmin.sblcorp.com/\",\"uniqueKey\":\"https://mlsadmin.sblcorp.com\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2024-06-10T11:55:11.132Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://mlsadmin.sblcorp.com",
+	"url": "https://mlsadmin.sblcorp.com/"
+}

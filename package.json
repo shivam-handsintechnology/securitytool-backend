@@ -17,6 +17,7 @@
         "cheerio": "^1.0.0-rc.12",
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
+        "crawlee": "^3.10.3",
         "crypto-js": "^4.1.1",
         "csv-parser": "^3.0.0",
         "ddos": "^0.2.1",

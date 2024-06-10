@@ -1,32 +1,27 @@
-// run youtube video with playwright
-const { chromium } = require('playwright');
-const toMilliseconds = (hrs, min, sec) => (hrs * 60 * 60 + min * 60 + sec) * 1000;
+const { PlaywrightCrawler } = require('crawlee');
 
-async function run() {
-    const browser = await chromium.launch({ headless: false });
-    const context = await browser.newContext({
-        recordVideo: {
-            dir: 'videos/', // Specify the directory to save the video recordings
-            size: { width: 1280, height: 720 } // Set the desired video resolution
-        }
-    });
-    const page = await context.newPage();
-    try {
-        let time = toMilliseconds(1, 5, 45); // Convert the video duration to milliseconds
-        await page.goto('https://www.youtube.com/watch?v=bbsNYKDypQA', { timeout: time, waitUntil: 'domcontentloaded' });
-        await page.waitForLoadState('networkidle', { timeout: time });
-        await page.waitForSelector('button.ytp-large-play-button ytp-button');
-        await page.click('button.ytp-large-play-button ytp-button');
-        await page.waitForTimeout(time); // Wait for 10 seconds
-    } catch (error) {
-        await page.screenshot({ path: `error.png` });
-        await browser.close();
-    } finally {
-        await browser.close();
-    }
+// PlaywrightCrawler crawls the web using a headless
+// browser controlled by the Playwright library.
+const crawler = new PlaywrightCrawler({
+    // Use the requestHandler to process each of the crawled pages.
+    async requestHandler({ request, page, enqueueLinks, log }) {
+        const title = await page.title();
+        log.info(`Title of ${request.loadedUrl} is '${title}'`);
 
-}
+        // Add the URL to the succeededUrls array
+        succeededUrls.push(request.loadedUrl);
 
-for (let i = 0; i < 10; i++) {
-    run();
-}
+        // Extract links from the current page
+        // and add them to the crawling queue.
+        await enqueueLinks();
+    },
+    // Uncomment this option to see the browser window.
+    // headless: false,
+});
+
+// Add first URL to the queue and start the crawl.
+const succeededUrls = [];
+(async () => {
+    await crawler.run(['https://mlsadmin.sblcorp.com/']);
+    console.log('Succeeded URLs:', succeededUrls);
+})();

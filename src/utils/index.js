@@ -2,7 +2,6 @@ const { chromium } = require('playwright');
 const cheerio = require('cheerio');
 const moment = require('moment')
 const tls = require('tls');
-const MYSQLCSVDATA = require("../data/json/mysqldata.json");
 const { ignorePatterns, queryParams } = require("../data/json/ApplicationTestingData.json");
 const SSLverifier = async (hostname) => {
     return new Promise((resolve, reject) => {
@@ -113,67 +112,73 @@ function shouldIgnoreURL(url) {
     return ignorePatterns.some(pattern => url.includes(pattern));
 }
 async function scrapWebsite(url, res, sendEvent, visited = new Set(), isFirstPage = true) {
-    if (visited.has(url)) {
-        return visited;
-    }
-
-    const startTime = new Date();
-
-    sendEvent({ message: `Scanning ${url}`, time: Date.now() }, res);
-    visited.add(url);
-
-    const browser = await chromium.launch({ headless: true });
-    const context = await browser.newContext();
-    const page = await context.newPage();
-
     try {
-        await withRetry(async () => {
-            await page.goto(url, { timeout: 60000, waitUntil: 'domcontentloaded' });
-        });
+        if (visited.has(url)) {
+            return visited;
+        }
 
-        await withRetry(async () => {
-            await page.waitForLoadState('networkidle', { timeout: 60000 });
-        });
-    } catch (error) {
-        console.log(`Failed to load ${url} after multiple attempts:`, error);
-        await browser.close();
-        return visited;
-    }
-    const uniqueLinks = new Set();
-    const baseUrl = new URL(url);
+        const startTime = new Date();
 
-    const hrefs = await page.$$eval('a[href]', links => links.map(link => link.getAttribute('href')));
+        sendEvent({ message: `Crawling  ${url}`, time: Date.now() }, res);
+        visited.add(url);
 
-    hrefs.forEach(href => {
-        if (href && !href.includes('http') && href.trim().length > 0) {
+        const browser = await chromium.launch({ headless: true });
+        const context = await browser.newContext();
+        const page = await context.newPage();
 
-            const parsedUrl = new URL(href, baseUrl);
-            if (parsedUrl.hostname === baseUrl.hostname && !(isFirstPage && parsedUrl.pathname === '/')) {
-                let testurl = parsedUrl.href;
-                if (!shouldIgnoreURL(testurl)) {
-                    uniqueLinks.add(testurl)
+        try {
+            // wait for 2 seconds
+            await withRetry(async () => {
+                await page.goto(url, { timeout: 60000, waitUntil: 'domcontentloaded' });
+            });
+
+            await withRetry(async () => {
+                await page.waitForLoadState('networkidle', { timeout: 60000 });
+            });
+        } catch (error) {
+            console.log(`Failed to load ${url} after multiple attempts:`, error);
+            await browser.close();
+            return visited;
+        }
+        const uniqueLinks = new Set();
+        const baseUrl = new URL(url);
+
+        const hrefs = await page.$$eval('a[href]', links => links.map(link => link.getAttribute('href')));
+
+        hrefs.forEach(href => {
+            if (href && !href.includes('http') && href.trim().length > 0) {
+
+                const parsedUrl = new URL(href, baseUrl);
+                if (parsedUrl.hostname === baseUrl.hostname && !(isFirstPage && parsedUrl.pathname === '/')) {
+                    let testurl = parsedUrl.href;
+                    if (!shouldIgnoreURL(testurl)) {
+                        uniqueLinks.add(testurl)
+                    }
                 }
             }
+        });
+
+        await browser.close();
+
+        const endTime = new Date();
+        const timeElapsed = (endTime - startTime) / 1000;
+        sendEvent({ message: `Crawling ${url} complete. Time elapsed: ${timeElapsed} seconds`, time: Date.now() }, res);
+
+        // Recursively scrap each unique link
+        for (const link of uniqueLinks) {
+            let testurl = link;
+
+            if (!shouldIgnoreURL(testurl)) {
+                await scrapWebsite(link, res, sendEvent, visited, false);
+            }
+
         }
-    });
 
-    await browser.close();
-
-    const endTime = new Date();
-    const timeElapsed = (endTime - startTime) / 1000;
-    sendEvent({ message: `Scanning ${url} complete. Time elapsed: ${timeElapsed} seconds`, time: Date.now() }, res);
-
-    // Recursively scrap each unique link
-    for (const link of uniqueLinks) {
-        let testurl = link;
-
-        if (!shouldIgnoreURL(testurl)) {
-            await scrapWebsite(link, res, sendEvent, visited, false);
-        }
-
+        return visited;
+    } catch (error) {
+        console.log('Error occurred:', error);
+        throw new Error(error);
     }
-
-    return visited;
 }
 const fillInputField = async (page, selector, value) => {
     const inputs = await page.$$(selector);

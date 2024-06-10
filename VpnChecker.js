@@ -8,5 +8,4 @@ const VpnResponse = async (ip) => {
     return false;
   }
 };
-
-module.exports = { VpnResponse }
+VpnResponse('185.239.173.244').then((res) => console.log(res)).catch((e) => console.log(e))

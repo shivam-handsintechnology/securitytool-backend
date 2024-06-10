@@ -1,4 +1,4 @@
-const testSqlWildcardDos = require("../../../sqlWildcardDosTest");
+const testSqlWildcardDos = require("../../utils/TestWithPlayWright/sqlWildcardDosTest");
 const { TestLockoutFeature } = require("../../utils/TestWithPlayWright/LockoutFeatureTest");
 const { MiscellaneousAttacks } = require("../../utils/TestWithPlayWright/MiscellaneousAttacks");
 const { sendResponse } = require("../../utils/dataHandler");

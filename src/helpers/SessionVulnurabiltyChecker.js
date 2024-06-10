@@ -10,11 +10,11 @@ const sessionExpireOnClose = async (response) => {
                 try {
                     // Replace double quotes with single quotes for consistency
                     let modifiedContent = item.content.replace(/"/g, "'");
-                     // Regular expression to match patterns indicative of jwt.verify usage
-                    
-                     // const jwtVerifyRegex = /jwt\.sign\s*\([^)]*\)/g;
+                    // Regular expression to match patterns indicative of jwt.verify usage
+
+                    // const jwtVerifyRegex = /jwt\.sign\s*\([^)]*\)/g;
                     // const matches = modifiedContent.match(jwtVerifyRegex);
-                 
+
                     // if (matches && matches.length > 0) {
                     //     // Extract configuration used in jwt.verify
                     //     matches.forEach(match => {
@@ -30,7 +30,7 @@ const sessionExpireOnClose = async (response) => {
                     //         }
                     //     });
                     // }
-                     // Regular expression to match patterns indicative of jwt.verify usage
+                    // Regular expression to match patterns indicative of jwt.verify usage
                     // Regular expression to match session configuration pattern for cookie
                     const cookieRegex = /cookie:\s*{\s*[\s\S]*?\s*}/;
 
@@ -71,10 +71,37 @@ const sessionExpireOnClose = async (response) => {
                         if (sessionMaxAgeMatch[1] === null) {
                             results.push(`session_does_not_expire on closing browser in ${item.name}`);
                         }
-                    } 
+                    }
+                    // expiresin  is value null regex
+                    const expiresInRegex = /expiresIn:\s*['"](null|Infinity|\d+[smhd]{1})['"]/g;
+                    let findtime = modifiedContent.match(expiresInRegex)
+                    const value = findtime[0].split(":")[1].trim().replace(/['"]/, '')
+                    if (value === 'null') {
+                        results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                    } else if (value === 'Infinity') {
+                        results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                    } else if (value === '0') {
+                        results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                    } else if (value === 'undefined') {
+                        results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                    }
+                    else if (value === 'NaN') {
+                        results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                    }
+                    else if (value === 'false') {
+                        results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                    }
+                    else if (value === 'true') {
+                        results.push(`session_does_not_expire on closing browser in ${item.name}`);
+                    }
+
+
+
+
+
 
                 } catch (error) {
-                    
+
                     reject(error)
                     // Handle error if necessary
                 }
@@ -112,7 +139,49 @@ const sessionTimeout = async (response) => {
                     const cookieRegex = /cookie:\s*{\s*[\s\S]*?\s*}/;
                     const maxAgeRegex = /req\.session\.cookie\.maxAge\s*=\s*(\d+)/g;
                     const sessionMaxAgeRegex = /req\.session\.maxAge\s*=\s*(\d+)/g;
+                    //    find expiresIn: '1d' in the file or expiresIn: 86400 Or expiresIn: 1m
+                    const expiresInRegex = /expiresIn:\s*['"](\d+[smhd]{1})['"]/g;
+                    let findtime = modifiedContent.match(expiresInRegex)
+                    if (findtime) {
+                        let time = findtime[0].replace("expiresIn:", "").replace(/'/g, "").trim()
+                        if (time.includes('d')) {
+                            let totalDays = time.replace('d', '')
+                            let totalHours = totalDays * 24
+                            let totalMinutes = totalHours * 60
+                            let totalSeconds = totalMinutes * 60
+                            if (totalSeconds > sevenDays) {
+                                sessionTimeout = "High";
+                            } else if (totalSeconds < oneMinute) {
+                                sessionTimeout = "Low";
+                            } else {
+                                sessionTimeout = "Normal";
+                            }
 
+
+                        } else if (time.includes('m')) {
+                            let totalMinutes = time.replace('m', '')
+                            let totalSeconds = totalMinutes * 60
+                            if (totalSeconds > sevenDays) {
+                                sessionTimeout = "High";
+                            } else if (totalSeconds < oneMinute) {
+                                sessionTimeout = "Low";
+                            } else {
+                                sessionTimeout = "Normal";
+                            }
+
+                        }
+                        else if (time.includes('s')) {
+                            let totalSeconds = time.replace('s', '')
+                            if (totalSeconds > sevenDays) {
+                                sessionTimeout = "High";
+                            } else if (totalSeconds < oneMinute) {
+                                sessionTimeout = "Low";
+                            } else {
+                                sessionTimeout = "Normal";
+                            }
+                        }
+
+                    }
                     // Check if session configuration includes a cookie
                     const cookieMatch = modifiedContent.match(cookieRegex);
                     if (cookieMatch) {
@@ -215,7 +284,7 @@ const sessionTimeout = async (response) => {
                         results.push(`Session timout set ${sessionTimeout} in ${item.name}`);
                     }
                 } catch (error) {
-                    
+
                     reject(error)
                     // Handle error if necessary
                 }
@@ -234,8 +303,8 @@ const sessionTimeoutWithObject = async (response) => {
     return new Promise(async (resolve, reject) => {
         try {
             let results = []
-            let string='Session timout in' 
-            results.push({[string]:"High"});
+            let string = 'Session timout in'
+            results.push({ [string]: "High" });
             // Iterate through the data and process each item
             response.forEach(async (item) => {
                 try {
@@ -250,6 +319,49 @@ const sessionTimeoutWithObject = async (response) => {
                     const cookieRegex = /cookie:\s*{\s*[\s\S]*?\s*}/;
                     const maxAgeRegex = /req\.session\.cookie\.maxAge\s*=\s*(\d+)/g;
                     const sessionMaxAgeRegex = /req\.session\.maxAge\s*=\s*(\d+)/g;
+                    //    find expiresIn: '1d' in the file or expiresIn: 86400 Or expiresIn: 1m
+                    const expiresInRegex = /expiresIn:\s*['"](\d+[smhd]{1})['"]/g;
+                    let findtime = modifiedContent.match(expiresInRegex)
+                    if (findtime) {
+                        let time = findtime[0].replace("expiresIn:", "").replace(/'/g, "").trim()
+                        if (time.includes('d')) {
+                            let totalDays = time.replace('d', '')
+                            let totalHours = totalDays * 24
+                            let totalMinutes = totalHours * 60
+                            let totalSeconds = totalMinutes * 60
+                            if (totalSeconds > sevenDays) {
+                                sessionTimeout = "High";
+                            } else if (totalSeconds < oneMinute) {
+                                sessionTimeout = "Low";
+                            } else {
+                                sessionTimeout = "Normal";
+                            }
+
+
+                        } else if (time.includes('m')) {
+                            let totalMinutes = time.replace('m', '')
+                            let totalSeconds = totalMinutes * 60
+                            if (totalSeconds > sevenDays) {
+                                sessionTimeout = "High";
+                            } else if (totalSeconds < oneMinute) {
+                                sessionTimeout = "Low";
+                            } else {
+                                sessionTimeout = "Normal";
+                            }
+
+                        }
+                        else if (time.includes('s')) {
+                            let totalSeconds = time.replace('s', '')
+                            if (totalSeconds > sevenDays) {
+                                sessionTimeout = "High";
+                            } else if (totalSeconds < oneMinute) {
+                                sessionTimeout = "Low";
+                            } else {
+                                sessionTimeout = "Normal";
+                            }
+                        }
+
+                    }
 
                     // Check if session configuration includes a cookie
                     const cookieMatch = modifiedContent.match(cookieRegex);
@@ -282,8 +394,8 @@ const sessionTimeoutWithObject = async (response) => {
                             }
 
                             // Push session timeout info along with file name to results
-                            let string='Session timout in'+item.name
-                            results.push({[string]:sessionTimeout});
+                            let string = 'Session timout in' + item.name
+                            results.push({ [string]: sessionTimeout });
                         }
                     }
 
@@ -307,8 +419,8 @@ const sessionTimeoutWithObject = async (response) => {
                         } else {
                             sessionTimeout = "Normal";
                         }
-                        let string='Session timout in'+item.name
-                        results.push({[string]:sessionTimeout});
+                        let string = 'Session timout in' + item.name
+                        results.push({ [string]: sessionTimeout });
                     }
                     // Check if req.session.cookie.maxAge is set
                     const sessionExpireRegex = /req\.session\.expires\s*=\s*(\d+)/g;
@@ -330,8 +442,8 @@ const sessionTimeoutWithObject = async (response) => {
                         } else {
                             sessionTimeout = "Normal";
                         }
-                        let string='Session timout in'+item.name
-                        results.push({[string]:sessionTimeout});
+                        let string = 'Session timout in' + item.name
+                        results.push({ [string]: sessionTimeout });
                     }
 
                     // Check if req.session.maxAge is set
@@ -353,11 +465,11 @@ const sessionTimeoutWithObject = async (response) => {
                             sessionTimeout = "Normal";
                         }
 
-                        let string='Session timout in'+item.name
-                        results.push({[string]:sessionTimeout});
+                        let string = 'Session timout in' + item.name
+                        results.push({ [string]: sessionTimeout });
                     }
                 } catch (error) {
-                    
+
                     reject(error)
                     // Handle error if necessary
                 }
@@ -403,8 +515,8 @@ const sessionTokenWithObject = async (response) => {
                 const jwtFunctionsRegex = /jwt\.(verify|sign)\s*\(/g;
                 const matches = modifiedcontent.match(jwtFunctionsRegex);
                 if (matches && matches.length > 0) {
-                    results.push({'Session token Passed in':item.name});
-            
+                    results.push({ 'Session token Passed in': item.name });
+
                 }
                 resolve(results)
             })
@@ -460,7 +572,7 @@ const sessionFixation = async (response) => {
                         }
                     }
                 } catch (error) {
-                    
+
                     // Handle error if necessary
                 }
             });
@@ -497,7 +609,7 @@ const sessionFixationWithobject = async (response) => {
                         // Check if req.sessionID is not based on user-controlled input or predictable values
                         if (!cookieObject.httpOnly) {
                             // Session fixation may be possible
-                            results.push({'session fixation is possible  in':item.name});
+                            results.push({ 'session fixation is possible  in': item.name });
                         }
                     }
                     if (modifiedContent.includes("res.cookie")) {
@@ -511,15 +623,15 @@ const sessionFixationWithobject = async (response) => {
                             cookieMatch.forEach(match => {
                                 const [_, cookieName, cookieValue] = match.match(cookiePattern);
                                 // Push session fixation possible result along with cookie name and value
-                                results.push({'session fixation is possible  in':item.name});
+                                results.push({ 'session fixation is possible  in': item.name });
                             });
                         } else {
                             // If res.cookie is used but httpOnly is not set to true
-                            results.push({'session fixation is possible  in':item.name});
+                            results.push({ 'session fixation is possible  in': item.name });
                         }
                     }
                 } catch (error) {
-                    
+
                     // Handle error if necessary
                 }
             });
@@ -577,7 +689,7 @@ const sessionHijacking = async (response) => {
                         }
                     }
                 } catch (error) {
-                    
+
                     // Handle error if necessary
                 }
             });
@@ -614,7 +726,7 @@ const sessionHijackingWithObject = async (response) => {
                         // Check if req.sessionID is not based on user-controlled input or predictable values
                         if (!cookieObject.httpOnly) {
                             // Session fixation may be possible
-                            results.push({'session hijacking is possible':item.name});
+                            results.push({ 'session hijacking is possible': item.name });
                         }
                     }
                     if (modifiedContent.includes("res.cookie")) {
@@ -625,14 +737,14 @@ const sessionHijackingWithObject = async (response) => {
                         const rescookieMatch = modifiedContent.match(cookiePattern);
                         if (rescookieMatch) {
                             // Push session fixation possible result along with cookie name and value
-                            results.push({'session hijacking is possible':item.name});
+                            results.push({ 'session hijacking is possible': item.name });
                         } else {
                             // If res.cookie is used but httpOnly is not set to true
-                            results.push({'session hijacking is possible':item.name});
+                            results.push({ 'session hijacking is possible': item.name });
                         }
                     }
                 } catch (error) {
-                    
+
                     // Handle error if necessary
                 }
             });
@@ -664,6 +776,6 @@ const SessionVulnurability = async (response) => {
     })
 }
 module.exports = {
-    sessionExpireOnClose, sessionTimeout, sessionFixation, sessionHijacking, sessionToken,sessionTimeoutWithObject, SessionVulnurability,sessionTokenWithObject,sessionFixationWithobject,sessionHijackingWithObject
+    sessionExpireOnClose, sessionTimeout, sessionFixation, sessionHijacking, sessionToken, sessionTimeoutWithObject, SessionVulnurability, sessionTokenWithObject, sessionFixationWithobject, sessionHijackingWithObject
 }
 

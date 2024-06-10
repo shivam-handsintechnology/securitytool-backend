@@ -1,7 +1,7 @@
 const { isValidObjectId } = require('mongoose');
 const Project_Security_Logs = require('.././models/Project_Security_Logs')
-const { useCustomAxios } = require('../utilities/functions/fetchUrl');
-let validator = require('validator')
+let validator = require('validator');
+const { default: axios } = require('axios');
 
 const BcryptRegX = /^\$2[ayb]\$.{56}$/i
 function checkHashedData(value, isHashedPassword) {
@@ -26,7 +26,7 @@ const CreateuserDetails = async (req, res, message, type) => {
     message = "malacios"
     var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
 
-    const response = await useCustomAxios(`http://ip-api.com/json/${ip}`)
+    const response = await axios.get(`http://ip-api.com/json/${ip}`)
     const { country, city, region } = response.data
     const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const d = new Date();

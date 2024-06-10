@@ -3,7 +3,8 @@ const { sendResponse } = require('../../utils/dataHandler')
 const { errorHandler } = require('../../utils/errorHandler')
 const getRandomColor = require('../../helpers/randomColorGenerator')
 const { default: mongoose } = require('mongoose')
-const { scanSQLvulnerability } = require('../../utils')
+const scanSQLvulnerability = require('../../utils/TestWithPlayWright/Sqlvulnurability')
+
 const getAllLogs = async (req, res) => {
     try {
         // Get total count of users

@@ -1,7 +1,20 @@
 const { chromium } = require('playwright');
-const { withRetry, shouldIgnoreURL, scrapWebsite, takeScreenshot } = require('./src/utils');
-// Define the base URL and endpoints to test
+const { withRetry, shouldIgnoreURL, scrapWebsite, takeScreenshot, containsQueryParams } = require('..');
 
+// Define the base URL and endpoints to test
+let findArrayinJson = async function (json) {
+    for (const key in json) {
+        if (json.hasOwnProperty(key)) {
+            const element = json[key];
+            if (Array.isArray(element)) {
+                return element;
+            } else if (typeof element === 'object') {
+                findArrayinJson(element);
+            }
+        }
+    }
+    return null;
+}
 async function test(url, res, SendEvent, fullurl) {
     const browser = await chromium.launch();
     const context = await browser.newContext({
@@ -21,11 +34,47 @@ async function test(url, res, SendEvent, fullurl) {
         const Searchinputs = await page.$$(inputSelector);
 
         page.on("response", async (response) => {
-            if (response.url().includes("?q=") || response.url().includes("?query=") || response.url().includes("?s=") || response.url().includes("?search=")) {
-                console.log("Request URL: ", response.url());
-                const responseTime = response.timing().responseEnd - response.timing().requestStart;
-                console.log(`Response time: ${responseTime} ms`);
-                SendEvent({ error: false, message: `Response time: ${responseTime} ms`, time: Date.now(), screenshot: await takeScreenshot(page) }, res);
+            let reponseurl = response.url();
+
+            if (containsQueryParams(reponseurl)) {
+                const contentType = response.headers()["content-type"];
+                if (contentType.includes("application/json")) {
+                    const json = await response.json();
+                    let array = await findArrayinJson(json);
+                    if (array && array.length > 0 && array.length <= 10) {
+                        const responseTime = response.timing().responseEnd - response.timing().requestStart;
+                        console.log(`Response time: ${responseTime} ms`);
+                        SendEvent({ error: false, message: "DDOS Sql Wildcards Attack chances are low", responseTime, url: url, time: Date.now(), isSql: true, jsondata: true, screenshot: await takeScreenshot(page) }, res);
+                    } else if (array && array.length > 10) {
+                        SendEvent({ error: false, message: "DDOS Sql Wildcards Attack chances are high", responseTime, url: url, time: Date.now(), isSql: true, jsondata: true, screenshot: await takeScreenshot(page) }, res);
+                    } else if (!array) {
+                        SendEvent({ error: false, message: "DDOS Sql Wildcards Attack chances are low", responseTime, url: url, time: Date.now(), isSql: true, jsondata: true, screenshot: await takeScreenshot(page) }, res);
+                    }
+
+                } else if (contentType.includes("text/html")) {
+                    const text = await response.text();
+                    let isJsonString = false;
+                    try {
+                        JSON.parse(text);
+
+                        isJsonString = true;
+                    } catch (error) {
+                        isJsonString = false;
+                    }
+                    if (isJsonString) {
+                        const json = JSON.parse(text);
+                        let array = await findArrayinJson(json);
+                        if (array && array.length > 0 && array.length <= 10) {
+                            const responseTime = response.timing().responseEnd - response.timing().requestStart;
+                            console.log(`Response time: ${responseTime} ms`);
+                            SendEvent({ error: false, message: "DDOS Sql Wildcards Attack chances are low", responseTime, url: url, time: Date.now(), isSql: true, jsondata: true, screenshot: await takeScreenshot(page) }, res);
+                        } else if (array && array.length > 10) {
+                            SendEvent({ error: true, message: "DDOS Sql Wildcards Attack chances are high", responseTime, url: url, time: Date.now(), isSql: true, jsondata: true, screenshot: await takeScreenshot(page) }, res);
+                        } else if (!array) {
+                            SendEvent({ error: false, message: "DDOS Sql Wildcards Attack chances are low", responseTime, url: url, time: Date.now(), isSql: true, jsondata: true, screenshot: await takeScreenshot(page) }, res);
+                        }
+                    }
+                }
             }
         });
 
@@ -115,7 +164,8 @@ async function test(url, res, SendEvent, fullurl) {
                 await page.waitForLoadState('networkidle', { timeout: 60000, waitUntil: 'domcontentloaded' });
             } else {
                 console.log("submit but not found");
-                SendEvent({ error: false, message: `"submit but not found"  ${url}`, time: Date.now(), screenshot: await takeScreenshot(page) }, res);
+                // Enter keyword
+                await page.keyboard.press('Enter');
             }
 
         }
@@ -135,17 +185,8 @@ async function test(url, res, SendEvent, fullurl) {
 }
 // Run the test testSqlWildcardDos(url);
 async function testSqlWildcardDos(url, res, SendEvent, fullurl) {
-    // await test(url, res, SendEvent, fullurl);
-    // SendEvent({ message: "Scanning completed", time: Date.now(), complete: true }, res);
-    // return true;
+    await test(url, res, SendEvent, fullurl);
     let visited = await scrapWebsite(url, res, SendEvent)
-    const links = Array.from(visited);
-    if (links.length > 0) {
-        for (const link of links) {
-            await test(link, res, SendEvent, fullurl)
-        }
-        return true;
-    }
 
 
 }

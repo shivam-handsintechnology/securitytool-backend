@@ -31,7 +31,6 @@
         "moment": "^2.29.4",
         "mongoose": "^6.11.1",
         "playwright": "^1.43.1",
-        "socket.io": "^4.7.5",
         "uuid": "^9.0.1",
         "validator": "^13.11.0",
         "winston": "^3.12.0"

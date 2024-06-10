@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 const moment = require('moment')
 const tls = require('tls');
 const MYSQLCSVDATA = require("../data/json/mysqldata.json");
-const { ignorePatterns } = require("../data/json/ApplicationTestingData.json");
+const { ignorePatterns, queryParams } = require("../data/json/ApplicationTestingData.json");
 const SSLverifier = async (hostname) => {
     return new Promise((resolve, reject) => {
         try {
@@ -88,6 +88,9 @@ const SSLverifier = async (hostname) => {
         }
     });
 };
+function containsQueryParams(url) {
+    return queryParams.some(param => url.includes(param));
+}
 const withRetry = async (fn, retries = 3) => {
     let attempt = 0;
     while (attempt < retries) {
@@ -162,7 +165,9 @@ async function scrapWebsite(url, res, sendEvent, visited = new Set(), isFirstPag
 
     // Recursively scrap each unique link
     for (const link of uniqueLinks) {
-        if (!link.includes("#") && !link.includes("mailto") && !link.includes("tel") && !link.includes("javascript") && !link.includes("pdf") && !link.includes("jpg") && !link.includes("png") && !link.includes("jpeg") && !link.includes("doc") && !link.includes("docx") && !link.includes("xls") && !link.includes("xlsx") && !link.includes("ppt") && !link.includes("pptx") && !link.includes("csv") && !link.includes("xml") && !link.includes("json") && !link.includes("zip") && !link.includes("rar") && !link.includes("tar") && !link.includes("gz") && !link.includes("7z") && !link.includes("mp3") && !link.includes("mp4") && !link.includes("avi") && !link.includes("mov") && !link.includes("wmv") && !link.includes("flv") && !link.includes("ogg") && !link.includes("webm") && !link.includes("wav") && !link.includes("wma") && !link.includes("aac") && !link.includes("flac") && !link.includes("alac") && !link.includes("aiff") && !link.includes("ape") && !link.includes("m4a") && !link.includes("mid") && !link.includes("midi") && !link.includes("amr") && !link.includes("mka") && !link.includes("opus") && !link.includes("ra") && !link.includes("rm") && !link.includes("vqf") && !link.includes("wv") && !link.includes("webp") && !link.includes("svg") && !link.includes("gif") && !link.includes("bmp") && !link.includes("ico") && !link.includes("tiff") && !link.includes("psd") && !link.includes("eps") && !link.includes("ai") && !link.includes("indd") && !link.includes("raw") && !link.includes("cr2") && !link.includes("nef") && !link.includes("orf") && !link.includes("sr2") && !link.includes("pef") && !link.includes("dng") && !link.includes("x3f") && !link.includes("arw") && !link.includes("rw2") && !link.includes("rwl")) {
+        let testurl = link;
+
+        if (!shouldIgnoreURL(testurl)) {
             await scrapWebsite(link, res, sendEvent, visited, false);
         }
 
@@ -181,37 +186,112 @@ const fillInputField = async (page, selector, value) => {
 
 async function fillInputFields(page, username, password, email) {
     try {
-
         const dateNow = new Date().toISOString().split('T')[0];
 
+        // Handle checkboxes and radio buttons
+        let checkbox = await page.$('input[type="checkbox"]');
+        if (checkbox) await checkbox.click();
+        let radio = await page.$('input[type="radio"]');
+        if (radio) await radio.click();
 
-
-        // Fill input fields based on type
-        username && await fillInputField(page, 'input[type="text"]', username);
-        email && await fillInputField(page, 'input[type="email"]', email);
-        await fillInputField(page, 'input[type="number"]', Date.now());
+        // Fill input fields
+        if (username) await fillInputField(page, 'input[type="text"]', username);
+        if (email) await fillInputField(page, 'input[type="email"]', email);
+        await fillInputField(page, 'input[type="number"]', Date.now().toString());
         await fillInputField(page, 'input[type="date"]', dateNow);
-        password && await fillInputField(page, 'input[type="password"]', password);
+        if (password) await fillInputField(page, 'input[type="password"]', password);
         await fillInputField(page, 'input[name="date"]', dateNow);
-        let buttonTypeSubmit = await page.$('button[type="submit"]')
-        let buttonTypeButton = await page.$('button[type="button"]')
-        let inputTypeSubmit = await page.$('input[type="submit"]')
+
+        // Handle buttons
+        const buttonTypeSubmit = await page.$('button[type="submit"]');
+        const buttonTypeButton = await page.$('button[type="button"]');
+        const inputTypeSubmit = await page.$('input[type="submit"]');
+
         if (buttonTypeSubmit) {
             await buttonTypeSubmit.click();
-        }
-
-        else if (inputTypeSubmit) {
+        } else if (inputTypeSubmit) {
             await inputTypeSubmit.click();
+        } else if (buttonTypeButton) {
+            await buttonTypeButton.click();
         }
 
-        else if (buttonTypeButton) {
-            await buttonTypeButton.click();
+        // Handle CAPTCHA (pseudo-implementation)
+        const captchaInput = await page.$('input[aria-label*="captcha"], input[name*="captcha"], input[id*="captcha"]');
+        if (captchaInput) {
+            // Placeholder for captcha solving logic
+            const captchaImage = await page.$('img[alt="captcha"], img[src*="captcha"]');
+            if (captchaImage) {
+                const captchaSrc = await captchaImage.getAttribute('src');
+                const captchaSolution = await solveCaptcha(captchaSrc); // External CAPTCHA solving service
+                await captchaInput.fill(captchaSolution);
+            }
+        }
+
+        // Handle Google reCAPTCHA (pseudo-implementation)
+        const recaptcha = await page.$('.g-recaptcha');
+        if (recaptcha) {
+            // You need to use an external service for solving reCAPTCHA
+            const recaptchaSolution = await solveRecaptcha(page.url());
+            // Implement the logic to fill the reCAPTCHA response token
+            await page.evaluate(`document.getElementById('g-recaptcha-response').value='${recaptchaSolution}'`);
         }
 
     } catch (error) {
         console.error('Error occurred:', error);
     }
 }
+// async function fillInputFields(page, username, password, email) {
+//     try {
+//         const dateNow = new Date().toISOString().split('T')[0];
+//         const catchanResolver = 'catcha resolver'; // Replace with the desired value
+
+//         // Fill input fields based on type
+//         const inputFields = await page.$$eval('input', inputs => inputs.map(input => ({
+//             type: input.type,
+//             name: input.name,
+//             attributes: [...input.attributes].map(attr => [attr.name, attr.value]).reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {})
+//         })));
+
+//         for (const field of inputFields) {
+//             const { type, name, attributes } = field;
+//             const includesCatchan = Object.values(attributes).some(value => value?.toLowerCase().includes('captcha'));
+
+//             switch (type) {
+//                 case 'text':
+//                     if (username && !includesCatchan) await fillInputField(page, `input[name="${type}"]`, username);
+//                     break;
+//                 case 'email':
+//                     if (email && !includesCatchan) await fillInputField(page, `input[name="${type}"]`, email);
+//                     break;
+//                 case 'number':
+//                     !includesCatchan && await fillInputField(page, `input[name="${type}"]`, Date.now());
+//                     break;
+//                 case 'date':
+//                     await fillInputField(page, `input[name="${type}"]`, dateNow);
+//                     break;
+//                 case 'password':
+//                     if (password && !includesCatchan) await fillInputField(page, `input[name="${type}"]`, password);
+//                     break;
+//                 default:
+//                     if (includesCatchan) await fillInputField(page, `input[name="${type}"]`, catchanResolver);
+//                     break;
+//             }
+//         }
+
+//         let buttonTypeSubmit = await page.$('button[type="submit"]');
+//         let buttonTypeButton = await page.$('button[type="button"]');
+//         let inputTypeSubmit = await page.$('input[type="submit"]');
+//         if (buttonTypeSubmit) {
+//             await buttonTypeSubmit.click();
+//         } else if (inputTypeSubmit) {
+//             await inputTypeSubmit.click();
+//         } else if (buttonTypeButton) {
+//             await buttonTypeButton.click();
+//         }
+//     } catch (error) {
+//         console.error('Error occurred:', error);
+//     }
+// }
 async function fillInputFieldsBlackPassword(page) {
     try {
         let username = Math.random().toString(36).substring(7);
@@ -275,69 +355,8 @@ const CronJobVIdeoDelete = async () => {
         console.log(error);
     }
 }
-async function scanSQLvulnerability(hostname, res, sendEvent,) {
-    return new Promise(async (resolve, reject) => {
-        const numRequests = MYSQLCSVDATA.length;
-        const averageResponseTime = 0.5; // Assuming 0.5 seconds average response time per request in a batch
-        const estimatedTime = numRequests * averageResponseTime;
-        console.log(`Estimated time to complete: ${estimatedTime} seconds`);
 
-        sendEvent({ numRequests: numRequests, estimatedTime, message: `Total Number of SQL Injection Tests: ${numRequests}`, time: Date.now() }, res);
-
-        let count = 0;
-        try {
-
-
-            for (let batchIndex = 0; batchIndex < numRequests; batchIndex++) {
-                try {
-                    let data = MYSQLCSVDATA[batchIndex];
-                    const response = await fetch(hostname, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data)
-                    });
-
-                    count++;
-                    let percentageCompleted = ((count / numRequests) * 100).toFixed(2);
-                    percentageCompleted = Math.round(percentageCompleted)
-                    if (response.status === 200 || response.status === 201 || response.status === 202 || response.status === 204 || response.status === 304 || response.status === 404) {
-                        sendEvent({ count, percentageCompleted, message: `Sql Injection Detected with this query: ${data.Query}`, time: Date.now() }, res);
-                    } else if (response.status > 400 && response.status < 500 && response.status !== 404) {
-                        // Handle client-side errors
-
-
-                        sendEvent({ count, percentageCompleted, time: Date.now() }, res);
-                    } else {
-                        // Handle other statuses if needed
-                        sendEvent({ count, percentageCompleted, time: Date.now() }, res);
-                    }
-
-                    // Calculate percentage completed
-
-
-                } catch (error) {
-                    count++;
-                    let percentageCompleted = ((count / numRequests) * 100).toFixed(2);
-                    percentageCompleted = Math.round(percentageCompleted)
-                    sendEvent({ count, percentageCompleted, time: Date.now() }, res);
-                    console.error("Error occurred during request:", error);
-                }
-            }
-            count++;
-
-            sendEvent({ count: numRequests, complete: true, percentageCompleted: 100, message: "Sql Injection Test Completed", time: Date.now() }, res);
-            resolve({ message: "Sql Injection Test Completed" });
-        } catch (error) {
-            count++;
-
-            sendEvent({ count, time: Date.now() }, res);
-            reject(error);
-        }
-    });
-}
 module.exports = {
-    scrapWebsite, extractVisibleText, withRetry, CronJobVIdeoDelete, SSLverifier, scanSQLvulnerability,
-    fillInputFields, takeScreenshot, fillInputFieldsBlackPassword, shouldIgnoreURL
+    scrapWebsite, extractVisibleText, withRetry, CronJobVIdeoDelete, SSLverifier,
+    fillInputFields, takeScreenshot, fillInputFieldsBlackPassword, shouldIgnoreURL, containsQueryParams
 }

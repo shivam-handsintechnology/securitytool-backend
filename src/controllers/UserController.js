@@ -97,10 +97,10 @@ Register = async (req, res) => {
         return sendResponse(res, 400, "Invalid OTP",);
       }
       if (req.body.otp == user.otp) {
+        let subscription = await Subscription.create({ userId: user._id, appid: user.appid })
         user.otpisvalid = true
+        user.subsription = subscription._id
         await user.save()
-
-        await Subscro.create({ userId: user._id, appid: user.appid })
         return sendResponse(res, 201, "otp verified successfully", { otpisvalid: user.otpisvalid });
       }
 
@@ -176,9 +176,10 @@ Login = async (req, res, next) => {
         return sendResponse(res, 400, "Invalid OTP",);
       }
       if (req.body.otp == user.otp) {
+        let subscription = await Subscription.create({ userId: user._id, appid: user.appid })
         user.otpisvalid = true
+        user.subsription = subscription._id
         await user.save()
-        await Subscription.create({ userId: user._id, appid: user.appid })
         const token = jwt.sign({ id: user._id, appid: user.appid }, process.env.JWT_SECRET, { expiresIn: "1d" })
         return sendResponse(res, 201, "Otp Verified Successfully", { token, appid: user.appid });
       }

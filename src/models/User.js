@@ -8,6 +8,7 @@ const UserSchema = new Schema({
   password: { type: String, trim: true },
   appid: { type: String, unique: true },
   name: { type: String, trim: true },
+  subsription: { type: mongoose.Types.ObjectId, ref: 'Subscription' },
   // online:{type:Boolean,default:null},
   userType: {
     type: String, enum: ['Admin', 'User'], default: 'User'

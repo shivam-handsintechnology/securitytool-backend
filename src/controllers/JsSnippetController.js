@@ -36,9 +36,18 @@ module.exports = {
         status = 400;
         throw new Error("Hostname is required")
       }
-
+      let user = await User.findOne({ appid }).populate("subsription")
+      if (!user) {
+        status = 400;
+        throw new Error("Appid is not valid")
+      }
+      let subscription = user.subsription;
+      let today = new Date();
+      if (subscription && subscription.endDate && subscription.endDate < today) {
+        status = 400;
+        throw new Error("Subscription is Expired")
+      }
       let createWebDomain = await AllowedWebDomainsModel.aggregate([{ $match: { appid: appid, } }]);
-
       if (createWebDomain.length == 0) {
         await AllowedWebDomainsModel.create({ appid: appid, domain: hostname });
       } else if (createWebDomain.length === 1) {

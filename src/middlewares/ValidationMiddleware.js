@@ -80,8 +80,14 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
         if (!req.body.appid) {
             throw new Error("Plese Provide Appid")
         }
-        let user = await User.findOne({ appid: req.body.appid })
+        let user = await User.findOne({ appid: req.body.appid }).populate("subsription")
         if (user) {
+            let subscription = user.subsription;
+            let today = new Date();
+            if (subscription && subscription.endDate && subscription.endDate < today) {
+                statusCode = 400;
+                throw new Error("Subscription is Expired")
+            }
             await User.findByIdAndUpdate(user._id, { apistatus: true })
             req.user = user
             const { domain } = req.body;

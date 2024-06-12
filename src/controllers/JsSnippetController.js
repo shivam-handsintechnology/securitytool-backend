@@ -1,4 +1,5 @@
 const path = require('path');
+const moment = require('moment');
 const { sendResponse } = require('../utils/dataHandler');
 const { errorHandler } = require('../utils/errorHandler');
 const SensitiveDataStoredInLocalStorageModel = require('../models/Security/SensitiveDataStoredInLocalStorage.model');
@@ -42,12 +43,17 @@ module.exports = {
         throw new Error("Appid is not valid")
       }
       let subscription = user.subsription;
-      let today = new Date();
-      if (subscription && subscription.endDate && subscription.endDate < today) {
-        status = 400;
+      if (!subscription.startDate && !subscription.endDate) {
+        statusCode = 400;
+        throw new Error("Please Subsribe First")
+      }
+      const currentDate = moment();
+      const valid = moment(subscription.endDate, 'MMM DD HH:mm:ss YYYY GMT');
+      if (valid.isBefore(currentDate)) {
+        statusCode = 400;
         throw new Error("Subscription is Expired")
       }
-      let createWebDomain = await AllowedWebDomainsModel.aggregate([{ $match: { appid: appid, } }]);
+      WebDomain = await AllowedWebDomainsModel.aggregate([{ $match: { appid: appid, } }]);
       if (createWebDomain.length == 0) {
         await AllowedWebDomainsModel.create({ appid: appid, domain: hostname });
       } else if (createWebDomain.length === 1) {

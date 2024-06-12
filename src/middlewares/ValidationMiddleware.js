@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const moment = require('moment');
 const { sendResponse } = require('../utils/dataHandler');
 const { errorHandler } = require('../utils/errorHandler');
 const { AllowedDomainsModel } = require('../models/AllowedDomainsModel');
@@ -84,8 +85,13 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
         if (user) {
             let subscription = user.subsription;
             console.log("Subscription", subscription)
-            let today = new Date();
-            if (subscription && subscription.endDate && subscription.endDate < today) {
+            if (!subscription.startDate && !subscription.endDate) {
+                statusCode = 400;
+                throw new Error("Please Subsribe First")
+            }
+            const currentDate = moment();
+            const valid = moment(subscription.endDate, 'MMM DD HH:mm:ss YYYY GMT');
+            if (valid.isBefore(currentDate)) {
                 statusCode = 400;
                 throw new Error("Subscription is Expired")
             }

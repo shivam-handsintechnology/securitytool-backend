@@ -83,6 +83,7 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
         let user = await User.findOne({ appid: req.body.appid }).populate("subsription")
         if (user) {
             let subscription = user.subsription;
+            console.log("Subscription", subscription)
             let today = new Date();
             if (subscription && subscription.endDate && subscription.endDate < today) {
                 statusCode = 400;

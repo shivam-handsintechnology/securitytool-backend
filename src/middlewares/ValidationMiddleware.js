@@ -102,11 +102,10 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
                 } else if (existdomain.length === 1) {
                     let finddomain = existdomain.find((item) => item.domain === domain)
                     if (!finddomain) {
-                        throw new Error("Only One Domain is Allowed")
+                        throw new Error(`Only One Domain is Allowed  , ${existdomain["domain"]}`)
                     } else {
                         data = finddomain
                     }
-                    throw new Error("Only One Domain is Allowed")
                 }
             }
             next()

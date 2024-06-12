@@ -44,7 +44,7 @@ module.exports = {
       } else if (createWebDomain.length === 1) {
         let finddomain = createWebDomain.find((item) => item.domain === hostname)
         if (!finddomain) {
-          throw new Error("Only One Domain is Allowed")
+          throw new Error(`Only One Domain is Allowed,already  ${createWebDomain["domain"]} is used `)
         }
       }
       if (data !== null && data !== undefined && Object.keys(data).length > 0) {

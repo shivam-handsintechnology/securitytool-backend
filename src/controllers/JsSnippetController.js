@@ -42,7 +42,7 @@ module.exports = {
       if (createWebDomain.length == 0) {
         await AllowedWebDomainsModel.create({ appid: appid, domain: hostname });
       } else if (createWebDomain.length === 1) {
-        let finddomain = createWebDomain.find((item) => item.domain === domain)
+        let finddomain = createWebDomain.find((item) => item.domain === hostname)
         if (!finddomain) {
           throw new Error("Only One Domain is Allowed")
         }

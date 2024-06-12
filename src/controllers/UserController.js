@@ -1,10 +1,22 @@
+require("dotenv").config();
 const User = require("../models/User")
+const Subscription = require("../models/SubscriptionModel")
 const jwt = require("jsonwebtoken");
 const { sendResponse } = require("../utils/dataHandler");
 const { errorHandler } = require("../utils/errorHandler");
 const CryptoJS = require("crypto-js");
 const { v4: uuidv4 } = require('uuid');
 const { ValidateUserSignUp, ValidateUserLogin } = require("../helpers/Validators");
+const Razorpay = require("razorpay");
+const key_id = process.env.NODE_ENV == "production" ? process.env.RAZORPAY_KEY_ID : process.env.RAZORPAY_KEY_ID_TEST
+const key_secret = process.env.NODE_ENV == "production" ? process.env.RAZORPAY_KEY_SECRET : process.env.RAZORPAY_KEY_SECRET_TEST
+const { validatePaymentVerification, validateWebhookSignature } = require("razorpay/dist/utils/razorpay-utils");
+const { OtpGenerator } = require("../utils");
+const sendEmail = require("../helpers/sendEmail");
+const instance = new Razorpay({
+  key_id: key_id,
+  key_secret: key_secret,
+});
 const key = process.env.SECREY_KEY
 const searchFilesRemotely = async (remotePath, searchTerm, ssh) => {
   try {
@@ -69,29 +81,50 @@ const searchInFiles = async (ssh, files, searchTerm) => {
 // Register
 Register = async (req, res) => {
   try {
-    // const isValidHostname = await checkDomainAvailability(req.body.domain);
-    // const { containsSpecialCharacter, containsLowercase, containsUppercase, containsNumber } = await validatePassword(req.body.password)
-    // if (!containsSpecialCharacter) {
-    //   throw new Error()
-    //   return sendResponse(res, 406, "Please enter password 1 Special charater");
-    // }
-    // else if (!containsLowercase) {
-    //   return sendResponse(res, 406, "Please enter password 1  Lowercase letter",);
-    // }
-    // else if (!containsUppercase) {
-    //   return sendResponse(res, 406, "Please enter password 1  Uppercase letter",);
-    // }
-    // else if (!containsNumber) {
-    //   return sendResponse(res, 406, "Please enter password 1  Number letter",);
-    // }
+    let expires
+    // Validate user input
     const error = ValidateUserSignUp(req.body)
     if (error) {
       return sendResponse(res, 400, error,);
     }
+    // Check if user exists
     const user = await User.findOne({ email: req.body.email })
-    if (user) {
-      return sendResponse(res, 409, "email is already registered", {});
+    //   Check if otp in payload and user exists
+    if (req.body.otp && user) {
+      console.log(user.otp, req.body.otp)
+      if (user.otp !== req.body.otp) {
+
+        return sendResponse(res, 400, "Invalid OTP",);
+      }
+      if (req.body.otp == user.otp) {
+        user.otpisvalid = true
+        await user.save()
+
+        await Subscro.create({ userId: user._id, appid: user.appid })
+        return sendResponse(res, 201, "otp verified successfully", { otpisvalid: user.otpisvalid });
+      }
+
     }
+    // Check if user is verified
+    else if (user && !user.otpisvalid) {
+      user.otp = OtpGenerator()
+
+      if (user.expiresAt) {
+        expires = new Date(user.expiresAt).getMinutes()
+      } else if (user.expiresAt) {
+        expires = new Date(user.expiresAt).getMinutes()
+      }
+      await user.save()
+      await sendEmail(req.body.email, "OTP Verification", `Your OTP is ${user.otp} it is expire in ${expires} minutes`)
+
+      return sendResponse(res, 200, "otp sent successfully", { otpisvalid: user.otpisvalid, });
+    }
+
+    // Check if user is verified
+    else if (user && user.otpisvalid) {
+      return sendResponse(res, 409, "User already exists", { otpisvalid: user.otpisvalid });
+    }
+    // Encrypt password and create user
     else if (!user) {
       const appid = uuidv4(); // ⇨ '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
       var encrypted = CryptoJS.AES.encrypt(req.body.password, key).toString();
@@ -99,14 +132,21 @@ Register = async (req, res) => {
         email: req.body.email,
         password: encrypted,
         appid,
+        name: req.body.name,
+        otp: OtpGenerator(),
+        otpisvalid: false
 
       });
+      if (user.expiresAt) {
+        expires = new Date(user.expiresAt).getMinutes()
+      }
 
-      return sendResponse(res, 200, "register successfully", { appid: user.appid });
+      await sendEmail(req.body.email, "OTP Verification", `Your OTP is ${user.otp} it is expire in ${expires} minutes`)
+      return sendResponse(res, 200, "otp sent successfully", { otpisvalid: user.otpisvalid, });
     }
   } catch (error) {
-
-    return errorHandler(res)
+    console.log(error)
+    return errorHandler(res, 500, error.message)
   }
 }
 // Roles
@@ -116,43 +156,52 @@ Register = async (req, res) => {
 Login = async (req, res, next) => {
   let status = 500;
   try {
+    // Validate user input
     const error = ValidateUserLogin(req.body)
     if (error) {
       status = 400;
-      throw new Error("user does not exist")
+      throw new Error(error)
     }
 
     const user = await User.findOne({ email: req.body.email })
+    // Check if user exists
     if (!user) {
       status = 400;
       throw new Error("user does not exist")
     }
-    if (!user.apistatus) {
-      status = 400;
-      throw new Error("You are not allowed Please Configure your Nodejs App")
+    // Check if otp in payload and user exists
+    if (req.body.otp && user) {
+      console.log(user.otp, req.body.otp)
+      if (user.otp !== req.body.otp) {
+        return sendResponse(res, 400, "Invalid OTP",);
+      }
+      if (req.body.otp == user.otp) {
+        user.otpisvalid = true
+        await user.save()
+        await Subscription.create({ userId: user._id, appid: user.appid })
+        const token = jwt.sign({ id: user._id, appid: user.appid }, process.env.JWT_SECRET, { expiresIn: "1d" })
+        return sendResponse(res, 201, "Otp Verified Successfully", { token, appid: user.appid });
+      }
     }
-    if (!user.webstatus) {
-      status = 400;
-      throw new Error("You are not allowed Please Configure your Web App")
+    // Check if user is verified
+    if (user && !user.otpisvalid) {
+      user.otp = OtpGenerator()
+      user.expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+      await user.save()
+
+      let expires = new Date(user.expiresAt).getMinutes()
+      sendEmail(req.body.email, "OTP Verification", `Your OTP is ${user.otp} it is expire in ${expires} minutes`)
+      return sendResponse(res, 200, "otp sent successfully", { otpisvalid: user.otpisvalid, });
     }
+    //  Check if user is verified
     var bytes = CryptoJS.AES.decrypt(user.password, key);
     var decrypted = bytes.toString(CryptoJS.enc.Utf8);
     if (decrypted !== req.body.password) {
       throw new Error("please enter valid credentials")
     }
-    const token = jwt.sign({ id: user._id, appid: user.appid }, process.env.JWT_SECRET, { expiresIn: "365d" })
+    const token = jwt.sign({ id: user._id, appid: user.appid }, process.env.JWT_SECRET, { expiresIn: "1d" })
 
-    var date = new Date();
-    var tokenExpire = date.setTime(date.getTime() + (360 * 1000));
-    res
-      .cookie("access_token", token, {
-        httpOnly: true,
-        maxAge: tokenExpire,
-        // secure: process.env.NODE_ENV === "production",
-        // sameSite: "None",
-        // path: "/"
-      })
-    return sendResponse(res, 200, "login successfully", { token, appid: user.appid });
+    return sendResponse(res, 201, "login successfully", { token, appid: user.appid });
 
   } catch (error) {
     return errorHandler(res, status || 500, error.message)
@@ -234,13 +283,59 @@ Logout = async (req, res) => {
     }
     const [authType, token] = authHeader.split(' ');
 
-    jwt.destroy(token)
+    await jwt.destroy(token)
     sendResponse(res, 200, "logout successfully")
   } catch (error) {
 
     return errorHandler(res)
   }
 }
+Checkout = async (req, res) => {
+  try {
+    const { amount, currency, receipt, payment_capture } = req.body
+
+    const options = {
+      amount: amount * 100,  // amount in smallest currency unit
+      currency,
+      receipt: "receipt",
+
+    };
+
+    const response = await instance.orders.create(options)
+    console.log(response)
+    return sendResponse(res, 200, "payment gateway integration", response)
+  } catch (error) {
+    console.log(error)
+    return errorHandler(res, 500, error.message)
+  }
+},
+  CheckoutSuccess = async (req, res) => {
+    try {
+      let webhooksecret = "C5MT6tAJ@4XE7T@"
+      const { order_id, razorpay_payment_id, razorpay_signature } = req.body
+      console.log(order_id, razorpay_payment_id, razorpay_signature)
+      const order = await instance.orders.fetch(order_id)
+
+      const payment = await validatePaymentVerification({ "order_id": order_id, "payment_id": razorpay_payment_id }, razorpay_signature, key_secret)
+
+      if (!order) {
+        return sendResponse(res, 404, "order not found")
+      }
+      else if (!payment) {
+        return sendResponse(res, 404, "payment not found")
+      }
+
+      return sendResponse(res, 200, "payment success", order)
+    } catch (error) {
+      console.log(error.error)
+      if (error.error && error.error.code === "BAD_REQUEST_ERROR") {
+        return errorHandler(res, 400, error.error.description,)
+      }
+      return errorHandler(res, 500, error.message)
+    }
+  }
+
+
 
 // =
 FBCustomerLogin = async function (req, res, next) {
@@ -342,7 +437,9 @@ const UserController = {
   Register,
   GoogleRegister,
   FBCustomerLogin,
-  Profile
+  Profile,
+  Checkout,
+  CheckoutSuccess
 }
 
 module.exports = {

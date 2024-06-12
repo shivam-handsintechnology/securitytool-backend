@@ -12,7 +12,12 @@ module.exports = {
     if (!appid) {
       return errorHandler(res, 400, 'App ID is required');
     }
+    let existuser = await User.findOne({ appid });
+    if (!existuser) {
+      res.status(200).send("Appid is not valid")
+    }
     await User.findOneAndUpdate({ appid }, { webstatus: true });
+
     // Resolve the path to the protected JavaScript file
     const filePath = path.join(process.cwd(), 'src', 'public', 'protect.js');
     // Send the file as the response
@@ -32,9 +37,15 @@ module.exports = {
         throw new Error("Hostname is required")
       }
 
-      let createWebDomain = await AllowedWebDomainsModel.findOne({ appid: appid, domain: hostname });
-      if (!createWebDomain) {
+      let createWebDomain = await AllowedWebDomainsModel.aggregate([{ $match: { appid: appid, } }]);
+
+      if (createWebDomain.length == 0) {
         await AllowedWebDomainsModel.create({ appid: appid, domain: hostname });
+      } else if (createWebDomain.length === 1) {
+        let finddomain = createWebDomain.find((item) => item.domain === domain)
+        if (!finddomain) {
+          throw new Error("Only One Domain is Allowed")
+        }
       }
       if (data !== null && data !== undefined && Object.keys(data).length > 0) {
 

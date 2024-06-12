@@ -4,21 +4,21 @@ module.exports = async function sendEmail(to, subject, text) {
         service: 'gmail',
         auth
             : {
-            user: 'shivam@handsintechnology.com',
-            pass: 'Shivam@123'
+            user: process.env.EMAIL,
+            pass: process.env.PASSWORD
         }
     });
     let mailOptions = {
-        from: 'shivam@handsintechnology.com',
+        from: process.env.EMAIL,
         to: to,
         subject: subject,
         text: text
     };
     transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
-          return error
+            throw new Error(error)
         } else {
-            return "Email Sent"+info.response
+            return "Email Sent" + info.response
         }
     });
 }

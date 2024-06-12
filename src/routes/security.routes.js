@@ -6,7 +6,7 @@ const DomainController = require('../controllers/DomainController');
 const { ValidationMiddleware } = require('../middlewares/ValidationMiddleware');
 const { DomainValidationSchema } = require('../helpers/Validators');
 // middlewares
-router.route('/middlwares', ValidationMiddleware(DomainValidationSchema)).get(middlwareController.getMiddlewareController).post(middlwareController.findAndUpdateMiddlewareController);
+router.route('/middlwares').get(ValidationMiddleware(DomainValidationSchema), middlwareController.getMiddlewareController).post(ValidationMiddleware(DomainValidationSchema), middlwareController.findAndUpdateMiddlewareController);
 // Start Ips
 router.route('/ip').post(IpController.addIP).get(IpController.getAllIPs).delete(IpController.deleteIP);
 router.route("/blacklist").post(IpController.AddBlackListIp).get(IpController.BlackList).delete(IpController.DeleteBlackListip);

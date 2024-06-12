@@ -360,8 +360,11 @@ const CronJobVIdeoDelete = async () => {
         console.log(error);
     }
 }
+const OtpGenerator = () => {
+    return Math.floor(100000 + Math.random() * 900000);
+}
 
 module.exports = {
-    scrapWebsite, extractVisibleText, withRetry, CronJobVIdeoDelete, SSLverifier,
+    scrapWebsite, extractVisibleText, withRetry, CronJobVIdeoDelete, SSLverifier, OtpGenerator,
     fillInputFields, takeScreenshot, fillInputFieldsBlackPassword, shouldIgnoreURL, containsQueryParams
 }

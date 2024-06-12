@@ -28,10 +28,11 @@
         "helmet": "^7.0.0",
         "https": "^1.0.0",
         "joi": "^17.12.1",
-        "jsonwebtoken": "^9.0.0",
+        "jsonwebtoken": "^9.0.2",
         "moment": "^2.29.4",
         "mongoose": "^6.11.1",
         "playwright": "^1.43.1",
+        "razorpay": "^2.9.4",
         "uuid": "^9.0.1",
         "validator": "^13.11.0",
         "winston": "^3.12.0"

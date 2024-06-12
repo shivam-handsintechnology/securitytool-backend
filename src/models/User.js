@@ -7,6 +7,7 @@ const UserSchema = new Schema({
   email: { type: String, unique: true, trim: true },
   password: { type: String, trim: true },
   appid: { type: String, unique: true },
+  name: { type: String, trim: true },
   // online:{type:Boolean,default:null},
   userType: {
     type: String, enum: ['Admin', 'User'], default: 'User'
@@ -17,7 +18,20 @@ const UserSchema = new Schema({
   webstatus: {
     type: Boolean, default: false
   },
-  profilepic: { type: String, default: null },
+  otpisvalid: {
+    type: Boolean,
+    default: false
+  },
+  otp: {
+    type: String,
+    default: null
+  },
+  expiresAt: {
+    type: Date,
+    default: null,
+    index: { expires: '1500s' }  // TTL index that will trigger deletion
+  },
+  profilepic: { type: String, default: defaultProfilePic },
 
 
 }, {
@@ -26,8 +40,23 @@ const UserSchema = new Schema({
   toObject: { virtuals: true },
   toJSON: { virtuals: true }
 })
-UserSchema.virtual('id').get(function () {
 
+UserSchema.pre("save", async function (next) {
+  //  create default subsription model
+
+  if (!this.otpisvalid) {
+    // Set expiresAt to  5 minute from now
+    this.expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+  } else {
+    // If otpisvalid is true, do not set expiresAt
+    this.expiresAt = null;
+
+  }
+  // create subscription
+
+
+
+  next();
 });
-
 module.exports = mongoose.model("users", UserSchema);

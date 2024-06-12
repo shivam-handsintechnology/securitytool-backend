@@ -4,6 +4,7 @@ const { errorHandler } = require('../utils/errorHandler');
 const { AllowedDomainsModel } = require('../models/AllowedDomainsModel');
 const User = require("../models/User");
 const { checkDomainAvailability } = require('../utilities/functions/functions');
+const { default: mongoose } = require('mongoose');
 const ValidationMiddleware = (schema) => {
     return (req, res, next) => {
         let statusCode = 500
@@ -14,7 +15,7 @@ const ValidationMiddleware = (schema) => {
 
             if (error) {
                 const { details } = error;
-                const message = details.map(i => i.message).join(',');
+                const message = details.map(i => i.message.replace(/"/g, '')).join(',');
                 statusCode = 422
                 throw new Error(message)
             }
@@ -87,10 +88,25 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
 
             const result = await checkDomainAvailability(domain);
             if (result) {
-                let obj = { user: user._id, domain: domain, appid: req.body.appid }
-                let existdomain = await AllowedDomainsModel.findOne(obj);
-                if (!existdomain) {
+                let obj = { user: user._id, appid: req.body.appid }
+                let existdomain = await AllowedDomainsModel.aggregate([
+                    {
+                        $match: {
+                            user: new mongoose.Types.ObjectId(user._id),
+                            appid: req.body.appid
+                        }
+                    }
+                ])
+                if (existdomain.length == 0) {
                     data = await AllowedDomainsModel.create(obj);
+                } else if (existdomain.length === 1) {
+                    let finddomain = existdomain.find((item) => item.domain === domain)
+                    if (!finddomain) {
+                        throw new Error("Only One Domain is Allowed")
+                    } else {
+                        data = finddomain
+                    }
+                    throw new Error("Only One Domain is Allowed")
                 }
             }
             next()

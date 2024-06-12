@@ -17,6 +17,13 @@ module.exports = {
     ValidateUserSignUp: (data) => {
         const Schema = Joi.object({
             email: Joi.string().email({ tlds: { allow: false } }).required().label("Email"),
+            password: Joi.string().required().label("Password"),
+            name: Joi.string().required().label("Name"),
+            // start date is min current date
+
+
+
+
         }).unknown(true)
         const Error = Schema.validate(data)
         let message = null;
@@ -29,7 +36,7 @@ module.exports = {
         const Schema = Joi.object({
             email: Joi.string().email({ tlds: { allow: false } }).required().label("Email"),
             password: Joi.string().required().label("Paasword"),
-        })
+        }).unknown(true)
         const Error = Schema.validate(data)
         let message = null;
         if (Error.error) {
@@ -45,6 +52,25 @@ module.exports = {
     },
     DomainValidationSchema: {
         domain: Joi.string().domain().required().label("Domain")
+    },
+    razorPayValidation: {
+        amount: Joi.number().equal(9).required().label("Amount").messages({
+            "number.base": "Amount must be a number",
+            "number.equal": "Amount must be 9"
+        }),
+        currency: Joi.string().required().label("Currency"),
+        // receipt: Joi.string().required().label("Receipt"),
+        // customer: Joi.object().required().label("Customer"),
+        // order_id: Joi.string().required().label("Order ID")
+    },
+    razorPaySuccessValidation: {
+        order_id: Joi.string().required().label("Order ID"),
+        razorpay_order_id: Joi.string().required().label("Razorpay Order ID"),
+        razorpay_payment_id: Joi.string().required().label("Payment ID"),
+        razorpay_signature: Joi.string().required().label("Signature")
+
     }
+
+
 }
 

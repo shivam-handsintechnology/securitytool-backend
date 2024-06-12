@@ -13,7 +13,8 @@ const process = require("process");
 const logger = require('./logger/logger');
 const apirouter = require('./routes')
 const { DBConnection } = require("./config/connection"); // Database connection
-const { CronJobVIdeoDelete } = require('./utils');
+const { CronJobVIdeoDelete, OtpGenerator } = require('./utils');
+
 const numCPUs = os.cpus().length // Get the number of CPU cores
 // Connected to mongodb
 dotenv.config(); // Load environment variables
@@ -72,8 +73,8 @@ if (cluster.isPrimary) {
 setInterval(() => {
   CronJobVIdeoDelete()
 }, 600000); // Cron job for video deletion
-
 // CLeanDatabase() // Clean the database
+
 module.exports = app;
 
 

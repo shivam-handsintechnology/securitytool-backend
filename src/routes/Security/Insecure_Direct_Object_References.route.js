@@ -1,12 +1,11 @@
 const router = require('express').Router();
 const InsecureObjectRefGuard = require('../../controllers/Security/InsecureObjectRefGuard.controoler');
 const { DomainValidationSchema } = require('../../helpers/Validators');
-const GetFileCOntentMiddleware = require('../../middlewares/GetFileCOntentMiddleware');
-const { ValidationMiddlewareQuery } = require('../../middlewares/ValidationMiddleware');
+const { ValidationMiddlewareQuery, AuthWebDomainMiddleware, AuthDomainMiddleware } = require('../../middlewares/ValidationMiddleware');
 const verifyToken = require('../../middlewares/VerifyUser');
-router.get('/DirectoryListingEnable',verifyToken,ValidationMiddlewareQuery(DomainValidationSchema), InsecureObjectRefGuard.DirectoryListingEnable);
-router.get('/httpparameterpollution',verifyToken,ValidationMiddlewareQuery(DomainValidationSchema), InsecureObjectRefGuard.httpparameterpollution);
-router.get('/robottxt',verifyToken,ValidationMiddlewareQuery(DomainValidationSchema),GetFileCOntentMiddleware, InsecureObjectRefGuard.robotsTxtPath);
-router.post('/fetch',verifyToken, InsecureObjectRefGuard.fetch);
-router.post('/post',verifyToken, InsecureObjectRefGuard.post);
+router.get('/DirectoryListingEnable', verifyToken, ValidationMiddlewareQuery(DomainValidationSchema), AuthDomainMiddleware, InsecureObjectRefGuard.DirectoryListingEnable);
+router.get('/httpparameterpollution', verifyToken, ValidationMiddlewareQuery(DomainValidationSchema), AuthDomainMiddleware, InsecureObjectRefGuard.httpparameterpollution);
+router.get('/robottxt', verifyToken, ValidationMiddlewareQuery(DomainValidationSchema), AuthWebDomainMiddleware, InsecureObjectRefGuard.robotsTxtPath);
+router.post('/fetch', verifyToken, InsecureObjectRefGuard.fetch);
+router.post('/post', verifyToken, InsecureObjectRefGuard.post);
 module.exports = router;

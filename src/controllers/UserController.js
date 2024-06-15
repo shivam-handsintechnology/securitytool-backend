@@ -180,7 +180,7 @@ Login = async (req, res, next) => {
         user.otpisvalid = true
         user.subsription = subscription._id
         await user.save()
-        const token = jwt.sign({ id: user._id, appid: user.appid }, process.env.JWT_SECRET, { expiresIn: "1d" })
+        const token = jwt.sign({ id: user._id, appid: user.appid, subsription: user.subsription }, process.env.JWT_SECRET, { expiresIn: "1d" })
         return sendResponse(res, 201, "Otp Verified Successfully", { token, appid: user.appid });
       }
     }
@@ -200,7 +200,7 @@ Login = async (req, res, next) => {
     if (decrypted !== req.body.password) {
       throw new Error("please enter valid credentials")
     }
-    const token = jwt.sign({ id: user._id, appid: user.appid }, process.env.JWT_SECRET, { expiresIn: "1d" })
+    const token = jwt.sign({ id: user._id, appid: user.appid, subsription: user.subsription }, process.env.JWT_SECRET, { expiresIn: "1d" })
 
     return sendResponse(res, 201, "login successfully", { token, appid: user.appid });
 
@@ -312,8 +312,10 @@ Checkout = async (req, res) => {
 },
   CheckoutSuccess = async (req, res) => {
     try {
-      let webhooksecret = "C5MT6tAJ@4XE7T@"
+
       const { order_id, razorpay_payment_id, razorpay_signature } = req.body
+      const { subsription } = req.user
+
       console.log(order_id, razorpay_payment_id, razorpay_signature)
       const order = await instance.orders.fetch(order_id)
 
@@ -325,6 +327,11 @@ Checkout = async (req, res) => {
       else if (!payment) {
         return sendResponse(res, 404, "payment not found")
       }
+      let subscription = await Subscription.findById(subsription)
+
+      subscription.startDate = new Date()
+      subscription.endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+      await subscription.save()
 
       return sendResponse(res, 200, "payment success", order)
     } catch (error) {
@@ -419,7 +426,7 @@ FBCustomerLogin = async function (req, res, next) {
 //   
 const Profile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select(["-userType", "-password"])
+    const user = await User.findById(req.user.id).select(["-userType", "-password"]).populate("subsription")
     if (user) {
       return sendResponse(res, 200, "Fetch user", user);
     } else {

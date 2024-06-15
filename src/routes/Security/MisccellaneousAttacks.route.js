@@ -2,8 +2,8 @@ const router = require('express').Router();
 let { MiscellaneousAttackValidation } = require('../../helpers/Validators')
 
 const MiscellaneousAttacksController = require('../../controllers/Security/MiscellaneousAttacks.controller');
-const { ValidationMiddleware } = require('../../middlewares/ValidationMiddleware');
-router.get("/", MiscellaneousAttacksController.handleSpecialCharacters)
-router.get("/lockoutfeature", ValidationMiddleware(MiscellaneousAttackValidation), MiscellaneousAttacksController.handleAccountLockout)
-router.get("/SqlWildcards", MiscellaneousAttacksController.SqlWildcards)
+const { ValidationMiddleware, AuthWebDomainMiddleware } = require('../../middlewares/ValidationMiddleware');
+router.get("/", AuthWebDomainMiddleware, MiscellaneousAttacksController.handleSpecialCharacters)
+router.get("/lockoutfeature", AuthWebDomainMiddleware, ValidationMiddleware(MiscellaneousAttackValidation), MiscellaneousAttacksController.handleAccountLockout)
+router.get("/SqlWildcards", AuthWebDomainMiddleware, MiscellaneousAttacksController.SqlWildcards)
 module.exports = router;

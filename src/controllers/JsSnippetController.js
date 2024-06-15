@@ -43,6 +43,10 @@ module.exports = {
         throw new Error("Appid is not valid")
       }
       let subscription = user.subsription;
+      if (!subscription) {
+        statusCode = 400;
+        throw new Error("Please Subsribe First")
+      }
       if (!subscription.startDate && !subscription.endDate) {
         statusCode = 400;
         throw new Error("Please Subsribe First")

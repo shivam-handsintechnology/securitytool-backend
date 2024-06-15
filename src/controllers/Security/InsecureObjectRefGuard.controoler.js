@@ -17,8 +17,13 @@ module.exports = {
         }
       }).catch((e) => e.response)
       if (response.status === 200) {
+        console.log(response.data)
+        if (typeof response.data === "object") {
+          return sendResponse(res, 200, "success", response.data)
+        } else {
+          throw new Error("Invalid Response")
+        }
 
-        return sendResponse(res, 200, "success", response.data)
       } else {
         StatusCode = 403
         throw new Error("Access Denied")
@@ -30,25 +35,15 @@ module.exports = {
   },
   robotsTxtPath: async (req, res) => {
     try {
-      console.log("Request", req.user)
-      let WebDomain = await AllowedWebDomainsModel.find({ appid: req.user.appid });
-      let isRobotsTxt = false
-      if (WebDomain.length > 0) {
-
-        for (let i = 0; i < WebDomain.length; i++) {
-          console.log(WebDomain[i].domain)
-          await axios.get(`http://${WebDomain[i].domain}/robots.txt`).then((response) => {
-            console.log(response.status)
-            if (response.status === 200) {
-              isRobotsTxt = true
-            }
-          }
-          ).catch((error) => {
-            console.log(error)
-            isRobotsTxt = false
-          })
+      let domain = req.query.domain
+      let url = `http://${domain}/robots.txt`;
+      let data = await axios.get(url, {
+        headers: {
+          'origin': "https://securitytool.handsintechnology.in",
         }
-      }
+      }).then((res) => res.data).catch((e) => e.response.data);
+
+      let isRobotsTxt = data.includes("Disallow") || data.includes("Allow")
       data = isRobotsTxt ? "Yes" : "No"
 
       return sendResponse(res, 200, "success", data)
@@ -68,6 +63,9 @@ module.exports = {
         }
       })
       if (response.status === 200) {
+        if (typeof response.data !== "object") {
+          throw new Error("Invalid Response")
+        }
         let isHttp = await hashttpParametersPollutionavailable(response.data)
         return sendResponse(res, 200, "success", isHttp)
       } else {

@@ -85,6 +85,9 @@ module.exports = {
                     }
                 })
                 if (response.status === 200) {
+                    if (typeof response.data !== 'object') {
+                        throw new Error("Password not found")
+                    }
                     console.log("password response", response.data.data.password)
                     let hashedPassword = response.data.data.password;
                     if (validator.isMD5(hashedPassword)) {
@@ -124,7 +127,7 @@ module.exports = {
             }
         } catch (error) {
 
-            return errorHandler(res, 500, "success", error.message)
+            return errorHandler(res, 500, error.message,)
         }
     },
     WealALgorithmPassword: async (req, res) => {
@@ -139,6 +142,9 @@ module.exports = {
                     }
                 })
                 if (response.status === 200) {
+                    if (typeof response.data !== 'object') {
+                        throw new Error("Password not found")
+                    }
                     let hashedPassword = response.data.data.password;
                     if (validator.isStrongPassword(hashedPassword)) {
                         return sendResponse(res, 200, "success", "Password is Strong");
@@ -154,7 +160,7 @@ module.exports = {
             }
         } catch (error) {
 
-            return errorHandler(res, 500, "success", error.message)
+            return errorHandler(res, 500, error.message)
         }
     },
     supportoldnodejsversion: async (req, res) => {
@@ -169,7 +175,9 @@ module.exports = {
                     }
                 })
                 if (response.status === 200) {
-
+                    if (typeof response.data !== 'object') {
+                        throw new Error("Version not found")
+                    }
                     if (!response.data.data && !response.data.data.version) {
                         throw new Error("Version not found")
                     }
@@ -184,7 +192,7 @@ module.exports = {
                 return sendResponse(res, 500, "Domain is Not Find");
             }
         } catch (error) {
-            return errorHandler(res, 500, "success", error.message)
+            return errorHandler(res, 500, error.message)
         }
     },
     defaultpasswordandusername: async (req, res) => {

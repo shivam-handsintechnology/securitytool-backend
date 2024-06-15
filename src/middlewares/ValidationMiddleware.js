@@ -2,7 +2,7 @@ const Joi = require('joi');
 const moment = require('moment');
 const { sendResponse } = require('../utils/dataHandler');
 const { errorHandler } = require('../utils/errorHandler');
-const { AllowedDomainsModel } = require('../models/AllowedDomainsModel');
+const { AllowedDomainsModel, AllowedWebDomainsModel } = require('../models/AllowedDomainsModel');
 const User = require("../models/User");
 const { checkDomainAvailability } = require('../utilities/functions/functions');
 const { default: mongoose } = require('mongoose');
@@ -55,7 +55,8 @@ const ValidationMiddlewareQuery = (schema) => {
 const AuthDomainMiddleware = async (req, res, next) => {
     let statusCode = 500
     try {
-        const payload = { ...req.body, ...req.query, ...req.params }
+        let user = req.user ? req.user : {}
+        const payload = { ...req.body, ...req.query, ...req.params, ...user }
         let { domain, appid } = payload
         if (!domain) {
             throw new Error("Domain is required")
@@ -64,6 +65,30 @@ const AuthDomainMiddleware = async (req, res, next) => {
             throw new Error("Appid is required")
         }
         let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, appid: appid });
+        if (isExistDomain) {
+            next()
+        } else {
+            statusCode = 403
+            throw new Error("You Are Not Allowed")
+        }
+    } catch (error) {
+        return errorHandler(res, statusCode, error.message)
+    }
+}
+const AuthWebDomainMiddleware = async (req, res, next) => {
+    let statusCode = 500
+    try {
+        let user = req.user ? req.user : {}
+        const payload = { ...req.body, ...req.query, ...req.params, ...user }
+
+        let { domain, appid } = payload
+        if (!domain) {
+            throw new Error("Domain is required")
+        }
+        if (!appid) {
+            throw new Error("Appid is required")
+        }
+        let isExistDomain = await AllowedWebDomainsModel.findOne({ domain: domain, appid: appid });
         if (isExistDomain) {
             next()
         } else {
@@ -85,6 +110,10 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
         if (user) {
             let subscription = user.subsription;
             console.log("Subscription", subscription)
+            if (!subscription) {
+                statusCode = 400;
+                throw new Error("Please Subsribe First")
+            }
             if (!subscription.startDate && !subscription.endDate) {
                 statusCode = 400;
                 throw new Error("Please Subsribe First")
@@ -132,4 +161,4 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
 }
 
 
-module.exports = { ValidationMiddleware, ValidationMiddlewareQuery, AuthDomainMiddleware, AuthDomainMiddlewarePackage };
+module.exports = { ValidationMiddleware, ValidationMiddlewareQuery, AuthWebDomainMiddleware, AuthDomainMiddleware, AuthDomainMiddlewarePackage };

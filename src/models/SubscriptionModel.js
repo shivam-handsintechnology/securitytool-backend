@@ -24,7 +24,6 @@ const SubscriptionSchema = new Schema({
         // min date is one month after current date
         min: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         default: null,
-
     },
 }, {
     timestamps: true,

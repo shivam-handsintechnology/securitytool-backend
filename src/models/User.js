@@ -30,7 +30,7 @@ const UserSchema = new Schema({
   expiresAt: {
     type: Date,
     default: null,
-    index: { expires: '1500s' }  // TTL index that will trigger deletion
+    index: { expires: '5m' }  // TTL index that will trigger deletion
   },
   profilepic: { type: String, default: defaultProfilePic },
 

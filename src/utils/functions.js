@@ -160,6 +160,7 @@ function isObject(input) {
 
 async function CheckAllSensitiveData(data) {
   try {
+    console.log(value)
     const result = [];
 
     // Recursive function to check for sensitive data in nested objects or arrays
@@ -192,17 +193,9 @@ async function CheckAllSensitiveData(data) {
 
     // Helper function to check the value for sensitive data
     function checkValue(item) {
-      let { key, value } = item;
+      const { key, value } = item;
       const sensitiveData = { Email: false, "JSON Web Token": false, ObjectId: false, PassportNumber: false, CreditCard: false, Password: false, PhoneNumber: false, UUID: false };
       if (typeof value === 'string') {
-
-        if (value.startsWith('"' || "'")) {
-          value = value.replace('"', "")
-        }
-        if (value.endsWith('' || "'")) {
-          value = value.replace("'", "")
-        }
-        console.log(value)
 
         // Check if the value is a stringified JSON object
         if (isJsonString(value)) {
@@ -215,7 +208,6 @@ async function CheckAllSensitiveData(data) {
           }
           if (validator.isJWT(value)) {
             sensitiveData["JSON Web Token"] = true;
-            console.log("json webtoken")
           }
           if (validator.isMongoId(value)) {
             sensitiveData.ObjectId = true;

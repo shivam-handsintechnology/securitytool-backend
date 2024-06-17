@@ -202,7 +202,7 @@ async function CheckAllSensitiveData(data) {
         if (value.endsWith('' || "'")) {
           value = value.replace("'", "")
         }
-
+        console.log(value)
 
         // Check if the value is a stringified JSON object
         if (isJsonString(value)) {

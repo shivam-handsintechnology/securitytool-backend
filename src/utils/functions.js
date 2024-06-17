@@ -193,8 +193,16 @@ async function CheckAllSensitiveData(data) {
     // Helper function to check the value for sensitive data
     function checkValue(item) {
       const { key, value } = item;
-      const sensitiveData = { Email: false, "JSON Web Token": false, ObjectId: false, PassportNumber: false, CreditCard: false, Password: false, PhoneNumber: false, };
+      const sensitiveData = { Email: false, "JSON Web Token": false, ObjectId: false, PassportNumber: false, CreditCard: false, Password: false, PhoneNumber: false, UUID: false };
       if (typeof value === 'string') {
+
+        if (value.startsWith('"' || "'")) {
+          value = value.replace('"', "")
+        }
+        if (value.endsWith('' || "'")) {
+          value = value.replace("'", "")
+        }
+
 
         // Check if the value is a stringified JSON object
         if (isJsonString(value)) {
@@ -208,10 +216,9 @@ async function CheckAllSensitiveData(data) {
           if (validator.isJWT(value)) {
             sensitiveData["JSON Web Token"] = true;
           }
-          if (isValidObjectId(value)) {
+          if (validator.isMongoId(value)) {
             sensitiveData.ObjectId = true;
           }
-
           if (validator.isCreditCard(value)) {
             sensitiveData.CreditCard = true;
           }
@@ -220,6 +227,9 @@ async function CheckAllSensitiveData(data) {
           }
           if (validator.isMobilePhone(value)) {
             sensitiveData.PhoneNumber = true;
+          }
+          if (validator.isUUID(value)) {
+            sensitiveData.UUID = true
           }
 
 

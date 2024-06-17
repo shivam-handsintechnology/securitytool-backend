@@ -215,6 +215,7 @@ async function CheckAllSensitiveData(data) {
           }
           if (validator.isJWT(value)) {
             sensitiveData["JSON Web Token"] = true;
+            console.log("json webtoken")
           }
           if (validator.isMongoId(value)) {
             sensitiveData.ObjectId = true;

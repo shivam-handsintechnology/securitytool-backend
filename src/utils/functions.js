@@ -210,22 +210,22 @@ async function CheckAllSensitiveData(data) {
           if (validator.isEmail(value)) {
             sensitiveData.Email = true;
           }
-          if (validator.isJWT(value)) {
+          else if (validator.isJWT(value)) {
             sensitiveData["JSON Web Token"] = true;
           }
-          if (validator.isMongoId(value)) {
+          else if (validator.isMongoId(value)) {
             sensitiveData.ObjectId = true;
           }
-          if (validator.isCreditCard(value)) {
+          else if (validator.isCreditCard(value)) {
             sensitiveData.CreditCard = true;
           }
-          if (validator.isStrongPassword(value)) {
+          else if (validator.isStrongPassword(value)) {
             sensitiveData.Password = true;
           }
-          if (validator.isMobilePhone(value)) {
+          else if (validator.isMobilePhone(value)) {
             sensitiveData.PhoneNumber = true;
           }
-          if (validator.isUUID(value)) {
+          else if (validator.isUUID(value)) {
             sensitiveData.UUID = true
           }
 

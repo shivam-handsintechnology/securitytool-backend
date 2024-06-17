@@ -8,6 +8,7 @@ const dotenv = require('dotenv')
 const cluster = require("cluster")
 const os = require("os")
 const http = require('http');
+const mongoSanitize = require('express-mongo-sanitize');
 const process = require("process");
 // import internal modules
 const logger = require('./logger/logger');
@@ -30,6 +31,7 @@ app.use(cors());
 
 app.use(express.urlencoded({ extended: true })); // body parser 
 app.use(express.json({ limit: "50mb", extended: true })); // body parser
+app.use(mongoSanitize()); // Data sanitization against NoSQL query injection
 app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 },   // File Upload Functionality
 }));

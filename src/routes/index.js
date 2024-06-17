@@ -52,7 +52,7 @@ router.use("/SSLVerify", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware
 router.use("/ErrorMessage", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, ErrorMessagesRoute)
 // Insecure Direct Object References
 router.use("/InsecureObjectRefGuard", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, InsecureObjectRefGuard)
-// SecurityMisconfiguration
+// SecurityMisconfigurationuu
 router.use("/SecurityMisconfiguration", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, SecurityMisconfiguration)
 // Missing Function Level Access Control
 router.use("/MissingFunctionLevelAccessControl", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, verifyToken, MissingFunctionalLevelAccessControlrouter)

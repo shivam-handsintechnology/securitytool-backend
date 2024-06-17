@@ -192,7 +192,7 @@ async function CheckAllSensitiveData(data) {
 
     // Helper function to check the value for sensitive data
     function checkValue(item) {
-      const { key, value } = item;
+      let { key, value } = item;
       const sensitiveData = { Email: false, "JSON Web Token": false, ObjectId: false, PassportNumber: false, CreditCard: false, Password: false, PhoneNumber: false, UUID: false };
       if (typeof value === 'string') {
 

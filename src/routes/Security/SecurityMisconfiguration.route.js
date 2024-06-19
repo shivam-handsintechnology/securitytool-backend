@@ -25,6 +25,6 @@ router.get("/option-methods-enabled", verifyToken,
     ValidationMiddleware(DomainValidationSchema), GetFileCOntentMiddleware,
     SecurityMisconfiguration.OptionsMethodsEnabled)
 
-router.get("/defaultpasswordandusername", ValidationMiddleware(DomainValidationSchema), AuthWebDomainMiddleware, SecurityMisconfiguration.defaultpasswordandusername);
+router.get("/defaultpasswordandusername", ValidationMiddleware(DomainValidationSchema), verifyToken, AuthWebDomainMiddleware, SecurityMisconfiguration.defaultpasswordandusername);
 
 module.exports = router

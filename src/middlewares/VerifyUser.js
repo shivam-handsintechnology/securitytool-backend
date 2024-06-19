@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+require("dotenv").config()
 const moment = require("moment");
 const { sendResponse } = require("../utils/dataHandler");
 const { errorHandler } = require("../utils/errorHandler");
@@ -15,8 +16,10 @@ const verifyToken = (req, res, next) => {
       return sendResponse(res, 403, "missing authorization", { Authenticate })
     }
     const [authType, token] = authHeader.split(' ');
+    console.log({ token })
     jwt.verify(token, process.env.JWT_SECRET, async (err, user) => {
       if (err) {
+        console.log(err)
         Authenticate = false;
         return sendResponse(res, 403, err.message, { Authenticate })
       }

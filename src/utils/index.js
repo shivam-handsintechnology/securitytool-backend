@@ -214,10 +214,13 @@ async function fillInputFields(page, username, password, email) {
 
         if (buttonTypeSubmit) {
             await buttonTypeSubmit.click();
+            await page.waitForTimeout(2000);
         } else if (inputTypeSubmit) {
             await inputTypeSubmit.click();
+            await page.waitForTimeout(2000);
         } else if (buttonTypeButton) {
             await buttonTypeButton.click();
+            await page.waitForTimeout(2000);
         }
 
         // Handle CAPTCHA (pseudo-implementation)

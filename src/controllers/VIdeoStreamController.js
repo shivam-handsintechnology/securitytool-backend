@@ -63,6 +63,34 @@ const VideoStream = async (req, res) => {
             throw error;
 
         }
+        // if (!fs.existsSync(videoPath)) {
+        //     res.status(400).json({ message: 'Video not found' })
+        // }
+        // const range = req.headers.range
+        // if (!range) {
+        //     res.status(400).json({ message: 'Renge is required' })
+        // }
+        // const stat = fs.statSync(videoPath)
+        // const filesize = stat.size
+        // console.log("file size", filesize)
+        // const chunksize = 10 ** 6
+        // const start = Number(range.replace(/\D/g, ""))
+        // const end = Math.min(start + chunksize, filesize)
+        // const filestream = fs.createReadStream(videoPath, {
+        //     start,
+        //     end
+        // })
+        // const head = {
+        //     'Content-Range': `bytes ${start}-${end}/${filesize}`,
+        //     'Accept-Ranges': 'bytes',
+        //     'Content-Length': chunksize,
+        //     'Content-Type': 'video/webm',
+        //     'Access-Control-Allow-Origin': "*", // Replace with your frontend origin
+        //     'Access-Control-Allow-Headers': 'Range',
+        //     'Cross-Origin-Resource-Policy': 'cross-origin' // Add this line
+        // };
+        // res.writeHead(206, head);
+        // filestream.pipe(res)
         const stat = fs.statSync(videoPath);
         const fileSize = stat.size;
         const range = req.headers.range;

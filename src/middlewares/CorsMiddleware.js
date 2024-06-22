@@ -1,5 +1,6 @@
 const { errorHandler } = require("../utils/errorHandler");
-
+console.log(process.env.PROD_ORIGIN)
+console.log(process.env.DEV_ORIGIN)
 module.exports = {
   cors: async function cors(req, res, next) {
     try {
@@ -11,6 +12,7 @@ module.exports = {
       res.header('Cross-Origin-Resource-Policy', "cross-origin");
       res.header("Access-Control-Allow-Headers", "Content-Type,Authorization,Origin, X-Requested-With,Accept");
       // Check if the request has an origin header
+      console.log("Origin", req.headers.origin)
       if (!req.headers.origin) {
         return errorHandler(res, 403, "Forbidden");
       }

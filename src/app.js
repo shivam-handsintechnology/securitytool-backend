@@ -41,8 +41,7 @@ app.use(express.static(path.join(__dirname, "build"))); // Serve static files
 app.use(helmet()) // Secure your app by setting various HTTP headers
 // Set up session middleware with MongoDB store
 app.use(apirouter) // Use the API router
-
-app.get("*", (req, res) => {
+app.use("*", (req, res) => {
   console.log("get all routes")
   res.setHeader("Origin", process.env.PROD_ORIGIN)
   let buildpath = path.join(__dirname, "build", "index.html")
@@ -51,6 +50,7 @@ app.get("*", (req, res) => {
   }
   res.sendFile(buildpath)
 })
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error(err.stack);

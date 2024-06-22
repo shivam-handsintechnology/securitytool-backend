@@ -3,7 +3,7 @@ const { errorHandler } = require("../utils/errorHandler");
 module.exports = {
   cors: async function cors(req, res, next) {
     try {
-      const Origin = process.env.NODE_ENV === "production" ? "https://securitytool-front.handsintechnology.in" : "http://localhost:3000"
+      const Origin = process.env.NODE_ENV === "production" ? process.env.PROD_ORIGIN : process.env.DEV_ORIGIN
       // Set specific CORS headers
       res.header("Access-Control-Allow-Origin", Origin);
       res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE")

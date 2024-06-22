@@ -44,7 +44,7 @@ app.use(apirouter) // Use the API router
 
 app.get("*", (req, res) => {
   console.log("get all routes")
-  res.setHeader("Origin", process.env.PROD_API_URL)
+  res.setHeader("Origin", process.env.PROD_ORIGIN)
   let buildpath = path.join(__dirname, "build", "index.html")
   if (!existsSync(buildpath)) {
     return res.status(404).json({ message: "Resource is Not Found" })

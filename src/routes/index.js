@@ -32,44 +32,44 @@ const subsriptionrouter = require("./Security/subsription.routes")
 const UnvalidatedRedirectsandForwardsRouter = require("../controllers/Security/UnvalidatedRedirectsandForwards.controller").get
 const CrossSiteScriptingRouer = require("./Security/CrossSiteScripting")
 // Import Routes
-router.use("/security", IncomingDataHashFormat, CorsMiddleware, verifytoken, Security)
+router.use("/security", CorsMiddleware, IncomingDataHashFormat, verifytoken, Security)
 // Get Client Information
 router.use("/client", allowall, GetClientInformation)
 // Auth
-router.use("/auth", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, Authrouter)
+router.use("/auth", CorsMiddleware, AuditMiddleware,  IncomingDataHashFormat, Authrouter)
 // subsription
-router.use("/subsription", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, subsriptionrouter)
+router.use("/subsription", CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, subsriptionrouter)
 // Broken Authentication and Session Management
-router.use("/AuthSessionGuardian", IncomingDataHashFormat, CorsMiddleware, verifyToken,
+router.use("/AuthSessionGuardian", CorsMiddleware, IncomingDataHashFormat, verifyToken,
   ValidationMiddleware(DomainValidationSchema), AuthSessionGuardian
 )
 // Injections
-// router.use("/injections", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, verifyToken, AuthDomainMiddleware, InjectionsRoute)
-router.use("/injections", AuditMiddleware, IncomingDataHashFormat, InjectionsRoute)
+// router.use("/injections",CorsMiddleware,AuditMiddleware, IncomingDataHashFormat, verifyToken, AuthDomainMiddleware, InjectionsRoute)
+router.use("/injections", CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, InjectionsRoute)
 // SSL Verify
-router.use("/SSLVerify", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, verifyToken,
+router.use("/SSLVerify", CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, verifyToken,
   ValidationMiddlewareQuery(DomainValidationSchema), SSlRouter)
 // Error Message
-router.use("/ErrorMessage", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, ErrorMessagesRoute)
+router.use("/ErrorMessage", CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, ErrorMessagesRoute)
 // Insecure Direct Object References
-router.use("/InsecureObjectRefGuard", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, InsecureObjectRefGuard)
+router.use("/InsecureObjectRefGuard",CorsMiddleware,AuditMiddleware, IncomingDataHashFormat, InsecureObjectRefGuard)
 // SecurityMisconfigurationuu
-router.use("/SecurityMisconfiguration", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, SecurityMisconfiguration)
+router.use("/SecurityMisconfiguration",CorsMiddleware,AuditMiddleware, IncomingDataHashFormat, SecurityMisconfiguration)
 // Missing Function Level Access Control
-router.use("/MissingFunctionLevelAccessControl", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, verifyToken, MissingFunctionalLevelAccessControlrouter)
+router.use("/MissingFunctionLevelAccessControl",CorsMiddleware,AuditMiddleware, IncomingDataHashFormat, verifyToken, MissingFunctionalLevelAccessControlrouter)
 // SensitiveDataExposure
-router.use("/SensitiveDataExposure", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, SensitiveDataExposure)
+router.use("/SensitiveDataExposure",CorsMiddleware,AuditMiddleware, IncomingDataHashFormat, SensitiveDataExposure)
 // Unvalidated Redirects and Forwards
-router.use("/UnvalidatedRedirects", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, verifyToken, AuthDomainMiddleware,
+router.use("/UnvalidatedRedirects",CorsMiddleware,AuditMiddleware, IncomingDataHashFormat, verifyToken, AuthDomainMiddleware,
   ValidationMiddleware(DomainValidationSchema), GetFileCOntentMiddleware, UnvalidatedRedirectsandForwardsRouter)
 // Cross-Site Scripting (XSS)
-router.use("/CrossSiteScripting", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, verifyToken, AuthDomainMiddleware, CrossSiteScriptingRouer)
+router.use("/CrossSiteScripting",CorsMiddleware,AuditMiddleware, IncomingDataHashFormat, verifyToken, AuthDomainMiddleware, CrossSiteScriptingRouer)
 // Sensitive data is Store in Local Storage
-router.use("/SensitiveStorageLocalStorage", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, verifyToken, AuthWebDomainMiddleware, SensitiveDataLocalStorage.get)
+router.use("/SensitiveStorageLocalStorage",CorsMiddleware,AuditMiddleware, IncomingDataHashFormat, verifyToken, AuthWebDomainMiddleware, SensitiveDataLocalStorage.get)
 // Week Cross Domain Policy
-router.use("/WeakCrossDomainPolicy", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, verifyToken, ValidationMiddleware(DomainValidationSchema), AuthDomainMiddleware, WeekCrossDomainPolicy)
+router.use("/WeakCrossDomainPolicy",CorsMiddleware,AuditMiddleware, IncomingDataHashFormat, verifyToken, ValidationMiddleware(DomainValidationSchema), AuthDomainMiddleware, WeekCrossDomainPolicy)
 // MiscellaneousAttacks
-router.use("/MiscellaneousAttacks", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, MiscellaneousAttacksRoute)
+router.use("/MiscellaneousAttacks",CorsMiddleware,AuditMiddleware, IncomingDataHashFormat, MiscellaneousAttacksRoute)
 // vide streaming route
 router.use("/videostream", IncomingDataHashFormat, VideoStreamRouter)
 router.use("/api", router)

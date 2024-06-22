@@ -12,8 +12,8 @@ module.exports = {
       res.header('Cross-Origin-Resource-Policy', "cross-origin");
       res.header("Access-Control-Allow-Headers", "Content-Type,Authorization,Origin, X-Requested-With,Accept");
       // Check if the request has an origin header
-      console.log("Origin", req.headers.origin)
-      if (!req.headers.origin) {
+      console.log("Origin", req.headers)
+      if (!req.headers.origin || !req.headers["x-origin"]) {
         return errorHandler(res, 403, "Forbidden");
       }
 

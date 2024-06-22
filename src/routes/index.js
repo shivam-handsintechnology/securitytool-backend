@@ -44,7 +44,8 @@ router.use("/AuthSessionGuardian", IncomingDataHashFormat, CorsMiddleware, verif
   ValidationMiddleware(DomainValidationSchema), AuthSessionGuardian
 )
 // Injections
-router.use("/injections", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, verifyToken, AuthDomainMiddleware, InjectionsRoute)
+// router.use("/injections", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, verifyToken, AuthDomainMiddleware, InjectionsRoute)
+router.use("/injections", AuditMiddleware, IncomingDataHashFormat, InjectionsRoute)
 // SSL Verify
 router.use("/SSLVerify", AuditMiddleware, IncomingDataHashFormat, CorsMiddleware, verifyToken,
   ValidationMiddlewareQuery(DomainValidationSchema), SSlRouter)

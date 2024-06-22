@@ -15,6 +15,7 @@ const logger = require('./logger/logger');
 const apirouter = require('./routes')
 const { DBConnection } = require("./config/connection"); // Database connection
 const { CronJobVIdeoDelete, OtpGenerator } = require('./utils');
+const { existsSync } = require('fs');
 
 const numCPUs = os.cpus().length // Get the number of CPU cores
 // Connected to mongodb
@@ -36,9 +37,19 @@ app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 },   // File Upload Functionality
 }));
 app.use("/static", express.static(path.join(__dirname, "public"))); // Serve static files
+app.use(express.static(path.join(__dirname, "build"))); // Serve static files
 app.use(helmet()) // Secure your app by setting various HTTP headers
 // Set up session middleware with MongoDB store
 app.use(apirouter) // Use the API router
+
+app.get("*", (req, res) => {
+  console.log("get all routes")
+  let buildpath = path.join(__dirname, "build", "index.html")
+  if (!existsSync(buildpath)) {
+    return res.status(404).json({ message: "Resource is Not Found" })
+  }
+  res.sendFile(buildpath)
+})
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error(err.stack);

@@ -48,6 +48,7 @@ async function scanSQLvulnerability(hostname, res, sendEvent,) {
                     percentageCompleted = Math.round(percentageCompleted)
                     sendEvent({ count, percentageCompleted, time: Date.now() }, res);
                     console.error("Error occurred during request:", error);
+
                 }
             }
             count++;

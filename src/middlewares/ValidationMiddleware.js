@@ -45,6 +45,7 @@ const ValidationMiddlewareQuery = (schema) => {
                 throw new Error(message)
             }
 
+
             next()
 
         } catch (error) {
@@ -63,6 +64,11 @@ const AuthDomainMiddleware = async (req, res, next) => {
         }
         if (!appid) {
             throw new Error("Appid is required")
+        }
+        let isdomainfound = await checkDomainAvailability(domain)
+        if (!isdomainfound) {
+            statusCode = 422
+            throw new Error("Domain Not found")
         }
         let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, appid: appid });
         if (isExistDomain) {

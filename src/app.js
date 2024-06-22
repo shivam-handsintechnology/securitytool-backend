@@ -42,13 +42,11 @@ app.use(helmet()) // Secure your app by setting various HTTP headers
 // Set up session middleware with MongoDB store
 app.use(apirouter) // Use the API router
 app.use("*", (req, res) => {
-  console.log("get all routes")
   let buildpath = path.join(__dirname, "build", "index.html")
   if (!fs.existsSync(buildpath)) {
     return res.status(404).json({ message: "Resource is Not Found" })
   }
   const raw = fs.readFileSync(buildpath, 'utf8')
-  console.log(raw)
   const pageTitle = "Homepage - Welcome to my page"
   const updated = raw.replace("__PAGE_META__", `<title>${pageTitle}</title>`)
   res.send(updated)

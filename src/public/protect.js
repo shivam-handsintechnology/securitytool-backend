@@ -52,6 +52,7 @@ async function sendToApi(data) {
     //   }
     // }
     let appid = window.API_KEY
+    console.log({ appid })
     if (appid) {
       fetch('https://securitytool.handsintechnology.in/api/client/protection', {
         method: 'POST',

@@ -15,7 +15,7 @@ const logger = require('./logger/logger');
 const apirouter = require('./routes')
 const { DBConnection } = require("./config/connection"); // Database connection
 const { CronJobVIdeoDelete, OtpGenerator } = require('./utils');
-const { existsSync } = require('fs');
+const fs = require('fs');
 
 const numCPUs = os.cpus().length // Get the number of CPU cores
 // Connected to mongodb
@@ -44,10 +44,14 @@ app.use(apirouter) // Use the API router
 app.use("*", (req, res) => {
   console.log("get all routes")
   let buildpath = path.join(__dirname, "build", "index.html")
-  if (!existsSync(buildpath)) {
+  if (!fs.existsSync(buildpath)) {
     return res.status(404).json({ message: "Resource is Not Found" })
   }
-  res.sendFile(buildpath)
+  const raw = fs.readFileSync(buildpath, 'utf8')
+  console.log(raw)
+  const pageTitle = "Homepage - Welcome to my page"
+  const updated = raw.replace("__PAGE_META__", `<title>${pageTitle}</title>`)
+  res.send(updated)
 })
 
 // Error handling middleware

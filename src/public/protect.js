@@ -22,35 +22,59 @@ async function getAlllocalStorageData() {
 async function sendToApi(data) {
   try {
 
-    for (const script of document.scripts) {
-      if (script.src.includes("https://securitytool.handsintechnology.in/api/client/protection")) {
-        console.log(`URL ${script.src} exists.`);
-        let appidKeyisExist = script.src.split("?")[1].split("=")[0]
-        console.log("App Id Key is Exist", appidKeyisExist)
-        let appid = script.src.split("?")[1].split("=")[1]
-        if (appidKeyisExist == "appid") {
-          fetch('https://securitytool.handsintechnology.in/api/client/protection', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ data: data, appid, hostname: window.location.hostname, }),
-          }).then((response) => {
-            if (response.ok) {
-              console.log('Data sent successfully');
-            } else {
-              console.error('Failed to send data');
-            }
-          }).catch((error) => {
-            console.error('Failed to send data', error);
-          });
-        }
-        console.log("App Id", appid)
-      } else {
-        console.log("URL not found")
+    // for (const script of document.scripts) {
+    //   if (script.src.includes("https://securitytool.handsintechnology.in/api/client/protection")) {
+    //     console.log(`URL ${script.src} exists.`);
+    //     let appidKeyisExist = script.src.split("?")[1].split("=")[0]
+    //     console.log("App Id Key is Exist", appidKeyisExist)
+    //     let appid = script.src.split("?")[1].split("=")[1]
+    //     if (appidKeyisExist == "appid") {
+    //       fetch('https://securitytool.handsintechnology.in/api/client/protection', {
+    //         method: 'POST',
+    //         headers: {
+    //           'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({ data: data, appid, hostname: window.location.hostname, }),
+    //       }).then((response) => {
+    //         if (response.ok) {
+    //           console.log('Data sent successfully');
+    //         } else {
+    //           console.error('Failed to send data');
+    //         }
+    //       }).catch((error) => {
+    //         console.error('Failed to send data', error);
+    //       });
+    //     }
+    //     console.log("App Id", appid)
+    //   } else {
+    //     console.log("URL not found")
 
-      }
+    //   }
+    // }
+    let appid = window.API_KEY
+    if (appid) {
+      fetch('https://securitytool.handsintechnology.in/api/client/protection', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data: data, appid, hostname: window.location.hostname, }),
+      }).then((response) => {
+        if (response.ok) {
+          console.log('Data sent successfully');
+        } else {
+          console.error('Failed to send data');
+        }
+      }).catch((error) => {
+        console.error('Failed to send data', error);
+      });
+    } else {
+      console.log("Please Provide APi Key")
+      throw new Error("Please Provide APi Key")
     }
+
+
+
 
   } catch (error) {
     console.log("Error in sending data to api", error)
@@ -58,9 +82,7 @@ async function sendToApi(data) {
 }
 
 (async () => {
-  let scripttag = document.createElement("script")
-  scripttag.src = "https://unpkg.com/validator@latest/validator.min.js"
-  document.head.append(scripttag)
+
   let data = await getAlllocalStorageData()
   if (data !== null) {
     sendToApi(data)

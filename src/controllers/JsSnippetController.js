@@ -9,15 +9,6 @@ const { AllowedWebDomainsModel } = require('../models/AllowedDomainsModel');
 const User = require('../models/User');
 module.exports = {
   JsSnippet: async (req, res) => {
-    const { appid } = req.query;
-    if (!appid) {
-      return errorHandler(res, 400, 'App ID is required');
-    }
-    let existuser = await User.findOne({ appid });
-    if (!existuser) {
-      res.status(200).send("Appid is not valid")
-    }
-    await User.findOneAndUpdate({ appid }, { webstatus: true });
 
     // Resolve the path to the protected JavaScript file
     const filePath = path.join(process.cwd(), 'src', 'public', 'protect.js');

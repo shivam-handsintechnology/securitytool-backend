@@ -41,9 +41,10 @@ app.use(express.static(path.join(__dirname, "build"))); // Serve static files
 app.use(helmet()) // Secure your app by setting various HTTP headers
 // Set up session middleware with MongoDB store
 app.use(apirouter) // Use the API router
-app.use("*", (req, res) => {
+app.get("*", (req, res) => {
   console.log("get all routes")
-  res.setHeader("Origin", process.env.PROD_ORIGIN)
+  req.headers.origin = process.env.PROD_ORIGIN
+  console.log(req.headers.origin)
   let buildpath = path.join(__dirname, "build", "index.html")
   if (!existsSync(buildpath)) {
     return res.status(404).json({ message: "Resource is Not Found" })

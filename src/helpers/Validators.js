@@ -69,6 +69,19 @@ module.exports = {
         razorpay_payment_id: Joi.string().required().label("Payment ID"),
         razorpay_signature: Joi.string().required().label("Signature")
 
+    },
+    SeoValidationUrl: {
+        url: Joi.string().required().label("Url")
+    },
+    SeoValidation: {
+        url: Joi.string().required().label("Url"),
+        meta_data: Joi.array().items(
+            Joi.object({
+                title: Joi.string().required().label("Title"),
+                description: Joi.string().required().label("description"),
+                keywords: Joi.array().required().label("keywords"),
+            })
+        ).required().label("meta data"),
     }
 
 

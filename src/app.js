@@ -1,4 +1,5 @@
 // Import external modules
+const fs = require('fs');
 const cors = require('cors');
 const path = require('path');
 const fileUpload = require('express-fileupload')
@@ -11,16 +12,19 @@ const http = require('http');
 const mongoSanitize = require('express-mongo-sanitize');
 const process = require("process");
 // import internal modules
+// app.js or server.js
+
+// Rest of your application code.
 const logger = require('./logger/logger');
 const apirouter = require('./routes')
-const { DBConnection } = require("./config/connection"); // Database connection
-const { CronJobVIdeoDelete, OtpGenerator } = require('./utils');
-const fs = require('fs');
 
+const { DBConnection } = require("./config/connection"); // Database connection
+const { CronJobVIdeoDelete } = require('./utils');
+const SEO = require('./models/SEO.Model');
 const numCPUs = os.cpus().length // Get the number of CPU cores
 // Connected to mongodb
 dotenv.config(); // Load environment variables
-DBConnection(process.env.MONGO_URI) // Connect to MongoDB
+DBConnection(process.env.MONGO_URI)// Connect to MongoDB
 const app = express(); // Create Express APP
 const server = http.createServer(app);
 
@@ -36,20 +40,69 @@ app.use(mongoSanitize()); // Data sanitization against NoSQL query injection
 app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 },   // File Upload Functionality
 }));
+app.use(express.static(path.join(__dirname, "build")))
 app.use("/static", express.static(path.join(__dirname, "public"))); // Serve static files
-app.use(express.static(path.join(__dirname, "build"))); // Serve static files
+
 app.use(helmet()) // Secure your app by setting various HTTP headers
 // Set up session middleware with MongoDB store
 app.use(apirouter) // Use the API router
-app.use("*", (req, res) => {
-  let buildpath = path.join(__dirname, "build", "index.html")
-  if (!fs.existsSync(buildpath)) {
-    return res.status(404).json({ message: "Resource is Not Found" })
+
+// Middleware to handle routes for SPA
+// Middleware to handle routes for SPA
+let ChangeHtml = `<title>Security Tool</title>`
+app.use("/*", async (req, res) => {
+  try {
+    const buildpath = path.join(__dirname, "build", "index.html");
+    if (!fs.existsSync(buildpath)) {
+      return res.status(404).json({ message: "Resource is Not Found" });
+    }
+
+    const raw = fs.readFileSync(buildpath, 'utf8');
+    let url = req.originalUrl === "/" ? "home" : req.originalUrl.replace(/\//g, "");
+    console.log("url", req.originalUrl);
+
+    // Mongoose aggregation
+    const [seoData] = await SEO.aggregate([
+      { $match: { url: url } },
+      { $limit: 1 }
+    ]);
+
+    console.log(seoData ? "SEO data found" : "No SEO data found");
+
+    // Default home page SEO
+
+    let metaTags = `
+        <title>Welcome to Our Website</title>
+        <meta name="description" content="Explore our amazing content and services">
+        <meta name="keywords" content="home, welcome, website">
+      `;
+    let updated = raw.replace(ChangeHtml, metaTags);
+    if (!seoData || !seoData.meta_data || seoData.meta_data.length === 0) {
+      // Default home page SEO
+      metaTags = `
+        <title>Welcome to Our Website</title>
+        <meta name="description" content="Explore our amazing content and services">
+        <meta name="keywords" content="home, welcome, website">
+      `;
+    } else {
+      // Construct meta tags for all items in the meta_data array
+      metaTags = seoData.meta_data.map(metaData => `
+        <title>${metaData.title}</title>
+        <meta name="description" content="${metaData.description}">
+        <meta name="keywords" content="${metaData.keywords.join(', ')}">
+      `).join('');
+    }
+
+    // Replace __PAGE_META__ with the constructed meta tags
+    updated = raw.replace(ChangeHtml, metaTags);
+
+    // Send the updated HTML
+    return res.send(updated);
+
+  } catch (error) {
+    console.error('Error updating meta tags:', error);
+    return res.status(500).json({ message: "Error updating meta tags" });
   }
-  const raw = fs.readFileSync(buildpath, 'utf8')
-  const pageTitle = "Homepage - Welcome to my page"
-  const updated = raw.replace("__PAGE_META__", `<title>${pageTitle}</title>`)
-  res.send(updated)
 })
 
 // Error handling middleware

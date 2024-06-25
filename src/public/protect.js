@@ -12,32 +12,44 @@ async function getAlllocalStorageData() {
     return localStorageData
   }
 }
+const ValidatConfiguration = () => {
+
+  let appid = window.appid
+  let configuration = window.SecurityValidation
+  if (!appid) {
+    throw new Error("Please Provide AppId")
+  }
+  else if (!configuration) {
+    throw new Error("Please Provide Security Configuration")
+  } else if (Object.keys(configuration).length == 0) {
+    throw new Error("Please Provide atleast one configuration")
+  }
+  else if (appid && configuration && Object.keys(configuration).length > 0) {
+    return true
+  }
+}
 // Check if session cookie has expiration
 // send data to api with xhr request
 async function sendToApi(url, data) {
   try {
 
-    let appid = window.API_KEY
-    if (appid) {
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ data: data, appid, hostname: window.location.hostname, }),
-      }).then((response) => {
-        if (response.ok) {
-          console.log('Data sent successfully');
-        } else {
-          console.error('Failed to send data');
-        }
-      }).catch((error) => {
-        console.error('Failed to send data', error);
-      });
-    } else {
-      console.log("Please Provide APi Key")
-      throw new Error("Please Provide APi Key")
-    }
+
+    ValidatConfiguration() && fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ data: data, appid, hostname: window.location.hostname, }),
+    }).then((response) => {
+      if (response.ok) {
+        console.log('Data sent successfully');
+      } else {
+        console.error('Failed to send data');
+      }
+    }).catch((error) => {
+      console.error('Failed to send data', error);
+    });
+
 
 
 
@@ -49,8 +61,9 @@ async function sendToApi(url, data) {
 const CallSensitivedataLocalStorage = async () => {
   let data = await getAlllocalStorageData()
   if (data !== null) {
+
     let url = 'https://securitytool.handsintechnology.in/api/client/protection'
-    sendToApi(url, data).then(res => res).catch(err => err)
+    ValidatConfiguration() && sendToApi(url, data).then(res => res).catch(err => err)
   }
 }
 // Sql Injection Function
@@ -201,7 +214,7 @@ const CreateuserDetails = async (type) => {
       type
     };
 
-    await sendToApi("https://securitytool.handsintechnology.in/api/client/createuserdetailsfromclient", data).then(res => res).catch(err => err)
+    ValidatConfiguration() && await sendToApi("https://securitytool.handsintechnology.in/api/client/createuserdetailsfromclient", data).then(res => res).catch(err => err)
   } catch (error) {
     console.log("eror in malacius data create ", error);
   }

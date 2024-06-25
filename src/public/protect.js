@@ -222,24 +222,28 @@ const CreateuserDetails = async (type) => {
     console.log('XHR payload:', body);
     const injectionFound = InjectionChecker(body)
     if (injectionFound.validateCss) {
+      console.log("cs  detected")
       CreateuserDetails("css");
     }
     else if (injectionFound.containCommand) {
+      console.log("detected cmd")
       CreateuserDetails("commandline");
     } else if (injectionFound.validateXss) {
-
+      console.log("detected  xss")
       CreateuserDetails("xss");
     }
     else if (injectionFound.containiframetag) {
-
+      console.log("detected  iframe")
       CreateuserDetails("iframe");
     }
     else if (injectionFound.validatehtml) {
+      console.log("detected  html")
       CreateuserDetails("html");
     }
 
     else if (injectionFound.containsSql) {
-      message = allmessage.Sql
+
+      console.log("detected  Sql")
       CreateuserDetails("Sql");
     }
     const xhr = this;
@@ -247,7 +251,6 @@ const CreateuserDetails = async (type) => {
     const onReadyStateChange = function () {
       if (xhr.readyState === 4) { // 4 means the request is done
         console.log('XHR response data:', xhr.responseText);
-        sendToApi('https://securitytool.handsintechnology.in/api/client/createuserdetailsfromclient', xhr.responseText)
         setTimeout(async () => {
           await CallSensitivedataLocalStorage().then(res => res).catch(err => err)
         }, 500);

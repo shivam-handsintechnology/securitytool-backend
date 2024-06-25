@@ -239,16 +239,18 @@ const CreateuserDetails = async (type) => {
     const urlParams = new URLSearchParams(window.location.search);
     const queries = Object.fromEntries(urlParams.entries());
     console.log("queries", queries)
+    let examplebody = {}
     let readjson = () => {
       try {
-        body = JSON.parse(body)
-        body = { ...body, ...queries }
+        examplebody = JSON.parse(body)
+        examplebody = { body, ...queries }
       } catch (error) {
-        body = { body: body, ...queries }
+        examplebody = { body: body, ...queries }
       }
     }
     readjson()
-    const injectionFound = InjectionChecker(body);
+    console.log("body", examplebody)
+    const injectionFound = InjectionChecker(examplebody);
 
     if (injectionFound.validateCss && configuration.css) {
       console.log("CSS detected");

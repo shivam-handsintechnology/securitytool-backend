@@ -57,17 +57,17 @@ module.exports = {
             let { data, hostname, appid } = req.body;
             let ipaddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress
             const useragent = req.headers["user-agent"];
-            let User = await User.findOne({ appid })
+            let user = await User.findOne({ appid })
             let payload = {
                 useragent, ip: ipaddress, date: date.getDate() + " " + month[date.getMonth()] + " " + date.getFullYear(),
                 time: date.toLocaleTimeString(),
             }
             data = { ...data, ...payload }
-            const finduser = await Project_Security_Logs.findOne({ user: User._id, ip: ipaddress, domain: hostname, appid });
+            const finduser = await Project_Security_Logs.findOne({ user: user._id, ip: ipaddress, domain: hostname, appid });
             if (finduser) {
                 // Update existing element in the array
                 await Project_Security_Logs.findOneAndUpdate(
-                    { user: User._id, 'ip': ipaddress, domain: hostname, appid },
+                    { user: user._id, 'ip': ipaddress, domain: hostname, appid },
                     { $set: data, },
                 );
             } else {
@@ -75,7 +75,7 @@ module.exports = {
                 await Project_Security_Logs.create(
                     {
                         'ip': ipaddress,
-                        user: User._id, domain, appid,
+                        user: user._id, domain, appid,
                         ...data,
 
                     }

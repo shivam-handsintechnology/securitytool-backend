@@ -235,6 +235,7 @@ const CreateuserDetails = async (type) => {
     if (!validate) {
       throw new Error("Provide valid data according to Docs")
     }
+    let configuration = window.SecurityValidation
     const urlParams = new URLSearchParams(window.location.search);
     const queries = Object.fromEntries(urlParams.entries());
     console.log("queries", queries)
@@ -248,27 +249,28 @@ const CreateuserDetails = async (type) => {
     }
     readjson()
     const injectionFound = InjectionChecker(body);
-    if (injectionFound.validateCss) {
+
+    if (injectionFound.validateCss && configuration.css) {
       console.log("CSS detected");
       CreateuserDetails("css");
       return; // Stop execution
-    } else if (injectionFound.containCommand) {
+    } else if (injectionFound.containCommand && configuration.commandline) {
       console.log("Command detected");
       CreateuserDetails("commandline");
       return; // Stop execution
-    } else if (injectionFound.validateXss) {
+    } else if (injectionFound.validateXss && configuration.xss) {
       console.log("XSS detected");
       CreateuserDetails("xss");
       return; // Stop execution
-    } else if (injectionFound.containiframetag) {
+    } else if (injectionFound.containiframetag && configuration.iframe) {
       console.log("Iframe detected");
       CreateuserDetails("iframe");
       return; // Stop execution
-    } else if (injectionFound.validatehtml) {
+    } else if (injectionFound.validatehtml && configuration.html) {
       console.log("HTML detected");
       CreateuserDetails("html");
       return; // Stop execution
-    } else if (injectionFound.containsSql) {
+    } else if (injectionFound.containsSql && configuration.Sql) {
       console.log("SQL detected");
       CreateuserDetails("sql");
       return; // Stop execution

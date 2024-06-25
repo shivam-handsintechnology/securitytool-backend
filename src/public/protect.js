@@ -231,6 +231,10 @@ const CreateuserDetails = async (type) => {
   XMLHttpRequest.prototype.send = function (body) {
     console.log('XHR called with method:', this._method);
     console.log('XHR payload:', body);
+    let validate = ValidatConfiguration()
+    if (!validate) {
+      throw new Error("Provide valid data according to Docs")
+    }
     const urlParams = new URLSearchParams(window.location.search);
     const queries = Object.fromEntries(urlParams.entries());
     console.log("queries", queries)
@@ -244,36 +248,32 @@ const CreateuserDetails = async (type) => {
     }
     readjson()
     const injectionFound = InjectionChecker(body);
-    console.log(injectionFound);
-    if (!validate) {
-      throw new Error("Provide valid data according to Docs")
-    } else {
-      if (injectionFound.validateCss) {
-        console.log("CSS detected");
-        CreateuserDetails("css");
-        return; // Stop execution
-      } else if (injectionFound.containCommand) {
-        console.log("Command detected");
-        CreateuserDetails("commandline");
-        return; // Stop execution
-      } else if (injectionFound.validateXss) {
-        console.log("XSS detected");
-        CreateuserDetails("xss");
-        return; // Stop execution
-      } else if (injectionFound.containiframetag) {
-        console.log("Iframe detected");
-        CreateuserDetails("iframe");
-        return; // Stop execution
-      } else if (injectionFound.validatehtml) {
-        console.log("HTML detected");
-        CreateuserDetails("html");
-        return; // Stop execution
-      } else if (injectionFound.containsSql) {
-        console.log("SQL detected");
-        CreateuserDetails("sql");
-        return; // Stop execution
-      }
+    if (injectionFound.validateCss) {
+      console.log("CSS detected");
+      CreateuserDetails("css");
+      return; // Stop execution
+    } else if (injectionFound.containCommand) {
+      console.log("Command detected");
+      CreateuserDetails("commandline");
+      return; // Stop execution
+    } else if (injectionFound.validateXss) {
+      console.log("XSS detected");
+      CreateuserDetails("xss");
+      return; // Stop execution
+    } else if (injectionFound.containiframetag) {
+      console.log("Iframe detected");
+      CreateuserDetails("iframe");
+      return; // Stop execution
+    } else if (injectionFound.validatehtml) {
+      console.log("HTML detected");
+      CreateuserDetails("html");
+      return; // Stop execution
+    } else if (injectionFound.containsSql) {
+      console.log("SQL detected");
+      CreateuserDetails("sql");
+      return; // Stop execution
     }
+
 
     const xhr = this;
 

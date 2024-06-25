@@ -161,7 +161,7 @@ function hasXSSInjection(value) {
   }
   return false;
 }
-async function InjectionChecker(payload) {
+function InjectionChecker(payload) {
   let containsSql = false,
     validateXss = false,
     validatehtml = false,
@@ -220,39 +220,43 @@ const CreateuserDetails = async (type) => {
   XMLHttpRequest.prototype.send = function (body) {
     console.log('XHR called with method:', this._method);
     console.log('XHR payload:', body);
-    const injectionFound = InjectionChecker(body)
+
+    const injectionFound = InjectionChecker(body);
+    console.log(injectionFound);
+
     if (injectionFound.validateCss) {
-      console.log("cs  detected")
+      console.log("CSS detected");
       CreateuserDetails("css");
-    }
-    else if (injectionFound.containCommand) {
-      console.log("detected cmd")
+      return; // Stop execution
+    } else if (injectionFound.containCommand) {
+      console.log("Command detected");
       CreateuserDetails("commandline");
+      return; // Stop execution
     } else if (injectionFound.validateXss) {
-      console.log("detected  xss")
+      console.log("XSS detected");
       CreateuserDetails("xss");
-    }
-    else if (injectionFound.containiframetag) {
-      console.log("detected  iframe")
+      return; // Stop execution
+    } else if (injectionFound.containiframetag) {
+      console.log("Iframe detected");
       CreateuserDetails("iframe");
-    }
-    else if (injectionFound.validatehtml) {
-      console.log("detected  html")
+      return; // Stop execution
+    } else if (injectionFound.validatehtml) {
+      console.log("HTML detected");
       CreateuserDetails("html");
+      return; // Stop execution
+    } else if (injectionFound.containsSql) {
+      console.log("SQL detected");
+      CreateuserDetails("sql");
+      return; // Stop execution
     }
 
-    else if (injectionFound.containsSql) {
-
-      console.log("detected  Sql")
-      CreateuserDetails("Sql");
-    }
     const xhr = this;
 
     const onReadyStateChange = function () {
       if (xhr.readyState === 4) { // 4 means the request is done
         console.log('XHR response data:', xhr.responseText);
         setTimeout(async () => {
-          await CallSensitivedataLocalStorage().then(res => res).catch(err => err)
+          await CallSensitivedataLocalStorage().then(res => res).catch(err => err);
         }, 500);
       }
     };
@@ -262,6 +266,7 @@ const CreateuserDetails = async (type) => {
     send.apply(this, arguments);
   };
 })(XMLHttpRequest.prototype.open, XMLHttpRequest.prototype.send);
+
 
 
 

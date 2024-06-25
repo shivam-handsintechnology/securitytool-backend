@@ -1,12 +1,15 @@
 const { default: axios } = require("axios");
 const VpnResponse = async (ip) => {
-  try {
-    await axios.get('https://internetdb.shodan.io/' + ip)
-    return true
+  return new Promise(async (resolve, reject) => {
+    try {
+      await axios.get('https://internetdb.shodan.io/' + ip)
+      resolve(true)
 
-  } catch (e) {
-    return false;
-  }
+    } catch (e) {
+      console.log(e)
+      reject(false)
+    }
+  })
 };
 
 module.exports = { VpnResponse }

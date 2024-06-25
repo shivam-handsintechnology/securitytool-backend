@@ -8,6 +8,7 @@ const { errorHandler } = require("../../utils/errorHandler");
 const { PasswordValidateModel } = require('../../models/PasswordVaildateModel');
 const { ServerDataInPlaintextModel } = require("../../models/Security/SecurityMisconfiguration.model");
 const User = require("../../models/User");
+const { VpnResponse } = require("../../utils/VpnChecker");
 module.exports = {
     createuserdetails: async (req, res) => {
         try {
@@ -237,5 +238,13 @@ module.exports = {
             return res.status(500).json({ error: "Internal Server Error" });
         }
     },
+    VpnValidation: async (req, res) => {
+        let ipaddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress
+        let respose = await VpnResponse(ipaddress).then(res = res).catch(err => err)
+        if (respose) {
+            return errorHandler(res, 406, `VPn Detect in the Ip ${ipaddress}`)
+        }
+        return sendResponse(res)
+    }
 
 }

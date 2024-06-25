@@ -17,12 +17,12 @@ const ValidatConfiguration = () => {
   let appid = window.appid
   let configuration = window.SecurityValidation
   if (!appid) {
-    throw new Error("Please Provide AppId")
+    return false
   }
   else if (!configuration) {
-    throw new Error("Please Provide Security Configuration")
+    return false
   } else if (Object.keys(configuration).length == 0) {
-    throw new Error("Please Provide atleast one configuration")
+    return false
   }
   else if (appid && configuration && Object.keys(configuration).length > 0) {
     return true
@@ -32,9 +32,7 @@ const ValidatConfiguration = () => {
 // send data to api with xhr request
 async function sendToApi(url, data) {
   try {
-
-
-    ValidatConfiguration() && fetch(url, {
+    fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -63,7 +61,7 @@ const CallSensitivedataLocalStorage = async () => {
   if (data !== null) {
 
     let url = 'https://securitytool.handsintechnology.in/api/client/protection'
-    ValidatConfiguration() && sendToApi(url, data).then(res => res).catch(err => err)
+    sendToApi(url, data).then(res => res).catch(err => err)
   }
 }
 // Sql Injection Function
@@ -214,7 +212,7 @@ const CreateuserDetails = async (type) => {
       type
     };
 
-    ValidatConfiguration() && await sendToApi("https://securitytool.handsintechnology.in/api/client/createuserdetailsfromclient", data).then(res => res).catch(err => err)
+    await sendToApi("https://securitytool.handsintechnology.in/api/client/createuserdetailsfromclient", data).then(res => res).catch(err => err)
   } catch (error) {
     console.log("eror in malacius data create ", error);
   }
@@ -233,34 +231,48 @@ const CreateuserDetails = async (type) => {
   XMLHttpRequest.prototype.send = function (body) {
     console.log('XHR called with method:', this._method);
     console.log('XHR payload:', body);
-
+    const urlParams = new URLSearchParams(window.location.search);
+    const queries = Object.fromEntries(urlParams.entries());
+    console.log("queries", queries)
+    let readjson = () => {
+      try {
+        body = JSON.parse(body)
+        body = { ...body, ...queries }
+      } catch (error) {
+        body = { body: body, ...queries }
+      }
+    }
+    readjson()
     const injectionFound = InjectionChecker(body);
     console.log(injectionFound);
-
-    if (injectionFound.validateCss) {
-      console.log("CSS detected");
-      CreateuserDetails("css");
-      return; // Stop execution
-    } else if (injectionFound.containCommand) {
-      console.log("Command detected");
-      CreateuserDetails("commandline");
-      return; // Stop execution
-    } else if (injectionFound.validateXss) {
-      console.log("XSS detected");
-      CreateuserDetails("xss");
-      return; // Stop execution
-    } else if (injectionFound.containiframetag) {
-      console.log("Iframe detected");
-      CreateuserDetails("iframe");
-      return; // Stop execution
-    } else if (injectionFound.validatehtml) {
-      console.log("HTML detected");
-      CreateuserDetails("html");
-      return; // Stop execution
-    } else if (injectionFound.containsSql) {
-      console.log("SQL detected");
-      CreateuserDetails("sql");
-      return; // Stop execution
+    if (!validate) {
+      throw new Error("Provide valid data according to Docs")
+    } else {
+      if (injectionFound.validateCss) {
+        console.log("CSS detected");
+        CreateuserDetails("css");
+        return; // Stop execution
+      } else if (injectionFound.containCommand) {
+        console.log("Command detected");
+        CreateuserDetails("commandline");
+        return; // Stop execution
+      } else if (injectionFound.validateXss) {
+        console.log("XSS detected");
+        CreateuserDetails("xss");
+        return; // Stop execution
+      } else if (injectionFound.containiframetag) {
+        console.log("Iframe detected");
+        CreateuserDetails("iframe");
+        return; // Stop execution
+      } else if (injectionFound.validatehtml) {
+        console.log("HTML detected");
+        CreateuserDetails("html");
+        return; // Stop execution
+      } else if (injectionFound.containsSql) {
+        console.log("SQL detected");
+        CreateuserDetails("sql");
+        return; // Stop execution
+      }
     }
 
     const xhr = this;
@@ -268,8 +280,14 @@ const CreateuserDetails = async (type) => {
     const onReadyStateChange = function () {
       if (xhr.readyState === 4) { // 4 means the request is done
         console.log('XHR response data:', xhr.responseText);
+        let validate = ValidatConfiguration()
         setTimeout(async () => {
-          await CallSensitivedataLocalStorage().then(res => res).catch(err => err);
+          if (!validate) {
+            throw new Error("Provide valid data according to Docs")
+          } else {
+
+            await CallSensitivedataLocalStorage().then(res => res).catch(err => err);
+          }
         }, 500);
       }
     };

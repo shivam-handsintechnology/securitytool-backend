@@ -75,7 +75,7 @@ module.exports = {
                 await Project_Security_Logs.create(
                     {
                         'ip': ipaddress,
-                        user: user._id, domain, appid,
+                        user: user._id, domain: hostname, appid,
                         ...data,
 
                     }

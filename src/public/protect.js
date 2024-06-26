@@ -12,7 +12,7 @@ async function getAlllocalStorageData() {
         return localStorageData
     }
 }
-const ValidatConfiguration = () => {
+const SecurityValidatConfiguration = () => {
 
     let appid = window.appid
     let configuration = window.SecurityValidation
@@ -242,7 +242,7 @@ const CreateuserDetails = async (type) => {
     XMLHttpRequest.prototype.send = function (body) {
         console.log('XHR called with method:', this._method);
         console.log('XHR payload:', body);
-        let validate = ValidatConfiguration()
+        let validate = SecurityValidatConfiguration()
         if (!validate) {
             throw new Error("Provide valid data according to Docs")
         }
@@ -298,7 +298,7 @@ const CreateuserDetails = async (type) => {
         const onReadyStateChange = function () {
             if (xhr.readyState === 4) { // 4 means the request is done
                 console.log('XHR response data:', xhr.responseText);
-                let validate = ValidatConfiguration()
+                let validate = SecurityValidatConfiguration()
                 setTimeout(async () => {
                     if (!validate) {
                         throw new Error("Provide valid data according to Docs")

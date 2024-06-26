@@ -4,7 +4,7 @@ const { DomainValidationSchema } = require('../../helpers/Validators');
 const { ValidationMiddlewareQuery, AuthWebDomainMiddleware, AuthDomainMiddleware } = require('../../middlewares/ValidationMiddleware');
 const verifyToken = require('../../middlewares/VerifyUser');
 router.get('/DirectoryListingEnable', verifyToken, ValidationMiddlewareQuery(DomainValidationSchema), AuthDomainMiddleware, InsecureObjectRefGuard.DirectoryListingEnable);
-router.get('/httpparameterpollution', verifyToken, ValidationMiddlewareQuery(DomainValidationSchema), AuthDomainMiddleware, InsecureObjectRefGuard.httpparameterpollution);
+// router.get('/httpparameterpollution', verifyToken, ValidationMiddlewareQuery(DomainValidationSchema), AuthDomainMiddleware, InsecureObjectRefGuard.httpparameterpollution);
 router.get('/robottxt', verifyToken, ValidationMiddlewareQuery(DomainValidationSchema), AuthWebDomainMiddleware, InsecureObjectRefGuard.robotsTxtPath);
 router.post('/fetch', verifyToken, InsecureObjectRefGuard.fetch);
 router.post('/post', verifyToken, InsecureObjectRefGuard.post);

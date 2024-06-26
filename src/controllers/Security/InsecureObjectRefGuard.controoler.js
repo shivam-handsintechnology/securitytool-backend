@@ -52,33 +52,33 @@ module.exports = {
       return errorHandler(res, 500, error.message)
     }
   },
-  httpparameterpollution: async (req, res) => {
-    let StatusCode = 500
-    try {
-      let domain = req.query.domain
-      let url = `http://${domain}/sitescanner?id=1&id=2&id=3`;
-      let response = await axios.get(url, {
-        headers: {
-          'origin': "https://securitytool.handsintechnology.in",
-        }
-      })
-      if (response.status === 200) {
-        if (typeof response.data !== "object") {
-          throw new Error("Invalid Response")
-        }
-        let isHttp = await hashttpParametersPollutionavailable(response.data)
-        return sendResponse(res, 200, "success", isHttp)
-      } else {
-        StatusCode = 403
-        throw new Error("Access Denied")
-      }
-    }
-    catch (error) {
-      return errorHandler(res, StatusCode, error.message)
-    }
+  // httpparameterpollution: async (req, res) => {
+  //   let StatusCode = 500
+  //   try {
+  //     let domain = req.query.domain
+  //     let url = `http://${domain}/sitescanner?id=1&id=2&id=3`;
+  //     let response = await axios.get(url, {
+  //       headers: {
+  //         'origin': "https://securitytool.handsintechnology.in",
+  //       }
+  //     })
+  //     if (response.status === 200) {
+  //       if (typeof response.data !== "object") {
+  //         throw new Error("Invalid Response")
+  //       }
+  //       let isHttp = await hashttpParametersPollutionavailable(response.data)
+  //       return sendResponse(res, 200, "success", isHttp)
+  //     } else {
+  //       StatusCode = 403
+  //       throw new Error("Access Denied")
+  //     }
+  //   }
+  //   catch (error) {
+  //     return errorHandler(res, StatusCode, error.message)
+  //   }
 
 
-  },
+  // },
   post: async (req, res) => {
     try {
       let paterns = [

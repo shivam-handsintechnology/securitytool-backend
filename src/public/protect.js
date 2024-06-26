@@ -64,6 +64,17 @@ const CallSensitivedataLocalStorage = async () => {
     sendToApi(url, data).then(res => res).catch(err => err)
   }
 }
+// duplicate params
+const hasDuplicateParameters = (params) => {
+  const seen = new Set();
+  for (const param in params) {
+    if (seen.has(param)) {
+      return true; // Duplicate parameter found
+    }
+    seen.add(param);
+  }
+  return false; // No duplicate parameters found
+}
 // Sql Injection Function
 function hasSqlInjection(value) {
   const sqlMeta = new RegExp(
@@ -249,32 +260,35 @@ const CreateuserDetails = async (type) => {
       }
     }
     readjson()
-    console.log("body", examplebody)
     const injectionFound = InjectionChecker(examplebody);
-
+    let duplicateQueries = hasDuplicateParameters(queries)
     if (injectionFound.validateCss && configuration.css) {
-      console.log("CSS detected");
+      alert("CSS detected");
       CreateuserDetails("css");
       return; // Stop execution
     } else if (injectionFound.containCommand && configuration.commandline) {
-      console.log("Command detected");
+      alert("Command detected");
       CreateuserDetails("commandline");
       return; // Stop execution
     } else if (injectionFound.validateXss && configuration.xss) {
-      console.log("XSS detected");
+      alert("XSS detected");
       CreateuserDetails("xss");
       return; // Stop execution
     } else if (injectionFound.containiframetag && configuration.iframe) {
-      console.log("Iframe detected");
+      alert("Iframe detected");
       CreateuserDetails("iframe");
       return; // Stop execution
     } else if (injectionFound.validatehtml && configuration.html) {
-      console.log("HTML detected");
+      alert("HTML detected");
       CreateuserDetails("html");
       return; // Stop execution
     } else if (injectionFound.containsSql && configuration.Sql) {
-      console.log("SQL detected");
+      alert("SQL detected");
       CreateuserDetails("sql");
+      return; // Stop execution
+    } else if (duplicateQueries) {
+      alert("Http parameter pollution detected");
+      CreateuserDetails("httpParameterPollution");
       return; // Stop execution
     }
 

@@ -6,7 +6,7 @@ async function HostAndAppidGetterMiddleware(req, res, next) {
         if (!req.headers.origin) {
             return errorHandler(res, 404, "Origin Not found");
         }
-        const hostname = new URL(origin).hostname;
+        const hostname = new URL(req.headers.origin).hostname;
         req.body.domain = hostname
         req.body.hostname = hostname
         // Continue to the next middleware or route handler

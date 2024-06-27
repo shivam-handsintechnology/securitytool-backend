@@ -52,7 +52,7 @@ window.SecurityTool = {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(),
+                body: JSON.stringify(obj),
             }).then((response) => {
                 if (response.ok) {
                     console.log('Data sent successfully');

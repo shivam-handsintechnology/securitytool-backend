@@ -186,7 +186,7 @@ window.SecurityTool = {
 };
 window.allowedWeb = false
 
-fetch("https://securitytool.handsintechnology.in/api/client/authentication").then((res) => {
+fetch(`https://securitytool.handsintechnology.in/api/client/authentication?appid=${window.appid}`).then((res) => {
     window.allowedWeb = true
 }).catch((err) => {
     window.allowedWeb = false

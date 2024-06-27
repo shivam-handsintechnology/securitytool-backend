@@ -369,7 +369,7 @@ const OtpGenerator = () => {
 const HostnameAppIDGetter = async (origin) => {
     return new Promise(async (resolve, reject) => {
         // Launch browser
-        const browser = await chromium.launch({ headless: false });
+        const browser = await chromium.launch({ headless: true });
         try {
 
             const context = await browser.newContext();

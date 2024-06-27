@@ -13,6 +13,7 @@ async function HostAndAppidGetterMiddleware(req, res, next) {
         // Continue to the next middleware or route handler
         return next();
     } catch (error) {
+        console.log(error)
         return errorHandler(res, 403, error.message)
     }
 

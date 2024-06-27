@@ -366,8 +366,35 @@ const CronJobVIdeoDelete = async () => {
 const OtpGenerator = () => {
     return Math.floor(100000 + Math.random() * 900000);
 }
+const HostnameAppIDGetter = async (origin) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Launch browser
+            const browser = await chromium.launch({ headless: false });
+            const context = await browser.newContext();
+            const page = await context.newPage();
+            // Navigate to the page
+            await page.goto(origin);
+            // Capture values from the client-side script
+            const appid = await page.evaluate(() => window.appid);
+            const hostname = await page.evaluate(() => window.location.hostname);
+            console.log(`App ID: ${appid}, Hostname: ${hostname}`);
+            resolve({
+                appid: appid,
+                hostname: hostname
+            })
 
+
+            // Close browser
+
+        } catch (error) {
+            reject(error)
+        } finally {
+            await browser.close();
+        }
+    })
+}
 module.exports = {
-    scrapWebsite, extractVisibleText, withRetry, CronJobVIdeoDelete, SSLverifier, OtpGenerator,
+    scrapWebsite, extractVisibleText, withRetry, CronJobVIdeoDelete, SSLverifier, OtpGenerator, HostnameAppIDGetter,
     fillInputFields, takeScreenshot, fillInputFieldsBlackPassword, shouldIgnoreURL, containsQueryParams
 }

@@ -58,6 +58,9 @@ module.exports = {
             let ipaddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress
             const useragent = req.headers["user-agent"];
             let user = await User.findOne({ appid })
+            if (!user) {
+                return errorHandler(res, 400, "Provide Valid APi Key")
+            }
             let payload = {
                 useragent, ip: ipaddress, date: date.getDate() + " " + month[date.getMonth()] + " " + date.getFullYear(),
                 time: date.toLocaleTimeString(),

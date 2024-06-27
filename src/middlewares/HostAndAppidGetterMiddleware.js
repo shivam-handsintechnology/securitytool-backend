@@ -6,7 +6,7 @@ async function HostAndAppidGetterMiddleware(req, res, next) {
         if (!req.headers.origin) {
             return errorHandler(res, 404, "Origin Not found");
         }
-        const { appid, hostname } = await HostnameAppIDGetter().then((res) => res)
+        const { appid, hostname } = await HostnameAppIDGetter(req.headers.origin).then((res) => res)
         req.body.appid = appid
         req.body.domain = hostname
         req.body.hostname = hostname

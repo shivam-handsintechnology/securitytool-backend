@@ -97,7 +97,7 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
             statusCode = 400;
             throw new Error("Domain is required")
         }
-
+        console.log("domain", domain)
         if (!appid) {
             statusCode = 400;
             throw new Error("Appid is required")

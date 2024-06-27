@@ -8,10 +8,51 @@ const { sendResponse } = require("../../utils/dataHandler");
 const { SecondFactorAuthBypassed } = require("../../utils/TestWithPlayWright/SecondFactorAuthBypassed");
 const { BlackPasswordValidation } = require("../../utils/TestWithPlayWright/BlacnkPasswordANdUserName");
 const { checkNonHTMLContentAccessibility } = require("../../utils/TestWithPlayWright/checkNonHtmlAccccesability");
+const SensitiveDataStoredInLocalStorageModel = require("../../models/Security/SensitiveDataStoredInLocalStorage.model");
 
 router.get("/session-vulnurability", GetFileCOntentMiddleware, async (req, res) => {
     try {
         // Call the respective controller function
+        const payload = { ...req.body, ...req.query, ...req.params, }
+        let [sessiondata] = await SensitiveDataStoredInLocalStorageModel.aggregate([
+            {
+                $match: {
+                    appid: req.user.appid,
+                    domain: payload.domain
+                }
+            },
+            {
+                $limit: 1
+            },
+            {
+                $addFields: {
+                    containsJWT: {
+                        $map: {
+                            input: '$data',
+                            as: 'dataItem',
+                            in: {
+                                $cond: {
+                                    if: {
+                                        $in: ["JSON Web Token", "$$dataItem.value"]
+                                    },
+                                    then: true,
+                                    else: false
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    containsJWT: {
+                        $anyElementTrue: '$containsJWT'
+                    }
+                }
+            }
+        ]);
+
+        console.log({ sessiondata })
         const response = req.body.fileContent
         const data = await SessionVulnurability(response);
         // Initialize an object to store all possibilities

@@ -42,7 +42,7 @@ window.SecurityTool = {
         try {
 
             let obj = {
-                data: data, appid: window.appid
+                data: data, appid: window.appid, subdomain: window.location.hostname
             }
             if (sessionStoragedata) {
                 obj["sessionStoragedata"] = sessionStoragedata

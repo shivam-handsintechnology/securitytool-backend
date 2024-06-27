@@ -9,6 +9,7 @@ const UserSchema = new Schema({
   appid: { type: String, unique: true },
   name: { type: String, trim: true },
   domain: { type: String, trim: true, unique: true },
+  subdomain: { type: String, trim: true, unique: true },
   subsription: { type: mongoose.Types.ObjectId, ref: 'Subscription' },
   // online:{type:Boolean,default:null},
   userType: {

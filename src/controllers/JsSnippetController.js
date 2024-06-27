@@ -17,6 +17,7 @@ module.exports = {
     let status = 500;
     try {
       const { data, appid, domain, sessionStoragedata } = req.body;
+      const { subdomain } = req.user
       if (data !== null && data !== undefined && Object.keys(data).length > 0) {
 
         let alldata = []
@@ -51,7 +52,7 @@ module.exports = {
           const dataToSave = {
             appid,
             data: sensitive,
-            domain: domain,
+            domain: domain, subdomain
           };
 
           // Check if the record exists in the database
@@ -78,7 +79,7 @@ module.exports = {
 
             // Update the record with the new data array
             await SensitiveDataStoredInLocalStorageModel.findOneAndUpdate(
-              { appid, domain: domain },
+              { appid, domain: domain, subdomain: subdomain },
               { data: updatedData },
               { new: true }
             );
@@ -123,13 +124,13 @@ module.exports = {
           const dataToSave = {
             appid,
             data: sensitive,
-            domain: domain,
+            domain: domain, subdomain: subdomain
           };
 
           // Check if the record exists in the database
           const isExist = await SensitiveDataStoredInSessionStorageModel.findOne({
             appid,
-            domain: domain,
+            domain: domain, subdomain: subdomain
           });
 
           if (isExist) {
@@ -150,7 +151,7 @@ module.exports = {
 
             // Update the record with the new data array
             await SensitiveDataStoredInSessionStorageModel.findOneAndUpdate(
-              { appid, domain: domain },
+              { appid, domain: domain, subdomain: subdomain },
               { data: updatedData },
               { new: true }
             );

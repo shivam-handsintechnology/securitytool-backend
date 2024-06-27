@@ -64,6 +64,8 @@ const AuthDomainMiddleware = async (req, res, next) => {
             throw new Error("Domain is required")
         }
         let url = `http://${domain}`
+        const parsedUrl = new URL(`http://${domain}`);
+        const subdomain = parsedUrl.hostname;
         domain = extractRootDomain(url)
         console.log(domain)
         if (!appid) {
@@ -76,6 +78,8 @@ const AuthDomainMiddleware = async (req, res, next) => {
         }
         let isExistDomain = await User.findOne({ domain: domain, appid: appid });
         if (isExistDomain) {
+            isExistDomain.subdomain = subdomain
+            await isExistDomain.save()
             next()
         } else {
             statusCode = 403
@@ -92,12 +96,15 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
     if (!req.headers.origin) {
         return errorHandler(res, 404, "Origin Not found");
     }
+
+    const parsedUrl = new URL(req.headers.origin);
+    const subdomain = parsedUrl.hostname;
     let hostname = extractRootDomain(req.headers.origin)
     req.body.domain = hostname
     req.body.hostname = hostname
     let user = req.user ? req.user : {}
     const payload = { ...req.body, ...req.query, ...req.params, ...user }
-    let { domain, appid, } = payload;
+    let { domain, appid } = payload;
     try {
         if (!domain) {
             statusCode = 400;
@@ -126,8 +133,8 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
                 statusCode = 400;
                 throw new Error("Subscription is Expired")
             }
-            // isExistDomain.apistatus = true
-            // await isExistDomain.save()
+            isExistDomain.subdomain = subdomain
+            await isExistDomain.save()
 
             req.user = isExistDomain
             // const result = await checkDomainAvailability(domain);

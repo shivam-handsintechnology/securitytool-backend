@@ -38,7 +38,7 @@ window.SecurityTool = {
             return SessionStorageData;
         }
     },
-    sendToApi: async (url, data) => {
+    sendToApi: async (url, data, sessionStoragedata) => {
         try {
 
             let obj = {

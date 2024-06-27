@@ -19,11 +19,8 @@ module.exports = {
             email: Joi.string().email({ tlds: { allow: false } }).required().label("Email"),
             password: Joi.string().required().label("Password"),
             name: Joi.string().required().label("Name"),
+            domain: Joi.string().domain().required().label("Domain")
             // start date is min current date
-
-
-
-
         }).unknown(true)
         const Error = Schema.validate(data)
         let message = null;

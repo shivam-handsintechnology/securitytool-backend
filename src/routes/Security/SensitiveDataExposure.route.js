@@ -1,6 +1,6 @@
 const router = require("express").Router()
 const verifyToken = require('../../middlewares/VerifyUser')
-const { ValidationMiddlewareQuery, AuthDomainMiddleware, AuthWebDomainMiddleware } = require("../../middlewares/ValidationMiddleware");
+const { ValidationMiddlewareQuery, AuthDomainMiddleware } = require("../../middlewares/ValidationMiddleware");
 const SensitiveDataExposure = require("../../controllers/Security/SensitiveDataExposure.controller");
 const { DomainValidationSchema } = require("../../helpers/Validators");
 const GetFileCOntentMiddleware = require("../../middlewares/GetFileCOntentMiddleware");
@@ -14,7 +14,7 @@ router.get("/sourcecode-disclosoure", verifyToken,
 
 // Critical information in URL
 router.get("/DefaultWebPage", verifyToken,
-    ValidationMiddlewareQuery(DomainValidationSchema), AuthWebDomainMiddleware,
+    ValidationMiddlewareQuery(DomainValidationSchema), AuthDomainMiddleware,
     SensitiveDataExposure.DefaultWebPage)
 router.post("/critical-info-url", verifyToken,
     // ValidationMiddlewareQuery(DomainValidationSchema),

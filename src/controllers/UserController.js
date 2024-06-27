@@ -13,6 +13,7 @@ const key_secret = process.env.NODE_ENV == "production" ? process.env.RAZORPAY_K
 const { validatePaymentVerification, validateWebhookSignature } = require("razorpay/dist/utils/razorpay-utils");
 const { OtpGenerator } = require("../utils");
 const sendEmail = require("../helpers/sendEmail");
+const { checkDomainAvailability } = require("../utilities/functions/functions");
 const instance = new Razorpay({
   key_id: key_id,
   key_secret: key_secret,
@@ -85,11 +86,18 @@ Register = async (req, res) => {
     // Validate user input
     const error = ValidateUserSignUp(req.body)
     if (error) {
-      return sendResponse(res, 400, error,);
+      return errorHandler(res, 400, error,);
+    }
+    let isDomain = await checkDomainAvailability(req.body.domain)
+    if (!isDomain) {
+      return errorHandler(res, 400, "Domain Not Found On Server");
     }
     // Check if user exists
     const user = await User.findOne({ email: req.body.email })
     //   Check if otp in payload and user exists
+    if (user && user.domain && user.domain == req.body.domain) {
+      return errorHandler(res, 400, "Domain is already registred");
+    }
     if (req.body.otp && user) {
       console.log(user.otp, req.body.otp)
       if (user.otp !== req.body.otp) {
@@ -134,7 +142,8 @@ Register = async (req, res) => {
         appid,
         name: req.body.name,
         otp: OtpGenerator(),
-        otpisvalid: false
+        otpisvalid: false,
+        domain: req.body.domain
 
       });
       if (user.expiresAt) {

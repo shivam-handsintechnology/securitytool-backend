@@ -70,7 +70,7 @@ const AuthDomainMiddleware = async (req, res, next) => {
             statusCode = 422
             throw new Error("Domain Not found")
         }
-        let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, appid: appid });
+        let isExistDomain = await User.findOne({ domain: domain, appid: appid });
         if (isExistDomain) {
             next()
         } else {
@@ -81,43 +81,24 @@ const AuthDomainMiddleware = async (req, res, next) => {
         return errorHandler(res, statusCode, error.message)
     }
 }
-const AuthWebDomainMiddleware = async (req, res, next) => {
-    let statusCode = 500
-    try {
-        let user = req.user ? req.user : {}
-        const payload = { ...req.body, ...req.query, ...req.params, ...user }
 
-        let { domain, appid } = payload
-        if (!domain) {
-            throw new Error("Domain is required")
-        }
-        if (!appid) {
-            throw new Error("Appid is required")
-        }
-        let isExistDomain = await AllowedWebDomainsModel.findOne({ domain: domain, appid: appid });
-        if (isExistDomain) {
-            next()
-        } else {
-            statusCode = 403
-            throw new Error("You Are Not Allowed")
-        }
-    } catch (error) {
-        return errorHandler(res, statusCode, error.message)
-    }
-}
 const AuthDomainMiddlewarePackage = async (req, res, next) => {
     let statusCode = 500
     let user = req.user ? req.user : {}
     const payload = { ...req.body, ...req.query, ...req.params, ...user }
     const { domain } = payload;
     try {
-        let data
-        if (!payload.appid) {
-            throw new Error("Plese Provide Appid")
+        if (!domain) {
+            statusCode = 400;
+            throw new Error("Domain is required")
         }
-        let user = await User.findOne({ appid: payload.appid }).populate("subsription")
-        if (user) {
-            let subscription = user.subsription;
+        if (!appid) {
+            statusCode = 400;
+            throw new Error("Appid is required")
+        }
+        let isExistDomain = await User.findOne({ domain: domain, appid: appid }).populate("subsription")
+        if (isExistDomain) {
+            let subscription = isExistDomain.subsription;
             console.log("Subscription", subscription)
             if (!subscription) {
                 statusCode = 400;
@@ -133,32 +114,32 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
                 statusCode = 400;
                 throw new Error("Subscription is Expired")
             }
-            await User.findByIdAndUpdate(user._id, { apistatus: true })
-            req.user = user
+            // isExistDomain.apistatus = true
+            // await isExistDomain.save()
 
-
-            const result = await checkDomainAvailability(domain);
-            if (result) {
-                let obj = { user: user._id, appid: payload.appid, domain }
-                let existdomain = await AllowedDomainsModel.aggregate([
-                    {
-                        $match: {
-                            user: new mongoose.Types.ObjectId(user._id),
-                            appid: payload.appid
-                        }
-                    }
-                ])
-                if (existdomain.length == 0) {
-                    data = await AllowedDomainsModel.create(obj);
-                } else if (existdomain.length === 1) {
-                    let finddomain = existdomain.find((item) => item.domain === domain)
-                    if (!finddomain) {
-                        throw new Error(`Only One Domain is Allowed  , ${existdomain[0]["domain"]}`)
-                    } else {
-                        data = finddomain
-                    }
-                }
-            }
+            req.user = isExistDomain
+            // const result = await checkDomainAvailability(domain);
+            // if (result) {
+            //     let obj = { user: user._id, appid: payload.appid, domain }
+            //     let existdomain = await AllowedDomainsModel.aggregate([
+            //         {
+            //             $match: {
+            //                 user: new mongoose.Types.ObjectId(user._id),
+            //                 appid: payload.appid
+            //             }
+            //         }
+            //     ])
+            //     if (existdomain.length == 0) {
+            //         data = await AllowedDomainsModel.create(obj);
+            //     } else if (existdomain.length === 1) {
+            //         let finddomain = existdomain.find((item) => item.domain === domain)
+            //         if (!finddomain) {
+            //             throw new Error(`Only One Domain is Allowed  , ${existdomain[0]["domain"]}`)
+            //         } else {
+            //             data = finddomain
+            //         }
+            //     }
+            // }
             next()
         } else {
             statusCode = 403
@@ -170,4 +151,4 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
 }
 
 
-module.exports = { ValidationMiddleware, ValidationMiddlewareQuery, AuthWebDomainMiddleware, AuthDomainMiddleware, AuthDomainMiddlewarePackage };
+module.exports = { ValidationMiddleware, ValidationMiddlewareQuery, AuthDomainMiddleware, AuthDomainMiddlewarePackage };

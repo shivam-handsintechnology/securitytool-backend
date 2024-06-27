@@ -1,7 +1,7 @@
 const
     router = require("express").Router()
 const verifyToken = require('../../middlewares/VerifyUser')
-const { AuthDomainMiddleware, ValidationMiddleware, AuthWebDomainMiddleware } = require("../../middlewares/ValidationMiddleware");
+const { ValidationMiddleware, AuthDomainMiddleware } = require("../../middlewares/ValidationMiddleware");
 const SecurityMisconfiguration = require("../../controllers/Security/SecurityMisconfiguration.controller");
 const { DomainValidationSchema } = require("../../helpers/Validators");
 const GetFileCOntentMiddleware = require("../../middlewares/GetFileCOntentMiddleware");
@@ -25,6 +25,6 @@ router.get("/option-methods-enabled", verifyToken,
     ValidationMiddleware(DomainValidationSchema), GetFileCOntentMiddleware,
     SecurityMisconfiguration.OptionsMethodsEnabled)
 
-router.get("/defaultpasswordandusername", ValidationMiddleware(DomainValidationSchema), verifyToken, AuthWebDomainMiddleware, SecurityMisconfiguration.defaultpasswordandusername);
+router.get("/defaultpasswordandusername", ValidationMiddleware(DomainValidationSchema), verifyToken, AuthDomainMiddleware, SecurityMisconfiguration.defaultpasswordandusername);
 
 module.exports = router

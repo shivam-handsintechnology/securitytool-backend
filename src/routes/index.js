@@ -6,7 +6,7 @@ const swaggerDocument = require('../swagger.json');
 const AuditMiddleware = require('../middlewares/AuditMiddleware');
 // Import Middlewares  And Functions
 
-const { ValidationMiddleware, ValidationMiddlewareQuery, AuthDomainMiddleware, AuthWebDomainMiddleware } = require('../middlewares/ValidationMiddleware');
+const { ValidationMiddleware, ValidationMiddlewareQuery, AuthDomainMiddleware } = require('../middlewares/ValidationMiddleware');
 const verifytoken = require('../middlewares/VerifyUser')
 const verifyToken = require('../middlewares/VerifyUser');
 const GetFileCOntentMiddleware = require('../middlewares/GetFileCOntentMiddleware');
@@ -68,7 +68,7 @@ router.use("/UnvalidatedRedirects", CorsMiddleware, AuditMiddleware, IncomingDat
 // Cross-Site Scripting (XSS)
 router.use("/CrossSiteScripting", CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, verifyToken, AuthDomainMiddleware, CrossSiteScriptingRouer)
 // Sensitive data is Store in Local Storage
-router.use("/SensitiveStorageLocalStorage", CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, verifyToken, AuthWebDomainMiddleware, SensitiveDataLocalStorage.get)
+router.use("/SensitiveStorageLocalStorage", CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, verifyToken, AuthDomainMiddleware, SensitiveDataLocalStorage.get)
 // Week Cross Domain Policy
 router.use("/WeakCrossDomainPolicy", CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, verifyToken, ValidationMiddleware(DomainValidationSchema), AuthDomainMiddleware, WeekCrossDomainPolicy)
 // MiscellaneousAttacks

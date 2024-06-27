@@ -395,7 +395,25 @@ const HostnameAppIDGetter = async (origin) => {
         }
     })
 }
+// Online Javascript Editor for free
+// Write, Edit and Run your Javascript code using JS Online Compiler
+const extractRootDomain = (url) => {
+    const parsedUrl = new URL(url);
+    const hostname = parsedUrl.hostname;
+    const parts = hostname.split('.').filter(Boolean); // Split and filter out empty strings
+    const length = parts.length;
+
+    // If the length of the parts array is less than 2, return the hostname itself
+    if (length < 2) {
+        return hostname;
+    }
+
+    // Extract the domain and TLD (Top-Level Domain)
+    const domain = parts[length - 2];
+    const tld = parts[length - 1];
+    return `${domain}.${tld}`;
+};
 module.exports = {
     scrapWebsite, extractVisibleText, withRetry, CronJobVIdeoDelete, SSLverifier, OtpGenerator, HostnameAppIDGetter,
-    fillInputFields, takeScreenshot, fillInputFieldsBlackPassword, shouldIgnoreURL, containsQueryParams
+    fillInputFields, takeScreenshot, fillInputFieldsBlackPassword, shouldIgnoreURL, containsQueryParams, extractRootDomain
 }

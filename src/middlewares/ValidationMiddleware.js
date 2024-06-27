@@ -6,6 +6,7 @@ const { AllowedDomainsModel, AllowedWebDomainsModel } = require('../models/Allow
 const User = require("../models/User");
 const { checkDomainAvailability } = require('../utilities/functions/functions');
 const { default: mongoose } = require('mongoose');
+const { extractRootDomain } = require('../utils');
 const ValidationMiddleware = (schema) => {
     return (req, res, next) => {
         let statusCode = 500
@@ -62,6 +63,9 @@ const AuthDomainMiddleware = async (req, res, next) => {
         if (!domain) {
             throw new Error("Domain is required")
         }
+        let url = `http://${domain}`
+        domain = extractRootDomain(url)
+        console.log(domain)
         if (!appid) {
             throw new Error("Appid is required")
         }
@@ -86,12 +90,15 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
     let statusCode = 500
     let user = req.user ? req.user : {}
     const payload = { ...req.body, ...req.query, ...req.params, ...user }
-    const { domain } = payload;
+    let { domain } = payload;
     try {
         if (!domain) {
             statusCode = 400;
             throw new Error("Domain is required")
         }
+        let url = `http://${domain}`
+        domain = extractRootDomain(url)
+        console.log(domain)
         if (!appid) {
             statusCode = 400;
             throw new Error("Appid is required")

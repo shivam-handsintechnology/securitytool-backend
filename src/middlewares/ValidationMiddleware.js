@@ -89,6 +89,12 @@ const AuthDomainMiddleware = async (req, res, next) => {
 
 const AuthDomainMiddlewarePackage = async (req, res, next) => {
     let statusCode = 500
+    if (!req.headers.origin) {
+        return errorHandler(res, 404, "Origin Not found");
+    }
+    let hostname = extractRootDomain(req.headers.origin)
+    req.body.domain = hostname
+    req.body.hostname = hostname
     let user = req.user ? req.user : {}
     const payload = { ...req.body, ...req.query, ...req.params, ...user }
     let { domain, appid, } = payload;

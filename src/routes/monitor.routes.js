@@ -5,7 +5,7 @@ const { AuthDomainMiddlewarePackage } = require("../middlewares/ValidationMiddle
 const JsSnippetController = require("../controllers/JsSnippetController");
 const { HostAndAppidGetterMiddleware } = require("../middlewares/HostAndAppidGetterMiddleware");
 // @api protected
-router.route("/protection").get(HostAndAppidGetterMiddleware, AuthDomainMiddlewarePackage, JsSnippetController.JsSnippet).post(JsSnippetController.getALlDataFromSnippet);
+router.route("/protection").get(HostAndAppidGetterMiddleware, AuthDomainMiddlewarePackage, JsSnippetController.JsSnippet).post(HostAndAppidGetterMiddleware, AuthDomainMiddlewarePackage, JsSnippetController.getALlDataFromSnippet);
 // Inections Data Create Get from Nodemonitor Package
 router.post("/createuserdetails", AuthDomainMiddlewarePackage, Vulnurabilitycontroller.createuserdetails);
 router.post("/createuserdetailsfromclient", AuthDomainMiddlewarePackage, Vulnurabilitycontroller.createuserdetailsfromclient);

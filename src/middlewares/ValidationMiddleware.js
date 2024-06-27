@@ -82,6 +82,7 @@ const AuthDomainMiddleware = async (req, res, next) => {
             throw new Error("You Are Not Allowed")
         }
     } catch (error) {
+        console.log(error)
         return errorHandler(res, statusCode, error.message)
     }
 }
@@ -96,9 +97,7 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
             statusCode = 400;
             throw new Error("Domain is required")
         }
-        let url = `http://${domain}`
-        domain = extractRootDomain(url)
-        console.log(domain)
+
         if (!appid) {
             statusCode = 400;
             throw new Error("Appid is required")
@@ -153,6 +152,7 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
             throw new Error("You Are Not Allowed")
         }
     } catch (error) {
+        console.log(error)
         return errorHandler(res, statusCode, error.message)
     }
 }

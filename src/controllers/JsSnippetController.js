@@ -28,35 +28,8 @@ module.exports = {
         status = 400;
         throw new Error("Hostname is required")
       }
-      let user = await User.findOne({ appid }).populate("subsription")
-      if (!user) {
-        status = 400;
-        throw new Error("Appid is not valid")
-      }
-      let subscription = user.subsription;
-      if (!subscription) {
-        statusCode = 400;
-        throw new Error("Please Subsribe First")
-      }
-      if (!subscription.startDate && !subscription.endDate) {
-        statusCode = 400;
-        throw new Error("Please Subsribe First")
-      }
-      const currentDate = moment();
-      const valid = moment(subscription.endDate, 'MMM DD HH:mm:ss YYYY GMT');
-      if (valid.isBefore(currentDate)) {
-        statusCode = 400;
-        throw new Error("Subscription is Expired")
-      }
-      WebDomain = await AllowedWebDomainsModel.aggregate([{ $match: { appid: appid, } }]);
-      if (WebDomain.length == 0) {
-        await AllowedWebDomainsModel.create({ appid: appid, domain: hostname });
-      } else if (WebDomain.length === 1) {
-        let finddomain = WebDomain.find((item) => item.domain === hostname)
-        if (!finddomain) {
-          throw new Error(`Only One Domain is Allowed,already  ${WebDomain[0]["domain"]} is used `)
-        }
-      }
+
+
       if (data !== null && data !== undefined && Object.keys(data).length > 0) {
 
         let alldata = []

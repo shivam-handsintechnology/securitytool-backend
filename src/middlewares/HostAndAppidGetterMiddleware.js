@@ -1,4 +1,4 @@
-const { HostnameAppIDGetter } = require("../utils");
+const { HostnameAppIDGetter, extractRootDomain } = require("../utils");
 const { errorHandler } = require("../utils/errorHandler");
 
 async function HostAndAppidGetterMiddleware(req, res, next) {
@@ -6,7 +6,7 @@ async function HostAndAppidGetterMiddleware(req, res, next) {
         if (!req.headers.origin) {
             return errorHandler(res, 404, "Origin Not found");
         }
-        const hostname = new URL(req.headers.origin).hostname;
+        let hostname = extractRootDomain(req.headers.origin)
         req.body.domain = hostname
         req.body.hostname = hostname
         // Continue to the next middleware or route handler

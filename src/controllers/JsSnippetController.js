@@ -58,7 +58,7 @@ module.exports = {
           // Check if the record exists in the database
           const isExist = await SensitiveDataStoredInLocalStorageModel.findOne({
             appid,
-            domain: domain,
+            domain: domain, subdomain
           });
 
           if (isExist) {

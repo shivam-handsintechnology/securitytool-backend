@@ -4,12 +4,9 @@ const { sendResponse } = require('../utils/dataHandler');
 const { errorHandler } = require('../utils/errorHandler');
 const SensitiveDataStoredInLocalStorageModel = require('../models/Security/SensitiveDataStoredInLocalStorage.model');
 const { CheckAllSensitiveData } = require('../utils/functions');
-const { sensitivedata } = require('../sensitive/availableapikeys');
-const { AllowedWebDomainsModel } = require('../models/AllowedDomainsModel');
-const User = require('../models/User');
+
 module.exports = {
   JsSnippet: async (req, res) => {
-
     // Resolve the path to the protected JavaScript file
     const filePath = path.join(process.cwd(), 'src', 'public', 'protect.js');
     // Send the file as the response
@@ -18,18 +15,7 @@ module.exports = {
   getALlDataFromSnippet: async (req, res) => {
     let status = 500;
     try {
-      const { data, appid, hostname } = req.body;
-
-      if (appid == null || appid == undefined || appid == "") {
-        status = 400;
-        throw new Error("App Id is required")
-      }
-      if (hostname == null || hostname == undefined || hostname == "") {
-        status = 400;
-        throw new Error("Hostname is required")
-      }
-
-
+      const { data, appid, domain } = req.body;
       if (data !== null && data !== undefined && Object.keys(data).length > 0) {
 
         let alldata = []
@@ -64,13 +50,13 @@ module.exports = {
           const dataToSave = {
             appid,
             data: sensitive,
-            domain: hostname,
+            domain: domain,
           };
 
           // Check if the record exists in the database
           const isExist = await SensitiveDataStoredInLocalStorageModel.findOne({
             appid,
-            domain: hostname,
+            domain: domain,
           });
 
           if (isExist) {
@@ -91,7 +77,7 @@ module.exports = {
 
             // Update the record with the new data array
             await SensitiveDataStoredInLocalStorageModel.findOneAndUpdate(
-              { appid, domain: hostname },
+              { appid, domain: domain },
               { data: updatedData },
               { new: true }
             );

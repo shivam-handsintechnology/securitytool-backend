@@ -4,7 +4,7 @@ const Vulnurabilitycontroller = require('../controllers/Security/vulnurability.c
 const { AuthDomainMiddlewarePackage } = require("../middlewares/ValidationMiddleware");
 const JsSnippetController = require("../controllers/JsSnippetController")
 // @api protected
-router.route("/protection").get(JsSnippetController.JsSnippet).post(JsSnippetController.getALlDataFromSnippet);
+router.route("/protection").get(AuthDomainMiddlewarePackage, JsSnippetController.JsSnippet).post(JsSnippetController.getALlDataFromSnippet);
 // Inections Data Create Get from Nodemonitor Package
 router.post("/createuserdetails", AuthDomainMiddlewarePackage, Vulnurabilitycontroller.createuserdetails);
 router.post("/createuserdetailsfromclient", AuthDomainMiddlewarePackage, Vulnurabilitycontroller.createuserdetailsfromclient);

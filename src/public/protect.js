@@ -184,17 +184,7 @@ window.SecurityTool = {
     },
 
 };
-window.allowedWeb = false
 
-fetch(`https://securitytool.handsintechnology.in/api/client/authentication?appid=${window.appid}&domain=${window.location.hostname}`).then((res) => {
-    window.allowedWeb = true
-}).catch((err) => {
-    window.allowedWeb = false
-})
-
-
-
-console.log("allowedWeb", window.allowedWeb)
 if (typeof window !== "undefined" && !window.CustomXMLHttpRequest) {
     class CustomXMLHttpRequest extends XMLHttpRequest {
         constructor() {

@@ -91,7 +91,7 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
     let statusCode = 500
     let user = req.user ? req.user : {}
     const payload = { ...req.body, ...req.query, ...req.params, ...user }
-    let { domain } = payload;
+    let { domain, appid, } = payload;
     try {
         if (!domain) {
             statusCode = 400;

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const SensitiveDataStoredInLocalStorageSchema = new Schema({
+const SensitiveDataStoredInSessionStorageSchema = new Schema({
     appid: {
         type: String,
         ref: 'User'
@@ -25,4 +25,4 @@ const SensitiveDataStoredInLocalStorageSchema = new Schema({
 }, {
     timestamps: true
 });
-module.exports = mongoose.model('SensitiveDataStoredInLocalStorage', SensitiveDataStoredInLocalStorageSchema);
+module.exports = mongoose.model('SensitiveDataStoredInSessionStorage', SensitiveDataStoredInSessionStorageSchema);

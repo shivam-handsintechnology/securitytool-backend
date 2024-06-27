@@ -25,14 +25,34 @@ window.SecurityTool = {
             return localStorageData;
         }
     },
+    getAllSessionStorageData: async () => {
+        const SessionStorageData = {};
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            const value = sessionStorage.getItem(key);
+            SessionStorageData[key] = value;
+        }
+        if (Object.keys(SessionStorageData).length === 0) {
+            return null;
+        } else {
+            return SessionStorageData;
+        }
+    },
     sendToApi: async (url, data) => {
         try {
+
+            let obj = {
+                data: data, appid: window.appid
+            }
+            if (sessionStoragedata) {
+                obj["sessionStoragedata"] = sessionStoragedata
+            }
             await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ data: data, appid: window.appid }),
+                body: JSON.stringify(),
             }).then((response) => {
                 if (response.ok) {
                     console.log('Data sent successfully');
@@ -48,9 +68,10 @@ window.SecurityTool = {
     },
     CallSensitivedataLocalStorage: async () => {
         let data = await window.SecurityTool.getAlllocalStorageData();
+        let sessionStoragedata = await window.SecurityTool.getAllSessionStorageData()
         if (data !== null) {
             let url = 'https://securitytool.handsintechnology.in/api/client/protection';
-            window.SecurityTool.sendToApi(url, data).then(res => res).catch(err => err);
+            window.SecurityTool.sendToApi(url, data, sessionStoragedata).then(res => res).catch(err => err);
         }
     },
     hasDuplicateParameters: (params) => {

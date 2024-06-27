@@ -22,6 +22,11 @@ const SensitiveDataStoredInSessionStorageSchema = new Schema({
         required: true,
         unique: true
     }
+    , subdomain: {
+        type: String,
+        required: true,
+        unique: true
+    }
 }, {
     timestamps: true
 });

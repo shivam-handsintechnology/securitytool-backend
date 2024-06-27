@@ -21,6 +21,10 @@ const SensitiveDataStoredInLocalStorageSchema = new Schema({
         type: String,
         required: true,
         unique: true
+    }, subdomain: {
+        type: String,
+        required: true,
+        unique: true
     }
 }, {
     timestamps: true

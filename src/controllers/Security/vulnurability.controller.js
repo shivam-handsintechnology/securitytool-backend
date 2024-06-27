@@ -82,7 +82,6 @@ module.exports = {
                         ...data,
 
                     }
-
                 );
             }
             return sendResponse(res, 200, "fetch", "ok")
@@ -248,6 +247,14 @@ module.exports = {
             return errorHandler(res, 406, `VPn Detect in the Ip ${ipaddress}`)
         }
         return sendResponse(res)
+    },
+    AuthValidation: async (req, res) => {
+        try {
+            return sendResponse(res, 200, "Ok")
+        } catch (error) {
+            return errorHandler(res, 500, error.message)
+        }
+
     }
 
 }

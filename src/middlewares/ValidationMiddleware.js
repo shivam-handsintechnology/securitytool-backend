@@ -107,12 +107,14 @@ const AuthWebDomainMiddleware = async (req, res, next) => {
 }
 const AuthDomainMiddlewarePackage = async (req, res, next) => {
     let statusCode = 500
+    let user = req.user ? req.user : {}
+    const payload = { ...req.body, ...req.query, ...req.params, ...user }
     try {
         let data
-        if (!req.body.appid) {
+        if (!payload.appid) {
             throw new Error("Plese Provide Appid")
         }
-        let user = await User.findOne({ appid: req.body.appid }).populate("subsription")
+        let user = await User.findOne({ appid: payload.appid }).populate("subsription")
         if (user) {
             let subscription = user.subsription;
             console.log("Subscription", subscription)
@@ -132,16 +134,16 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
             }
             await User.findByIdAndUpdate(user._id, { apistatus: true })
             req.user = user
-            const { domain } = req.body;
+            const { domain } = payload;
 
             const result = await checkDomainAvailability(domain);
             if (result) {
-                let obj = { user: user._id, appid: req.body.appid }
+                let obj = { user: user._id, appid: payload.appid }
                 let existdomain = await AllowedDomainsModel.aggregate([
                     {
                         $match: {
                             user: new mongoose.Types.ObjectId(user._id),
-                            appid: req.body.appid
+                            appid: payload.appid
                         }
                     }
                 ])

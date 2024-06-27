@@ -7,9 +7,10 @@ const JsSnippetController = require("../controllers/JsSnippetController")
 router.route("/protection").get(JsSnippetController.JsSnippet).post(JsSnippetController.getALlDataFromSnippet);
 // Inections Data Create Get from Nodemonitor Package
 router.post("/createuserdetails", AuthDomainMiddlewarePackage, Vulnurabilitycontroller.createuserdetails);
-router.post("/createuserdetailsfromclient", Vulnurabilitycontroller.createuserdetailsfromclient);
+router.post("/createuserdetailsfromclient", AuthDomainMiddlewarePackage, Vulnurabilitycontroller.createuserdetailsfromclient);
 // Error Message  Get from Nodemonitor Package
 // Critical information in URL Get from Nodemonitor Package
 router.post("/sensitivekeysinurl", AuthDomainMiddlewarePackage, Vulnurabilitycontroller.sensitivekeysinurl);
+router.get("/authentication", AuthDomainMiddlewarePackage, Vulnurabilitycontroller.AuthValidation);
 router.get("/vpnvalidation", Vulnurabilitycontroller.VpnValidation);
 module.exports = router;

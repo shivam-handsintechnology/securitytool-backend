@@ -109,6 +109,7 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
     let statusCode = 500
     let user = req.user ? req.user : {}
     const payload = { ...req.body, ...req.query, ...req.params, ...user }
+    const { domain } = payload;
     try {
         let data
         if (!payload.appid) {
@@ -134,11 +135,11 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
             }
             await User.findByIdAndUpdate(user._id, { apistatus: true })
             req.user = user
-            const { domain } = payload;
+
 
             const result = await checkDomainAvailability(domain);
             if (result) {
-                let obj = { user: user._id, appid: payload.appid }
+                let obj = { user: user._id, appid: payload.appid, domain }
                 let existdomain = await AllowedDomainsModel.aggregate([
                     {
                         $match: {

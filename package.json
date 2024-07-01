@@ -36,6 +36,7 @@
         "playwright": "^1.43.1",
         "razorpay": "^2.9.4",
         "swagger-ui-express": "^5.0.1",
+        "terser": "^5.31.1",
         "uuid": "^9.0.1",
         "validator": "^13.11.0",
         "winston": "^3.12.0"

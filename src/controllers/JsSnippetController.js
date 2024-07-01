@@ -9,7 +9,7 @@ const SensitiveDataStoredInSessionStorageModel = require('../models/Security/Sen
 module.exports = {
   JsSnippet: async (req, res) => {
     // Resolve the path to the protected JavaScript file
-    const filePath = path.join(process.cwd(), 'src', 'public', 'protect.js');
+    const filePath = path.join(process.cwd(), 'dist', 'public', 'protect.js');
     // Send the file as the response
     res.sendFile(filePath);
   },

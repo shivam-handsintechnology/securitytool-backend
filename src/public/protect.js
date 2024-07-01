@@ -188,6 +188,35 @@ window.SecurityTool = {
 
         return { containsSql, validateXss, validatehtml, containCommand, containiframetag, validateCss };
     },
+    detectXMLInjection: function (xmlContent) {
+        // Regular expressions for detecting XML Injection
+        const XMLCdata = new RegExp("<!\\[CDATA\\[.*\\]\\]>", "g");
+        const XMLExternalEntity = new RegExp("<!ENTITY.*>", "g");
+        try {
+            if (XMLCdata.test(xmlContent)) {
+                return { error: 'XML Injection detected in Cdata' };
+            } else if (XMLExternalEntity.test(xmlContent)) {
+                return { error: 'XML Injection detected in ExternalEntity' };
+            } else if (xmlContent.includes("<iframe")) {
+                return { error: 'Iframe tag detected' };
+            } else if (this.hasCSSInjection(xmlContent) === true) {
+                return { error: 'CSS Injection detected' };
+            } else if (this.hasXSSInjection(xmlContent) === true) {
+                return { error: 'XSS Injection detected' };
+            } else if (this.hasHTMLInjection(xmlContent) === true) {
+                return { error: 'HTML Injection detected' };
+            } else if (this.hasCommandLineInjection(xmlContent) === true) {
+                return { error: 'Command Injection detected' };
+            } else if (this.hasSqlInjection(xmlContent) === true) {
+                return { error: 'SQL Injection detected' };
+            }
+
+            return null;
+        } catch (error) {
+            console.error('Error during XML injection detection:', error);
+            return { error: 'Error during XML injection detection' };
+        }
+    },
     CreateuserDetails: async function (type) {
         try {
             const data = {
@@ -250,39 +279,52 @@ if (typeof window !== "undefined" && !window.CustomXMLHttpRequest) {
                         }
                     };
                     readjson();
+                    const contentType = this.getRequestHeader('Content-Type');
+                    console.log('Request Content-Type:', contentType);
 
-                    const injectionFound = window.SecurityTool.InjectionChecker(examplebody);
-                    console.log("injectionFound", injectionFound)
-                    let duplicateQueries = window.SecurityTool.hasDuplicateParameters(queries);
-                    if (injectionFound.validateCss && configuration.css) {
-                        alert("CSS detected");
-                        window.SecurityTool.CreateuserDetails("css");
-                        return; // Stop execution
-                    } else if (injectionFound.containCommand && configuration.commandline) {
-                        alert("Command detected");
-                        window.SecurityTool.CreateuserDetails("commandline");
-                        return; // Stop execution
-                    } else if (injectionFound.validateXss && configuration.xss) {
-                        alert("XSS detected");
-                        window.SecurityTool.CreateuserDetails("xss");
-                        return; // Stop execution
-                    } else if (injectionFound.containiframetag && configuration.iframe) {
-                        alert("Iframe detected");
-                        window.SecurityTool.CreateuserDetails("iframe");
-                        return; // Stop execution
-                    } else if (injectionFound.validatehtml && configuration.html) {
-                        alert("HTML detected");
-                        window.SecurityTool.CreateuserDetails("html");
-                        return; // Stop execution
-                    } else if (injectionFound.containsSql && configuration.Sql) {
-                        alert("SQL detected");
-                        window.SecurityTool.CreateuserDetails("sql");
-                        return; // Stop execution
-                    } else if (duplicateQueries) {
-                        alert("Http parameter pollution detected");
-                        window.SecurityTool.CreateuserDetails("httpParameterPollution");
-                        return; // Stop execution
+                    if (contentType === 'application/xml') {
+                        // Call checkXML function
+                        const DetectXml = window.SecurityTool.detectXMLInjection(examplebody);
+                        if (DetectXml) {
+                            alert("CSS detected");
+                            window.SecurityTool.CreateuserDetails("css");
+                            return; // Stop execution
+                        }
+                    } else {
+                        const injectionFound = window.SecurityTool.InjectionChecker(examplebody);
+                        let duplicateQueries = window.SecurityTool.hasDuplicateParameters(queries);
+                        if (injectionFound.validateCss && configuration.css) {
+                            alert("CSS detected");
+                            window.SecurityTool.CreateuserDetails("css");
+                            return; // Stop execution
+                        } else if (injectionFound.containCommand && configuration.commandline) {
+                            alert("Command detected");
+                            window.SecurityTool.CreateuserDetails("commandline");
+                            return; // Stop execution
+                        } else if (injectionFound.validateXss && configuration.xss) {
+                            alert("XSS detected");
+                            window.SecurityTool.CreateuserDetails("xss");
+                            return; // Stop execution
+                        } else if (injectionFound.containiframetag && configuration.iframe) {
+                            alert("Iframe detected");
+                            window.SecurityTool.CreateuserDetails("iframe");
+                            return; // Stop execution
+                        } else if (injectionFound.validatehtml && configuration.html) {
+                            alert("HTML detected");
+                            window.SecurityTool.CreateuserDetails("html");
+                            return; // Stop execution
+                        } else if (injectionFound.containsSql && configuration.Sql) {
+                            alert("SQL detected");
+                            window.SecurityTool.CreateuserDetails("sql");
+                            return; // Stop execution
+                        } else if (duplicateQueries) {
+                            alert("Http parameter pollution detected");
+                            window.SecurityTool.CreateuserDetails("httpParameterPollution");
+                            return; // Stop execution
+                        }
                     }
+
+
 
                 } catch (error) {
                     console.log(error)

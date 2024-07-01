@@ -9,16 +9,54 @@ const { SecondFactorAuthBypassed } = require("../../utils/TestWithPlayWright/Sec
 const { BlackPasswordValidation } = require("../../utils/TestWithPlayWright/BlacnkPasswordANdUserName");
 const { checkNonHTMLContentAccessibility } = require("../../utils/TestWithPlayWright/checkNonHtmlAccccesability");
 const SensitiveDataStoredInLocalStorageModel = require("../../models/Security/SensitiveDataStoredInLocalStorage.model");
+const SensitiveDataStoredInSessionStorageModel = require("../../models/Security/SensitiveDataStoredInSessionStorage.model");
 
 router.get("/session-vulnurability", GetFileCOntentMiddleware, async (req, res) => {
     try {
         // Call the respective controller function
         const payload = { ...req.body, ...req.query, ...req.params, }
-        let [sessiondata] = await SensitiveDataStoredInLocalStorageModel.aggregate([
+        let [sessiondata] = await SensitiveDataStoredInSessionStorageModel.aggregate([
             {
                 $match: {
                     appid: req.user.appid,
-                    domain: payload.domain
+                    subdomain: payload.domain
+                }
+            },
+            {
+                $limit: 1
+            },
+            {
+                $addFields: {
+                    containsJWT: {
+                        $map: {
+                            input: '$data',
+                            as: 'dataItem',
+                            in: {
+                                $cond: {
+                                    if: {
+                                        $in: ["JSON Web Token", "$$dataItem.value"]
+                                    },
+                                    then: true,
+                                    else: false
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    containsJWT: {
+                        $anyElementTrue: '$containsJWT'
+                    }
+                }
+            }
+        ]);
+        let [localdata] = await SensitiveDataStoredInLocalStorageModel.aggregate([
+            {
+                $match: {
+                    appid: req.user.appid,
+                    subdomain: payload.domain
                 }
             },
             {
@@ -52,12 +90,16 @@ router.get("/session-vulnurability", GetFileCOntentMiddleware, async (req, res) 
             }
         ]);
 
-        console.log({ sessiondata })
+        console.log({ sessiondata, localdata })
         const response = req.body.fileContent
         const data = await SessionVulnurability(response);
         // Initialize an object to store all possibilities
         const possibilities = {};
-
+        if (localdata && localdata.containsJWT || sessiondata && sessiondata.containsJWT) {
+            possibilities["Session Token Being Passed In Other Areas Apart From Cookies"] = "Yes"
+        } else {
+            possibilities["Session Token Being Passed In Other Areas Apart From Cookies"] = "No"
+        }
         // Check if session expires on closing the browser
         possibilities["Session Does Not Expire On Closing The Browser"] = data.sessionExpireOnClose_data.length > 0 ? "Yes" : "Not Implemented";
 
@@ -66,7 +108,7 @@ router.get("/session-vulnurability", GetFileCOntentMiddleware, async (req, res) 
         possibilities["Session Time-Out Is High (Or) Not Implemented"] = !sessionTimeoutImplemented ? "Not IMplemented" : data.sessionTimeout_data.toString();
 
         // Check if session token is passed in areas other than cookies
-        possibilities["Session Token Being Passed In Other Areas Apart From Cookies"] = data.sessionToken_data.length > 0 ? data.sessionToken_data.toString() : "Not Implemented";
+
 
         // Check if an adversary can hijack user sessions by session fixation
         const sessionFixationPossible = data.sessionFixation_data.length > 0

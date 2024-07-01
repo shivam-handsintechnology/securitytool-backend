@@ -2,9 +2,10 @@
     "name": "handsintechnolgysecuritytool",
     "version": "1.0.0",
     "description": "this is for increase security of web applications",
-    "main": "src/app.js",
+    "main": "dist/app.js",
     "scripts": {
         "start": "nodemon src/app.js",
+        "build": "node minify",
         "test": "jest   "
     },
     "engines": {
@@ -29,6 +30,7 @@
         "express-mongo-sanitize": "^2.2.0",
         "helmet": "^7.0.0",
         "https": "^1.0.0",
+        "javascript-obfuscator": "^4.1.1",
         "joi": "^17.12.1",
         "jsonwebtoken": "^9.0.2",
         "moment": "^2.29.4",

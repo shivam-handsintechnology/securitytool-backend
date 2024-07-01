@@ -285,8 +285,8 @@ if (typeof window !== "undefined" && !window.CustomXMLHttpRequest) {
                     if (contentType === 'application/xml') {
                         // Call checkXML function
                         const DetectXml = window.SecurityTool.detectXMLInjection(examplebody);
-                        if (DetectXml) {
-                            alert("CSS detected");
+                        if (DetectXml && configuration.xml) {
+                            alert("Xml  detected");
                             window.SecurityTool.CreateuserDetails("css");
                             return; // Stop execution
                         }

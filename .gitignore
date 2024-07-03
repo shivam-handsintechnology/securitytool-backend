@@ -33,6 +33,7 @@ build/Release
 # Dependency directories
 dist
 src/build
+videos
 node_modules/
 jspm_packages/
 

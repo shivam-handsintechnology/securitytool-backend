@@ -137,28 +137,7 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
             await isExistDomain.save()
 
             req.user = isExistDomain
-            // const result = await checkDomainAvailability(domain);
-            // if (result) {
-            //     let obj = { user: user._id, appid: payload.appid, domain }
-            //     let existdomain = await AllowedDomainsModel.aggregate([
-            //         {
-            //             $match: {
-            //                 user: new mongoose.Types.ObjectId(user._id),
-            //                 appid: payload.appid
-            //             }
-            //         }
-            //     ])
-            //     if (existdomain.length == 0) {
-            //         data = await AllowedDomainsModel.create(obj);
-            //     } else if (existdomain.length === 1) {
-            //         let finddomain = existdomain.find((item) => item.domain === domain)
-            //         if (!finddomain) {
-            //             throw new Error(`Only One Domain is Allowed  , ${existdomain[0]["domain"]}`)
-            //         } else {
-            //             data = finddomain
-            //         }
-            //     }
-            // }
+
             next()
         } else {
             statusCode = 403

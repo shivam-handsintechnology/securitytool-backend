@@ -780,7 +780,53 @@ const SessionVulnurability = async (response) => {
         }
     })
 }
+const analyzeSessionCookie = (sessionCookie, localdata, sessiondata) => {
+    return new Promise((resolve, reject) => {
+        try {
+            let possibilities = {};
+            let sessionNotFound = sessionCookie ? true : false
+            // Check if session token is being passed in other areas apart from cookies
+            possibilities["Session Token Being Passed In Other Areas Apart From Cookies"] =
+                (localdata && localdata.containsJWT) || (sessiondata && sessiondata.containsJWT) ? "Yes" : "No"
+
+            // Check if session expires on closing the browser
+            possibilities["Session Does Not Expire On Closing The Browser"] =
+                sessionNotFound ? (sessionCookie._expires === null && sessionCookie.originalMaxAge === null) ? "Yes" : "No" : "Not  Implemented"
+
+            // Check session timeout
+            if (sessionCookie._expires === null && sessionCookie.originalMaxAge === null) {
+                sessionNotFound ? possibilities["Session Time-Out Is High (Or) Not Implemented"] = "Not Implemented" : "Not  Implemented"
+            } else {
+                const maxAge = sessionCookie.originalMaxAge;
+                if (maxAge === null) {
+                    sessionNotFound ? possibilities["Session Time-Out Is High (Or) Not Implemented"] = "High (No timeout set)" : "Not  Implemented"
+                } else {
+                    // Convert maxAge to hours for easier interpretation
+                    const maxAgeHours = maxAge / (1000 * 60 * 60);
+                    sessionNotFound ? possibilities["Session Time-Out Is High (Or) Not Implemented"] =
+                        maxAgeHours > 24 ? `High (${maxAgeHours} hours)` : `Normal (${maxAgeHours} hours)` : "Not  Implemented"
+                }
+            }
+
+            // Check for session fixation vulnerability
+            sessionNotFound ? possibilities["An Adversary Can Hijack User Sessions By Session Fixation"] =
+                !sessionCookie.httpOnly ? "Yes" : "No" : "Not  Implemented"
+
+            // Check for session hijacking vulnerability
+            sessionNotFound ? possibilities["Application Is Vulnerable To Session Hijacking Attack"] =
+                !sessionCookie.secure || sessionCookie.sameSite === null ? "Yes" : "No" : "Not  Implemented"
+
+            // Convert possibilities object to array of objects
+            let results = Object.keys(possibilities).map(key => ({ [key]: possibilities[key] }));
+            resolve(results);
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
 module.exports = {
+    analyzeSessionCookie,
     sessionExpireOnClose, sessionTimeout, sessionFixation, sessionHijacking, sessionToken, sessionTimeoutWithObject, SessionVulnurability, sessionTokenWithObject, sessionFixationWithobject, sessionHijackingWithObject
 }
 

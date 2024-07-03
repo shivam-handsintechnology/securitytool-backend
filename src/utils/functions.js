@@ -153,11 +153,6 @@ async function CheckAllDataIsEncrypted(data, keysToMatch) {
   }
 }
 // Define a function to check for CSS injection
-function isObject(input) {
-  return input !== null && typeof input === 'object' && !Array.isArray(input);
-}
-
-
 async function CheckAllSensitiveData(data) {
   try {
 

@@ -9,6 +9,7 @@ const { PasswordValidateModel } = require('../../models/PasswordVaildateModel');
 const { ServerDataInPlaintextModel } = require("../../models/Security/SecurityMisconfiguration.model");
 const User = require("../../models/User");
 const { VpnResponse } = require("../../utils/VpnChecker");
+const CLientSessionDataModel = require("../../models/Security/CLientSessionData.model");
 module.exports = {
     createuserdetails: async (req, res) => {
         try {
@@ -238,6 +239,43 @@ module.exports = {
                 return res.status(200).json({ success: true, message: "Sensitive key already exists in the URL." });
             }
             return res.status(500).json({ error: "Internal Server Error" });
+        }
+    },
+    sessiondatasaver: async (req, res) => {
+        try {
+
+            const { sessionData } = req.body;
+            const { domain, appid, subdomain } = req.user
+            const [exist] = await CLientSessionDataModel.aggregate([
+                {
+                    $match: {
+                        appid: req.user.appid,
+                        subdomain: subdomain
+                    }
+                },
+                {
+                    $limit: 1
+                },
+            ]);
+            if (exist) {
+                await CLientSessionDataModel.findOneAndUpdate({
+                    appid: appid,
+                    subdomain: subdomain
+                }, {
+                    data: sessionData
+                })
+            } else {
+                await CLientSessionDataModel.create({
+                    data: sessionData,
+                    appid: appid,
+                    subdomain: subdomain,
+                    domain: domain,
+                })
+            }
+            return sendResponse(res)
+        } catch (error) {
+            console.log(error)
+            return errorHandler(res, 406, error.message)
         }
     },
     VpnValidation: async (req, res) => {

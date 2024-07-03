@@ -90,18 +90,7 @@ router.get("/session-vulnurability", GetFileCOntentMiddleware, async (req, res) 
                 }
             }
         ]);
-        let [sessioncookies] = await CLientSessionDataModel.aggregate([
-            {
-                $match: {
-                    appid: req.user.appid,
-                    subdomain: payload.domain
-                }
-            },
-            {
-                $limit: 1
-            },
-        ]);
-        let [sessionCookies] = await CLientSessionDataModel.aggregate([
+        let [sessionData] = await CLientSessionDataModel.aggregate([
             {
                 $match: {
                     appid: req.user.appid,
@@ -113,8 +102,42 @@ router.get("/session-vulnurability", GetFileCOntentMiddleware, async (req, res) 
             },
         ]);
 
-        const results = await analyzeSessionCookie(sessionCookies, localdata, sessiondata).then(data => data)
+        console.log({ sessiondata, localdata })
+        const response = req.body.fileContent
+        const data = await SessionVulnurability(response);
+        // Initialize an object to store all possibilities
+        const possibilities = {};
+        if (localdata && localdata.containsJWT || sessiondata && sessiondata.containsJWT) {
+            possibilities["Session Token Being Passed In Other Areas Apart From Cookies"] = "Yes"
+        } else {
+            possibilities["Session Token Being Passed In Other Areas Apart From Cookies"] = "No"
+        }
+        // Check if session expires on closing the browser
+        possibilities["Session Does Not Expire On Closing The Browser"] = data.sessionExpireOnClose_data.length > 0 ? "Yes" : "Not Implemented";
 
+        // Check if session timeout is high or not implemented
+        const sessionTimeoutImplemented = data.sessionTimeout_data.length > 0;
+        possibilities["Session Time-Out Is High (Or) Not Implemented"] = !sessionTimeoutImplemented ? "Not IMplemented" : data.sessionTimeout_data.toString();
+
+        // Check if session token is passed in areas other than cookies
+
+
+        // Check if an adversary can hijack user sessions by session fixation
+        const sessionFixationPossible = data.sessionFixation_data.length > 0
+        possibilities["An Adversary Can Hijack User Sessions By Session Fixation"] = sessionFixationPossible ? data.sessionFixation_data.toString() : "Not Implemented";
+
+        // Check if the application is vulnerable to session hijacking attack
+        const sessionHijackingPossible = data.sessionHijacking_data.length > 0
+        possibilities["Application Is Vulnerable To Session Hijacking Attack"] = sessionHijackingPossible ? data.sessionHijacking_data.toString() : "Not Implemented";
+
+        let results = []
+        if (Object.keys(possibilities).length > 0) {
+            results = Object.keys(possibilities).map((key) => {
+                return {
+                    [key]: possibilities[key]
+                }
+            })
+        }
         return sendResponse(res, 200, "fetch", results)
 
     } catch (error) {

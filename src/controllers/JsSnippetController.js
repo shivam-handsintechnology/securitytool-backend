@@ -11,6 +11,7 @@ module.exports = {
     // Resolve the path to the protected JavaScript file
     const filePath = path.join(process.cwd(), 'dist', 'public', 'protect.js');
     // Send the file as the response
+    res.setHeader('content-type', 'text/plain');
     res.sendFile(filePath);
   },
   getALlDataFromSnippet: async (req, res) => {

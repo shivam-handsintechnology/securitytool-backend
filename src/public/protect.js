@@ -267,7 +267,6 @@ if (typeof window !== "undefined" && !window.CustomXMLHttpRequest) {
                     const urlParams = new URLSearchParams(window.location.search);
                     const queries = Object.fromEntries(urlParams.entries());
                     console.log("queries", queries);
-
                     let examplebody = {};
                     let readjson = () => {
                         try {

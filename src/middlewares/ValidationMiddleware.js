@@ -145,7 +145,7 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
         }
     } catch (error) {
         console.log(error)
-        return errorHandler(res, statusCode, error.message)
+        return res.status(statusCode).send(error.message)
     }
 }
 

@@ -244,7 +244,7 @@ module.exports = {
     sessiondatasaver: async (req, res) => {
         try {
 
-            const { sessionData } = req.body;
+            const { sessionData, Cookiesdata } = req.body;
             const { domain, appid, subdomain } = req.user
             const [exist] = await CLientSessionDataModel.aggregate([
                 {
@@ -262,11 +262,13 @@ module.exports = {
                     appid: appid,
                     subdomain: subdomain
                 }, {
-                    data: sessionData
+                    sessionData: sessionData,
+                    Cookiesdata: Cookiesdata,
                 })
             } else {
                 await CLientSessionDataModel.create({
-                    data: sessionData,
+                    sessionData: sessionData,
+                    Cookiesdata: Cookiesdata,
                     appid: appid,
                     subdomain: subdomain,
                     domain: domain,

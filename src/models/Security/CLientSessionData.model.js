@@ -6,7 +6,8 @@ const CLientSessionDataSchema = new Schema({
         ref: 'User',
         unique: true
     },
-    data: { type: Object, default: null },
+    sessionData: { type: Object, default: null },
+    Cookiesdata: { type: Object, default: null },
     domain: {
         type: String,
         required: true,

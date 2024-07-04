@@ -1,4 +1,5 @@
 const { response } = require("express");
+const { findJwtToken, decodeJWT } = require("../utils");
 
 // Controller for checking session expiry on browser close
 const sessionExpireOnClose = async (response) => {
@@ -763,6 +764,7 @@ const sessionHijackingWithObject = async (response) => {
 
 
 };
+
 const SessionVulnurability = async (response) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -781,20 +783,31 @@ const SessionVulnurability = async (response) => {
     })
 }
 const analyzeSessionCookie = (sessionCookie, localdata, sessiondata) => {
+
     return new Promise((resolve, reject) => {
         try {
+
+            let sessionCookieobj = sessionCookie && sessionCookie.sessionData ? sessionCookie.sessionData : null
+            let sessionCookiesdata = sessionCookie && sessionCookie.Cookiesdata ? sessionCookie.Cookiesdata : null
+            sessionCookiesdata ? sessionCookiesdata = findJwtToken(sessionCookiesdata) : sessionCookiesdata = null
+            sessionCookiesdata ? sessionCookiesdata = decodeJWT(sessionCookiesdata) : sessionCookiesdata = null
+            console.log({ sessionCookiesdata })
             let possibilities = {};
-            let sessionNotFound = sessionCookie ? true : false
+            let sessionNotFound = sessionCookieobj ? true : false
+            console.log("localdata", localdata.map((item) => {
+                item.value
+            }))
+            console.log("sessiondata", sessiondata)
             // Check if session token is being passed in other areas apart from cookies
             possibilities["Session Token Being Passed In Other Areas Apart From Cookies"] =
                 (localdata && localdata.containsJWT) || (sessiondata && sessiondata.containsJWT) ? "Yes" : "No"
 
             // Check if session expires on closing the browser
             possibilities["Session Does Not Expire On Closing The Browser"] =
-                sessionNotFound ? (sessionCookie._expires === null && sessionCookie.originalMaxAge === null) ? "Yes" : "No" : "Not  Implemented"
+                sessionNotFound ? (sessionCookieobj._expires === null && sessionCookie.originalMaxAge === null) ? "Yes" : "No" : "Not  Implemented"
 
             // Check session timeout
-            if (sessionCookie._expires === null && sessionCookie.originalMaxAge === null) {
+            if (sessionCookieobj && sessionCookieobj._expires === null && sessionCookieobj && sessionCookieobj && sessionCookie.originalMaxAge === null) {
                 sessionNotFound ? possibilities["Session Time-Out Is High (Or) Not Implemented"] = "Not Implemented" : "Not  Implemented"
             } else {
                 const maxAge = sessionCookie.originalMaxAge;

@@ -1,6 +1,7 @@
 const { chromium } = require('playwright');
 const cheerio = require('cheerio');
 const moment = require('moment')
+const validator = require('validator');
 const tls = require('tls');
 const { ignorePatterns, queryParams } = require("../data/json/ApplicationTestingData.json");
 const SSLverifier = async (hostname) => {
@@ -413,7 +414,50 @@ const extractRootDomain = (url) => {
     const tld = parts[length - 1];
     return `${domain}.${tld}`;
 };
+const findJwtToken = (data) => {
+    if (typeof data === 'string') {
+        // Check if the string is a JWT token
+        if (validator.isJWT(data)) {
+            return data;
+        }
+    } else if (Array.isArray(data)) {
+        // Iterate over array elements
+        for (const element of data) {
+            const result = findJwtToken(element);
+            if (result) {
+                return result;
+            }
+        }
+    } else if (typeof data === 'object' && data !== null) {
+        // Iterate over object properties
+        for (const key in data) {
+            if (data.hasOwnProperty(key)) {
+                const result = findJwtToken(data[key]);
+                if (result) {
+                    return result;
+                }
+            }
+        }
+    }
+
+    return null; // Return null if no JWT token is found
+};
+function decodeJWT(token) {
+
+    try {
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+            throw new Error('Invalid JWT format');
+        }
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        return payload;
+    } catch (error) {
+        return null
+    }
+
+}
 module.exports = {
+    findJwtToken, decodeJWT,
     scrapWebsite, extractVisibleText, withRetry, CronJobVIdeoDelete, SSLverifier, OtpGenerator, HostnameAppIDGetter,
     fillInputFields, takeScreenshot, fillInputFieldsBlackPassword, shouldIgnoreURL, containsQueryParams, extractRootDomain
 }

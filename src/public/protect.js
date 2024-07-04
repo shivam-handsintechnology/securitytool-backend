@@ -356,6 +356,7 @@ if (typeof window !== "undefined" && !window.CustomXMLHttpRequest) {
     window.XMLHttpRequest = CustomXMLHttpRequest;
     window.CustomXMLHttpRequest = CustomXMLHttpRequest; // Store a reference to prevent redeclaration
 }
+window.SecurityTool && window.SecurityTool.CallSensitivedataLocalStorage();
 
 
 

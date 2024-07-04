@@ -12,7 +12,14 @@ const SensitiveDataStoredInSessionStorageSchema = new Schema({
 
             },
             value: {
-                type: mongoose.Schema.Types.Mixed,
+                key: String,
+                id: {
+                    type: Boolean,
+                    default: false
+                },
+                value: String
+
+
 
             }
         }

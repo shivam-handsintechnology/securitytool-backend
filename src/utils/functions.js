@@ -153,21 +153,18 @@ async function CheckAllDataIsEncrypted(data, keysToMatch) {
   }
 }
 // Define a function to check for CSS injection
-async function CheckAllSensitiveData(data) {
+const CheckAllSensitiveData = async (data) => {
   try {
-
     const result = [];
 
-    // Recursive function to check for sensitive data in nested objects or arrays
-    function checkForSensitiveData(obj) {
+    const checkForSensitiveData = (obj) => {
       if (Array.isArray(obj)) {
         obj.forEach(item => {
           if (typeof item === 'object' && item !== null) {
-            // Check if the item is an object with a 'value' property
             if (item.hasOwnProperty('value')) {
               checkValue(item);
             } else {
-              checkForSensitiveData(item); // Recursive call for nested objects or arrays
+              checkForSensitiveData(item);
             }
           }
         });
@@ -176,7 +173,7 @@ async function CheckAllSensitiveData(data) {
           if (Object.prototype.hasOwnProperty.call(obj, key)) {
             const value = obj[key];
             if (typeof value === 'object' && value !== null) {
-              checkForSensitiveData(value); // Recursive call for nested objects or arrays
+              checkForSensitiveData(value);
             } else if (typeof value === 'string') {
               checkValue({ key, value });
             }
@@ -184,70 +181,63 @@ async function CheckAllSensitiveData(data) {
         }
       }
       return result;
-    }
+    };
 
-    // Helper function to check the value for sensitive data
-    function checkValue(item) {
+    const checkValue = (item) => {
       let { key, value } = item;
 
-      const sensitiveData = { Email: false, "JSON Web Token": false, ObjectId: false, PassportNumber: false, CreditCard: false, Password: false, PhoneNumber: false, UUID: false };
-      if (typeof value === 'string') {
-        // Remove leading and trailing quotes
+      const sensitiveData = {
+        Email: { id: false, data: value },
+        "JSON Web Token": { id: false, data: value },
+        ObjectId: { id: false, data: value },
+        PassportNumber: { id: false, data: value },
+        CreditCard: { id: false, data: value },
+        Password: { id: false, data: value },
+        PhoneNumber: { id: false, data: value },
+        UUID: { id: false, data: value }
+      };
 
-        value = value.replace(/^"|"$/g, '')
-        value = value.replace(/^'|'$/g, '')
-        // Check if the value is a stringified JSON object
-        if (isJsonString(value)) {
-          const parsedValue = JSON.parse(value);
-          checkForSensitiveData(parsedValue);
-        } else {
-          // Check if the value is a string containing sensitive data
-          if (validator.isEmail(value)) {
-            sensitiveData.Email = true;
-          }
-          else if (validator.isJWT(value)) {
-            sensitiveData["JSON Web Token"] = true;
-          }
-          else if (validator.isMongoId(value)) {
-            sensitiveData.ObjectId = true;
-          }
-          else if (validator.isCreditCard(value)) {
-            sensitiveData.CreditCard = true;
-          }
-          else if (validator.isStrongPassword(value)) {
-            sensitiveData.Password = true;
-          }
-          else if (validator.isMobilePhone(value)) {
-            sensitiveData.PhoneNumber = true;
-          }
-          else if (validator.isUUID(value)) {
-            sensitiveData.UUID = true
-          }
+      value = value.replace(/^"|"$/g, '').replace(/^'|'$/g, '');
 
-
+      if (isJsonString(value)) {
+        const parsedValue = JSON.parse(value);
+        checkForSensitiveData(parsedValue);
+      } else {
+        if (validator.isEmail(value)) {
+          sensitiveData.Email.id = true;
+        } else if (validator.isJWT(value)) {
+          sensitiveData["JSON Web Token"].id = true;
+        } else if (validator.isMongoId(value)) {
+          sensitiveData.ObjectId.id = true;
+        } else if (validator.isCreditCard(value)) {
+          sensitiveData.CreditCard.id = true;
+        } else if (validator.isStrongPassword(value)) {
+          sensitiveData.Password.id = true;
+        } else if (validator.isMobilePhone(value)) {
+          sensitiveData.PhoneNumber.id = true;
+        } else if (validator.isUUID(value)) {
+          sensitiveData.UUID.id = true;
         }
       }
 
       result.push({ key, value: sensitiveData });
-    }
+    };
 
-    // Helper function to check if a string is a valid JSON string
-    function isJsonString(str) {
+    const isJsonString = (str) => {
       try {
         JSON.parse(str);
       } catch (e) {
         return false;
       }
       return true;
-    }
+    };
 
-    // Start checking for sensitive data
     return checkForSensitiveData(data);
   } catch (error) {
-    console.log("Error in CheckAllSensitiveData", error)
+    console.log("Error in CheckAllSensitiveData", error);
     throw new Error(error.message);
   }
-}
+};
 
 module.exports = {
   CreateuserDetails,

@@ -14,21 +14,15 @@ function checkServerFingerprinting(hostname) {
                 const serverFingerprints = [];
 
                 // Check for server-specific headers
-                if (headers['server']) {
-                    serverFingerprints.push({ server: headers['server'] });
-                }
+                // if (headers['server']) {
+                //     serverFingerprints.push({ server: headers['server'] });
+                // }
 
                 // Check for other potentially identifying headers
                 if (headers['x-powered-by']) {
                     serverFingerprints.push({ "x-powered-by": headers['x-powered-by'] });
                 } else {
                     serverFingerprints.push({ "x-powered-by": "Not Found" });
-                }
-
-                if (headers['x-aspnet-version']) {
-                    serverFingerprints.push({ "x-aspnet-version": headers['x-aspnet-version'] });
-                } else {
-                    serverFingerprints.push({ "x-aspnet-version": "Not Found" });
                 }
 
                 // Add more checks for other potentially identifying headers
@@ -40,9 +34,9 @@ function checkServerFingerprinting(hostname) {
                     const serverFingerprints = [];
 
                     // Check for server-specific headers
-                    if (headers['server']) {
-                        serverFingerprints.push({ server: headers['server'] });
-                    }
+                    // if (headers['server']) {
+                    //     serverFingerprints.push({ server: headers['server'] });
+                    // }
 
                     // Check for other potentially identifying headers
                     if (headers['x-powered-by']) {
@@ -51,11 +45,11 @@ function checkServerFingerprinting(hostname) {
                         serverFingerprints.push({ "x-powered-by": "Not Found" });
                     }
 
-                    if (headers['x-aspnet-version']) {
-                        serverFingerprints.push({ "x-aspnet-version": headers['x-aspnet-version'] });
-                    } else {
-                        serverFingerprints.push({ "x-aspnet-version": "Not Found" });
-                    }
+                    // if (headers['x-aspnet-version']) {
+                    //     serverFingerprints.push({ "x-aspnet-version": headers['x-aspnet-version'] });
+                    // } else {
+                    //     serverFingerprints.push({ "x-aspnet-version": "Not Found" });
+                    // }
 
                     // Add more checks for other potentially identifying headers
                     resolve(serverFingerprints);

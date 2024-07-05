@@ -447,6 +447,43 @@ const Profile = async (req, res) => {
     return errorHandler(res)
   }
 }
+// get all users
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.aggregate([{
+      $match: {
+        userType: "User"
+      }
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "subsription",
+        foreignField: "_id",
+        as: "subsription"
+      },
+    },
+    {
+      $unwind: "$subsription"
+    },
+    {
+      $project: {
+        password: 0,
+        userType: 0,
+      }
+    }
+    ])
+    if (users) {
+      return sendResponse(res, 200, "Fetch users", users);
+    } else {
+      return sendResponse(res, 404, "Users not found");
+    }
+  }
+  catch (error) {
+    console.log(error)
+    return errorHandler(res)
+  }
+}
 const UserController = {
   Login,
   Logout,
@@ -455,7 +492,7 @@ const UserController = {
   FBCustomerLogin,
   Profile,
   Checkout,
-  CheckoutSuccess
+  CheckoutSuccess, getAllUsers
 }
 
 module.exports = {

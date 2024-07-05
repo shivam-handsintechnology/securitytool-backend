@@ -1,11 +1,13 @@
 
 const express = require('express');
 const router = express.Router();
+const path = require("path")
+const fs = require("fs")
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('../swagger.json');
 const AuditMiddleware = require('../middlewares/AuditMiddleware');
 // Import Middlewares  And Functions
-
+let ChangeHtml = `<title>Security Tool</title>`
 const { ValidationMiddleware, AuthDomainMiddleware } = require('../middlewares/ValidationMiddleware');
 const verifytoken = require('../middlewares/VerifyUser')
 const verifyToken = require('../middlewares/VerifyUser');
@@ -32,7 +34,8 @@ const ErrorMessagesRoute = require("./Security/ErrorMessage.route")
 const subsriptionrouter = require("./Security/subsription.routes")
 const UnvalidatedRedirectsandForwardsRouter = require("../controllers/Security/UnvalidatedRedirectsandForwards.controller").get
 const CrossSiteScriptingRouer = require("./Security/CrossSiteScripting")
-const SEORoutes = require("./seo.routes")
+const SEORoutes = require("./seo.routes");
+const SEO = require('../models/SEO.Model');
 // Import Routes
 router.use("/security", CorsMiddleware, IncomingDataHashFormat, verifytoken, Security)
 router.use("/seo", CorsMiddleware, IncomingDataHashFormat, verifytoken, SEORoutes)
@@ -80,6 +83,61 @@ router.use("/videostream", IncomingDataHashFormat, VideoStreamRouter)
 router.use('/docs', swaggerUi.serve);
 router.get('/docs', swaggerUi.setup(swaggerDocument));
 router.use("/api", router)
+
+router.use("/*", async (req, res) => {
+  try {
+    const buildpath = path.join(__dirname, "../build", "index.html");
+    if (!fs.existsSync(buildpath)) {
+      return res.status(404).json({ message: "Resource is Not Found" });
+    }
+
+    const raw = fs.readFileSync(buildpath, 'utf8');
+    let url = req.originalUrl === "/" ? "home" : req.originalUrl.replace(/\//g, "");
+    console.log("url", req.originalUrl);
+
+    // Mongoose aggregation
+    const [seoData] = await SEO.aggregate([
+      { $match: { url: url } },
+      { $limit: 1 }
+    ]);
+
+    console.log(seoData ? "SEO data found" : "No SEO data found");
+
+    // Default home page SEO
+
+    let metaTags = `
+        <title>Welcome to Our Website</title>
+        <meta name="description" content="Explore our amazing content and services">
+        <meta name="keywords" content="home, welcome, website">
+      `;
+    let updated = raw.replace(ChangeHtml, metaTags);
+    if (!seoData || !seoData.meta_data || seoData.meta_data.length === 0) {
+      // Default home page SEO
+      metaTags = `
+        <title>Welcome to Our Website</title>
+        <meta name="description" content="Explore our amazing content and services">
+        <meta name="keywords" content="home, welcome, website">
+      `;
+    } else {
+      // Construct meta tags for all items in the meta_data array
+      metaTags = seoData.meta_data.map(metaData => `
+        <title>${metaData.title}</title>
+        <meta name="description" content="${metaData.description}">
+        <meta name="keywords" content="${metaData.keywords.join(', ')}">
+      `).join('');
+    }
+
+    // Replace __PAGE_META__ with the constructed meta tags
+    updated = raw.replace(ChangeHtml, metaTags);
+
+    // Send the updated HTML
+    return res.send(updated);
+
+  } catch (error) {
+    console.error('Error updating meta tags:', error);
+    return res.status(500).json({ message: "Error updating meta tags" });
+  }
+})
 
 
 module.exports = router

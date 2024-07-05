@@ -67,27 +67,31 @@ function checkServerFingerprinting(hostname) {
 }
 function analyzeResponseForPathDisclosure(response, hostname) {
     return new Promise((resolve, reject) => {
-        let isPhysical_path_disclosure = "No";
+        try {
+            let isPhysical_path_disclosure = "No";
 
-        if (typeof response === 'object') {
-            const jsonString = JSON.stringify(response.data);
-            if (jsonString.includes(process.env.HOME)) {
-                isPhysical_path_disclosure = `Potential server path disclosure vulnerability found in response: ${jsonString}`;
+            if (typeof response === 'object') {
+                const jsonString = JSON.stringify(response.data);
+                if (jsonString.includes(process.env.HOME)) {
+                    isPhysical_path_disclosure = `Potential server path disclosure vulnerability found in response: ${jsonString}`;
+                }
+            } else if (typeof response === 'string') {
+                if (response.includes(`/${hostname}/`)) {
+                    isPhysical_path_disclosure = `Potential server path disclosure vulnerability found`;
+                }
+            } else if (Array.isArray(response)) {
+                const joinedString = response.join('');
+                if (joinedString.includes(`/${hostname}/`)) {
+                    isPhysical_path_disclosure = `Potential server path disclosure vulnerability found `;
+                }
+            } else {
+                isPhysical_path_disclosure = "No";
             }
-        } else if (typeof response === 'string') {
-            if (response.includes(`/${hostname}/`)) {
-                isPhysical_path_disclosure = `Potential server path disclosure vulnerability found`;
-            }
-        } else if (Array.isArray(response)) {
-            const joinedString = response.join('');
-            if (joinedString.includes(`/${hostname}/`)) {
-                isPhysical_path_disclosure = `Potential server path disclosure vulnerability found `;
-            }
-        } else {
-            isPhysical_path_disclosure = "No";
+
+            resolve(isPhysical_path_disclosure);
+        } catch (error) {
+            reject(error)
         }
-
-        resolve(isPhysical_path_disclosure);
     });
 }
 
@@ -100,16 +104,16 @@ async function Full_Path_Disclosure(hostname) {
         };
 
         const response = await axios(options);
-        PathDisclosure  = await analyzeResponseForPathDisclosure(response, hostname);
+        PathDisclosure = await analyzeResponseForPathDisclosure(response, hostname);
         return PathDisclosure;
     } catch (error) {
         if (error.response) {
             const PathDisclosure = await analyzeResponseForPathDisclosure(error.response, hostname);
             return PathDisclosure;
         } else {
-           return  PathDisclosure
+            return PathDisclosure
         }
     }
 }
 
-module.exports = {checkServerFingerprinting, Full_Path_Disclosure};
+module.exports = { checkServerFingerprinting, Full_Path_Disclosure };

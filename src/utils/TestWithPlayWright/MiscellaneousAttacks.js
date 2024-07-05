@@ -1,7 +1,7 @@
 const { chromium } = require('playwright');
 const path = require('path');
 const { scrapWebsite, fillInputFields, takeScreenshot, withRetry } = require('..');
-const fs = require("fs");
+
 let requestabort = async (page) => {
   await page.route('**', (route) => {
     const requestUrl = route.request().url();

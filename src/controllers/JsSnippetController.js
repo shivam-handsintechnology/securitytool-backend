@@ -1,5 +1,4 @@
 const path = require('path');
-const moment = require('moment');
 const { sendResponse } = require('../utils/dataHandler');
 const { errorHandler } = require('../utils/errorHandler');
 const SensitiveDataStoredInLocalStorageModel = require('../models/Security/SensitiveDataStoredInLocalStorage.model');

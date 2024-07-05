@@ -1,4 +1,4 @@
-const { Schema, model, default: mongoose } = require('mongoose');
+const { Schema, model } = require('mongoose');
 const SubscriptionSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,

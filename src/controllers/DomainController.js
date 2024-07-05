@@ -2,7 +2,7 @@ const { checkDomainAvailability } = require("../utilities/functions/functions");
 const { sendResponse } = require("../utils/dataHandler");
 const { default: mongoose } = require("mongoose");
 const { AllowedDomainsModel, AllowedWebDomainsModel } = require("../models/AllowedDomainsModel");
-const User = require("../models/User");
+
 module.exports = {
     addDomain: async (req, res) => {
         try {
@@ -75,7 +75,7 @@ module.exports = {
     },
     updateDomain: async (req, res) => {
         try {
-            const { domain, newDomain } = req.body;
+            const { newDomain } = req.body;
             const updateDomain = await AllowedDomainsModel.findOneAndUpdate({ user: req.user.id }, { domain: newDomain })
             if (updateDomain) {
                 return sendResponse(res, 200, "Domain updated successfully");
@@ -146,7 +146,7 @@ module.exports = {
     },
     updateWebDomain: async (req, res) => {
         try {
-            const { domain, newDomain } = req.body;
+            const { newDomain } = req.body;
             const updateDomain = await AllowedWebDomainsModel.findOneAndUpdate({ appid: req.user.appid }, { domain: newDomain })
             if (updateDomain) {
                 return sendResponse(res, 200, "Domain updated successfully");

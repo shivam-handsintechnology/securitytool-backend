@@ -39,7 +39,7 @@ module.exports = {
         }
     },
     DefaultWebPage: async (req, res) => {
-        let status = 500
+
         try {
             let domain = req.query.domain
             let url = `http://${domain}/`;

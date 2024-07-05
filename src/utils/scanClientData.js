@@ -8,7 +8,7 @@ const staticFolders = require("../data/json/staticFolders.json");
 // OPTIONS method
 async function scanDirectoryOptionMethod(response) {
   let results = [];
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
 
       // Iterate through the data and process each item
@@ -40,7 +40,7 @@ async function ScanDangerousMethods(response) {
     const dangerousMethods = ["eval", "exec", "setTimeout", "setInterval", "Function", "XMLHttpRequest", "fetch"];
     return dangerousMethods.includes(method);
   }
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
       let results = []
       // Iterate through the data and process each item
@@ -74,7 +74,7 @@ async function ScanDangerousMethods(response) {
 const ScanArbitaryMethods = async (response) => {
   let results = [];
   let isAccessControlAllowMethods = false;
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
       const standardMethods = ["GET", "POST", "PUT", "PATCH", "DELETE"];
 
@@ -194,7 +194,7 @@ async function getLatestNodeVersion(version) {
   }
 }
 const get403ErrorMessage = async (response) => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
       const staticDirectories = [...staticFolders.staticFiles, ...staticFolders.staticFolders] // Add other static directories as needed
       let results = [];
@@ -231,7 +231,7 @@ const get403ErrorMessage = async (response) => {
   });
 };
 const getHttpErrorMessages = async (response) => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
       const staticDirectories = [...staticFolders.staticFiles, ...staticFolders.staticFolders]; // Add other static directories as needed
       let results = [];
@@ -272,9 +272,8 @@ const getHttpErrorMessages = async (response) => {
 };
 
 const getLoginErrorMessages = async (response) => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
-      const staticDirectories = [...staticFolders.staticFiles, ...staticFolders.staticFolders] // Add other static directories as needed
       const baseLoginTerms = [
         'login', 'auth', 'authentication', 'signin', 'signup', 'user', 'account',
         'session', 'token', 'password', 'forgot', 'reset', 'verify', 'confirm', 'authorize',

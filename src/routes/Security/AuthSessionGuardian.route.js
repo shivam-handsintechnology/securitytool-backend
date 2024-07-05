@@ -1,10 +1,5 @@
 
 const router = require("express").Router()
-const { errorHandler } = require("../../utils/errorHandler");
-
-const { analyzeSessionCookie, sessionExpireOnClose, sessionTimeoutWithObject, sessionFixationWithobject, sessionHijackingWithObject, sessionTokenWithObject, SessionVulnurability } = require("../../helpers/SessionVulnurabiltyChecker");
-const GetFileCOntentMiddleware = require("../../middlewares/GetFileCOntentMiddleware");
-const { sendResponse } = require("../../utils/dataHandler");
 const { SecondFactorAuthBypassed } = require("../../utils/TestWithPlayWright/SecondFactorAuthBypassed");
 const { BlackPasswordValidation } = require("../../utils/TestWithPlayWright/BlacnkPasswordANdUserName");
 const { checkNonHTMLContentAccessibility } = require("../../utils/TestWithPlayWright/checkNonHtmlAccccesability");
@@ -12,65 +7,6 @@ const AuthSessionGurdiancontroller = require('../../controllers/Security/AuthSes
 
 router.get("/session-vulnurability", AuthSessionGurdiancontroller.SessionVulnurbilityCOntroller);
 
-router.get("/session-expire-on-close", GetFileCOntentMiddleware, async (req, res) => {
-    try {
-        // Call the respective controller function
-        const response = req.body.fileContent
-        const data = await sessionExpireOnClose(response);
-        let results = data && data.length > 0 ? { "Session does not expire on closing the browser": "Yes" } : { "Session does not expire on closing the browser": "Not Implemented" }
-        return sendResponse(res, 200, "dsad", [results])
-    } catch (error) {
-        return errorHandler(res, 500, error.message);
-    }
-});
-
-// Route for checking session timeout
-router.get("/session-timeout", GetFileCOntentMiddleware, async (req, res) => {
-    try {
-        // Call the respective controller function
-        const response = req.body.fileContent
-        const results = await sessionTimeoutWithObject(response);
-        return sendResponse(res, 200, "dsad", results)
-    } catch (error) {
-        return errorHandler(res, 500, error.message);
-    }
-});
-
-// Route for checking session token being passed in other areas apart from cookie
-router.get("/session-token", GetFileCOntentMiddleware, async (req, res) => {
-    try {
-        // Call the respective controller function
-        const response = req.body.fileContent
-        const results = await sessionTokenWithObject(response);
-        return sendResponse(res, 200, "dsad", results)
-    } catch (error) {
-        return errorHandler(res, 500, error.message);
-    }
-});
-
-// Route for checking session fixation vulnerability
-router.get("/session-fixation", GetFileCOntentMiddleware, async (req, res) => {
-    try {
-        // Call the respective controller function
-        const response = req.body.fileContent
-        const results = await sessionFixationWithobject(response);
-        return sendResponse(res, 200, "dsad", results)
-    } catch (error) {
-        return errorHandler(res, 500, error.message);
-    }
-});
-
-// Route for checking session hijacking vulnerability
-router.get("/session-hijacking", GetFileCOntentMiddleware, async (req, res) => {
-    try {
-        // Call the respective controller function
-        const response = req.body.fileContent
-        const results = await sessionHijackingWithObject(response);
-        return sendResponse(res, 200, "dsad", results)
-    } catch (error) {
-        return errorHandler(res, 500, error.message);
-    }
-});
 // Route for checking session hijacking vulnerability
 router.get("/non-html-content-accessability", async (req, res) => {
     try {

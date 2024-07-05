@@ -8,7 +8,7 @@ const scanSQLvulnerability = require('../../utils/TestWithPlayWright/Sqlvulnurab
 const getAllLogs = async (req, res) => {
     try {
         // Get total count of users
-        const { page, limit, question, ...rest } = req.query;
+        const { page, limit, ...rest } = req.query;
         let obj = {}
         let restdata = Object.keys(rest)
         for (let i of restdata) {

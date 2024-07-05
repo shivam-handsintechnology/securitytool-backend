@@ -1,11 +1,10 @@
-const mongoose = require("mongoose")
+
 const { default: axios } = require("axios")
 const validator = require("validator")
 const { sendResponse } = require("../../utils/dataHandler")
 const { AllowedDomainsModel } = require("../../models/AllowedDomainsModel")
 const { ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanDirectoryOptionMethod } = require("../../utils/scanClientData")
 const { errorHandler } = require("../../utils/errorHandler")
-const { decryptData } = require("../../middlewares/IncomingDataHashFormat")
 const { DefaultUserNamePasswordTest } = require("../../utils/TestWithPlayWright/DefaultusernamePasswordTest")
 
 module.exports = {
@@ -103,22 +102,10 @@ module.exports = {
 
                     else if (!validator.isStrongPassword(hashedPassword)) {
                         return sendResponse(res, 200, "success", "Password is Weak");
+                    } else {
+                        return sendResponse(res, 200, "success", "Password is Weak");
                     }
-                    // let obj = "Password is not hashed"
-                    // for (const item of passwordTestHashes) {
-                    //     const regexPattern = eval(item.regex);
-                    //     console.log("regexPattern", regexPattern)
-                    //     if (regexPattern.test(hashedPassword)) {
-                    //         obj = `password found with ${item.name} algorithm`;
-                    //         break; // Once a match is found, exit the loop
-                    //     }
-                    // }
 
-                    // if (!obj) {
-                    //     return sendResponse(res, 200, "success", "Password is not hashed");
-                    // }
-
-                    return sendResponse(res, 200, "success", obj);
                 } else {
                     throw new Error("access Denied")
                 }

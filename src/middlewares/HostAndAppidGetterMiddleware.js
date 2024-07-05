@@ -1,4 +1,4 @@
-const { HostnameAppIDGetter, extractRootDomain } = require("../utils");
+const { extractRootDomain } = require("../utils");
 const { errorHandler } = require("../utils/errorHandler");
 
 async function HostAndAppidGetterMiddleware(req, res, next) {

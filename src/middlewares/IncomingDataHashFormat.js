@@ -1,4 +1,4 @@
-const { errorHandler } = require("../utils/errorHandler");
+
 const CryptoJS = require("crypto-js");
 const SecretKey = process.env.SECREY_KEY; // Correct the typo here: SECREY_KEY to SECRET_KEY
 const skipAPiurl = ["/protection", "/createuserdetails", "/sensitivekeysinurl"];

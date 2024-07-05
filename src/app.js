@@ -106,7 +106,7 @@ app.use("/*", async (req, res) => {
 })
 
 // Error handling middleware
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   logger.error(err.stack);
   let statusCode = err.statusCode || 500;
   let message = err.message || 'Something broke!';
@@ -127,13 +127,13 @@ if (cluster.isPrimary) {
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
-  cluster.on("exit", (worker, code, signal) => {
+  cluster.on("exit", (worker) => {
     console.log(`worker ${worker.process.pid} died`);
     cluster.fork();
   });
 } else {
 
-  server.listen(PortNumber, async function (req, res) {
+  server.listen(PortNumber, async function () {
     console.log(`Server is running on port ${PortNumber}`);
   });
 }

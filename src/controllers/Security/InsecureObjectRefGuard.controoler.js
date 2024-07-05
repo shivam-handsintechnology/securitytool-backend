@@ -1,8 +1,6 @@
 const { sendResponse } = require("../../utils/dataHandler");
 const axios = require("axios");
 const { errorHandler } = require("../../utils/errorHandler");
-const { hashttpParametersPollutionavailable } = require("../../utilities/functions/functions");
-const { AllowedWebDomainsModel } = require("../../models/AllowedDomainsModel");
 const { directoryListingPatterns } = require("../../data/json/ApplicationTestingData.json")
 
 module.exports = {
@@ -81,11 +79,7 @@ module.exports = {
   // },
   post: async (req, res) => {
     try {
-      let paterns = [
-        /require\s*\(\s*['"](.+?)['"]\s*\)/g,
-        /import\s*\(\s*['"](.+?)['"]\s*\)/g,
 
-      ]
       let url = req.body.url;
       let response = await axios.get(url).then((res) => res).catch((e) => e.response);
 
@@ -106,6 +100,7 @@ module.exports = {
       let { url } = req.body;
       let response = await axios.get(url).then((res) => res).catch((e) => e.response);
       if (response.status === 200) {
+        let pageContent = response.data;
         const isDirectoryListing = directoryListingPatterns.some(pattern => pageContent.includes(pattern));
         if (isDirectoryListing) {
           return sendResponse(res, 200, "success", "Yes", "Yes")

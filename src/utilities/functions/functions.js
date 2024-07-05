@@ -41,7 +41,7 @@ const hasDuplicateParameters = (params) => {
   }
   return false; // No duplicate parameters found
 }
-const hashttpParametersPollutionavailable = async (params, appid) => {
+const hashttpParametersPollutionavailable = async (params) => {
   if (hasDuplicateParameters(params)) {
     return "Yes"
   } else {

@@ -10,7 +10,7 @@ const { ValidateUserSignUp, ValidateUserLogin } = require("../helpers/Validators
 const Razorpay = require("razorpay");
 const key_id = process.env.NODE_ENV == "production" ? process.env.RAZORPAY_KEY_ID : process.env.RAZORPAY_KEY_ID_TEST
 const key_secret = process.env.NODE_ENV == "production" ? process.env.RAZORPAY_KEY_SECRET : process.env.RAZORPAY_KEY_SECRET_TEST
-const { validatePaymentVerification, validateWebhookSignature } = require("razorpay/dist/utils/razorpay-utils");
+const { validatePaymentVerification } = require("razorpay/dist/utils/razorpay-utils");
 const { OtpGenerator } = require("../utils");
 const sendEmail = require("../helpers/sendEmail");
 const { checkDomainAvailability } = require("../utilities/functions/functions");
@@ -80,7 +80,7 @@ const searchInFiles = async (ssh, files, searchTerm) => {
 
 
 // Register
-Register = async (req, res) => {
+const Register = async (req, res) => {
   try {
     let expires
     // Validate user input
@@ -162,7 +162,7 @@ Register = async (req, res) => {
 
 // Login
 
-Login = async (req, res, next) => {
+const Login = async (req, res, next) => {
   let status = 500;
   try {
     // Validate user input
@@ -221,12 +221,12 @@ Login = async (req, res, next) => {
 
 
 // =
-GoogleRegister = async (req, res) => {
+const GoogleRegister = async (req, res) => {
   try {
     const { token } = req.body
     const ticket = await client.verifyIdToken({
       idToken: token,
-      audience: GOOGLE_CLIENT_ID,
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
     const profile = ticket.getPayload()
     const UserExists = await User.findOne({ email: profile.email })
@@ -284,11 +284,12 @@ GoogleRegister = async (req, res) => {
   }
 
 }
-Logout = async (req, res) => {
+const Logout = async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
+    const Authenticate = false;
     if (!authHeader) {
-      Authenticate = false;
+
       return sendResponse(res, 403, "missing authorization", { Authenticate })
     }
     const [authType, token] = authHeader.split(' ');
@@ -300,7 +301,7 @@ Logout = async (req, res) => {
     return errorHandler(res)
   }
 }
-Checkout = async (req, res) => {
+const Checkout = async (req, res) => {
   try {
     const { amount, currency, receipt, payment_capture } = req.body
 
@@ -318,44 +319,44 @@ Checkout = async (req, res) => {
     console.log(error)
     return errorHandler(res, 500, error.message)
   }
-},
-  CheckoutSuccess = async (req, res) => {
-    try {
+}
+const CheckoutSuccess = async (req, res) => {
+  try {
 
-      const { order_id, razorpay_payment_id, razorpay_signature } = req.body
-      const { subsription } = req.user
+    const { order_id, razorpay_payment_id, razorpay_signature } = req.body
+    const { subsription } = req.user
 
-      console.log(order_id, razorpay_payment_id, razorpay_signature)
-      const order = await instance.orders.fetch(order_id)
+    console.log(order_id, razorpay_payment_id, razorpay_signature)
+    const order = await instance.orders.fetch(order_id)
 
-      const payment = await validatePaymentVerification({ "order_id": order_id, "payment_id": razorpay_payment_id }, razorpay_signature, key_secret)
+    const payment = await validatePaymentVerification({ "order_id": order_id, "payment_id": razorpay_payment_id }, razorpay_signature, key_secret)
 
-      if (!order) {
-        return sendResponse(res, 404, "order not found")
-      }
-      else if (!payment) {
-        return sendResponse(res, 404, "payment not found")
-      }
-      let subscription = await Subscription.findById(subsription)
-
-      subscription.startDate = new Date()
-      subscription.endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-      await subscription.save()
-
-      return sendResponse(res, 200, "payment success", order)
-    } catch (error) {
-      console.log(error.error)
-      if (error.error && error.error.code === "BAD_REQUEST_ERROR") {
-        return errorHandler(res, 400, error.error.description,)
-      }
-      return errorHandler(res, 500, error.message)
+    if (!order) {
+      return sendResponse(res, 404, "order not found")
     }
+    else if (!payment) {
+      return sendResponse(res, 404, "payment not found")
+    }
+    let subscription = await Subscription.findById(subsription)
+
+    subscription.startDate = new Date()
+    subscription.endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+    await subscription.save()
+
+    return sendResponse(res, 200, "payment success", order)
+  } catch (error) {
+    console.log(error.error)
+    if (error.error && error.error.code === "BAD_REQUEST_ERROR") {
+      return errorHandler(res, 400, error.error.description,)
+    }
+    return errorHandler(res, 500, error.message)
   }
+}
 
 
 
 // =
-FBCustomerLogin = async function (req, res, next) {
+const FBCustomerLogin = async function (req, res) {
   const {
     userID,
     accessToken,
@@ -424,8 +425,6 @@ FBCustomerLogin = async function (req, res, next) {
 
     }
 
-    // Getting the set Headers
-    const headers = response.getHeaders();
 
     // Printing those headers
 
@@ -439,7 +438,7 @@ const Profile = async (req, res) => {
     if (user) {
       return sendResponse(res, 200, "Fetch user", user);
     } else {
-      console.log("User not found", error)
+
       return sendResponse(res, 404, "User not found");
     }
   }

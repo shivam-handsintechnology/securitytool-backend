@@ -7,17 +7,18 @@ let lowerCasehitn404 = hints404.map((item) => item.toLowerCase())
 
 
 const scanNonHTMLContentAccessibility = async (url, res, SendEvent) => {
+  const browser = await chromium.launch();
+  const context = await browser.newContext();
+  const page = await context.newPage();
   try {
-    const browser = await chromium.launch();
-    const context = await browser.newContext();
-    const page = await context.newPage();
+
     let navigationSuccessful = false;
     let attempts = 0;
     while (!navigationSuccessful && attempts < 3) {
       try {
         await page.goto(url, { timeout: 60000, waitUntil: 'domcontentloaded' });
 
-        const response = await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('networkidle');
 
         const finalUrl = new URL(page.url());
         console.log("initial url", url, "final url", finalUrl);

@@ -1,6 +1,5 @@
 const { sendResponse } = require("../../utils/dataHandler");
 const axios = require("axios");
-const { errorHandler } = require("../../utils/errorHandler");
 const PasswordChangeTest = require("../../utils/TestWithPlayWright/PasswordChangeTest");
 module.exports = {
    async Managementinterface(req, res) {

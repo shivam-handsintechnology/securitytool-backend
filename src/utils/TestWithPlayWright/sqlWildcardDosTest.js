@@ -1,5 +1,5 @@
 const { chromium } = require('playwright');
-const { withRetry, shouldIgnoreURL, scrapWebsite, takeScreenshot, containsQueryParams } = require('..');
+const { scrapWebsite, takeScreenshot, containsQueryParams } = require('..');
 
 // Define the base URL and endpoints to test
 let findArrayinJson = async function (json) {
@@ -15,7 +15,7 @@ let findArrayinJson = async function (json) {
     }
     return null;
 }
-async function test(url, res, SendEvent, fullurl) {
+async function test(url, res, SendEvent) {
     const browser = await chromium.launch();
     const context = await browser.newContext({
         recordVideo: {
@@ -35,14 +35,14 @@ async function test(url, res, SendEvent, fullurl) {
 
         page.on("response", async (response) => {
             let reponseurl = response.url();
-
+            const responseTime = response.timing().responseEnd - response.timing().requestStart;
             if (containsQueryParams(reponseurl)) {
                 const contentType = response.headers()["content-type"];
                 if (contentType.includes("application/json")) {
                     const json = await response.json();
                     let array = await findArrayinJson(json);
+
                     if (array && array.length > 0 && array.length <= 10) {
-                        const responseTime = response.timing().responseEnd - response.timing().requestStart;
                         console.log(`Response time: ${responseTime} ms`);
                         SendEvent({ error: false, message: "DDOS Sql Wildcards Attack chances are low", responseTime, url: url, time: Date.now(), isSql: true, jsondata: true, screenshot: await takeScreenshot(page) }, res);
                     } else if (array && array.length > 10) {
@@ -59,7 +59,10 @@ async function test(url, res, SendEvent, fullurl) {
 
                         isJsonString = true;
                     } catch (error) {
-                        isJsonString = false;
+                        if (error) {
+
+                            isJsonString = false;
+                        }
                     }
                     if (isJsonString) {
                         const json = JSON.parse(text);
@@ -133,8 +136,8 @@ async function test(url, res, SendEvent, fullurl) {
         // Ensure the search input is still attached to the DOM
         await page.waitForSelector(inputSelector, { visible: true, interactable: true, timeout: 120000 }); // Increase the timeout to 120 seconds
 
-        let searchInputChanged = false;
 
+        let searchInputChanged = false;
         if (searchInput) {
             await searchInput.fill('payload', { timeout: 60000 }); // Increase the timeout to 60 seconds
 
@@ -187,6 +190,7 @@ async function test(url, res, SendEvent, fullurl) {
 async function testSqlWildcardDos(url, res, SendEvent, fullurl) {
     await test(url, res, SendEvent, fullurl);
     let visited = await scrapWebsite(url, res, SendEvent)
+    return visited;
 
 
 }

@@ -1,11 +1,8 @@
 const Joi = require('joi');
 const moment = require('moment');
-const { sendResponse } = require('../utils/dataHandler');
 const { errorHandler } = require('../utils/errorHandler');
-const { AllowedDomainsModel, AllowedWebDomainsModel } = require('../models/AllowedDomainsModel');
 const User = require("../models/User");
 const { checkDomainAvailability } = require('../utilities/functions/functions');
-const { default: mongoose } = require('mongoose');
 const { extractRootDomain } = require('../utils');
 const ValidationMiddleware = (schema) => {
     return (req, res, next) => {

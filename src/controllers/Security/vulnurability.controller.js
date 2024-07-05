@@ -282,7 +282,7 @@ module.exports = {
     },
     VpnValidation: async (req, res) => {
         let ipaddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress
-        let respose = await VpnResponse(ipaddress).then(res = res).catch(err => err)
+        let respose = await VpnResponse(ipaddress).then(res => res).catch(err => err)
         if (respose) {
             return errorHandler(res, 406, `VPn Detect in the Ip ${ipaddress}`)
         }

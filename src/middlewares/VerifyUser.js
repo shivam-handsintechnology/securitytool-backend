@@ -16,7 +16,7 @@ const verifyToken = (req, res, next) => {
       return sendResponse(res, 403, "missing authorization", { Authenticate })
     }
     const [authType, token] = authHeader.split(' ');
-    console.log({ token })
+    console.log({ authType })
     jwt.verify(token, process.env.JWT_SECRET, async (err, user) => {
       if (err) {
         console.log(err)

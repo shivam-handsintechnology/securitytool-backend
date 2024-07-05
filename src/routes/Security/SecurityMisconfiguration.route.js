@@ -5,7 +5,7 @@ const { ValidationMiddleware, AuthDomainMiddleware } = require("../../middleware
 const SecurityMisconfiguration = require("../../controllers/Security/SecurityMisconfiguration.controller");
 const { DomainValidationSchema } = require("../../helpers/Validators");
 const GetFileCOntentMiddleware = require("../../middlewares/GetFileCOntentMiddleware");
-const { decryptData } = require("../../middlewares/IncomingDataHashFormat");
+
 router.get("/arbitrary-methods", verifyToken, ValidationMiddleware(DomainValidationSchema), AuthDomainMiddleware, GetFileCOntentMiddleware,
     SecurityMisconfiguration.arbitraryMethods)
 

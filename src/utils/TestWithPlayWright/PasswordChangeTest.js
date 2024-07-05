@@ -1,5 +1,5 @@
 const { chromium } = require('playwright');
-const { withRetry, shouldIgnoreURL, takeScreenshot, scrapWebsite, fillInputFields, containsQueryParams } = require('..');
+const { scrapWebsite, containsQueryParams } = require('..');
 
 // Define the base URL and endpoints to test
 async function test(url, res, SendEvent, fullurl) {
@@ -17,14 +17,14 @@ async function test(url, res, SendEvent, fullurl) {
         await page.waitForLoadState('networkidle', { timeout: 60000 });
 
         // Find the input tag with a search-related placeholder or name attribute
-        const inputSelector = 'input';
+
         page.on("response", async (response) => {
             let reponseurl = response.url();
 
             if (containsQueryParams(reponseurl)) {
                 const contentType = response.headers()["content-type"];
                 if (contentType.includes("application/json")) {
-                    const json = await response.json();
+                    await response.json();
 
 
                 } else if (contentType.includes("text/html")) {
@@ -38,7 +38,7 @@ async function test(url, res, SendEvent, fullurl) {
                         isJsonString = false;
                     }
                     if (isJsonString) {
-                        const json = JSON.parse(text);
+                        JSON.parse(text);
 
                     }
                 }

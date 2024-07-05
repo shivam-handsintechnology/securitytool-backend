@@ -2,11 +2,10 @@ const csv = require('csv-parser');
 const fs = require('fs');
 const { promisify } = require('util');
 
-const readFileAsync = promisify(fs.readFile);
 const unlinkAsync = promisify(fs.unlink);
 
 exports.getcsvdatainjson = async (csvdata, columns) => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const results = [];
 
         try {
@@ -32,20 +31,20 @@ exports.getcsvdatainjson = async (csvdata, columns) => {
                     results.push(data);
                 })
                 .on('end', async () => {
-                 
+
                     // Remove the temporary file
                     await unlinkAsync(csvdata);
                     resolve(results);
                 })
-                .on('error', async (err) => {
+                .on('error', (err) => {
                     console.error(err);
                     // Remove the temporary file
-                    await unlinkAsync(csvdata);
+                    unlinkAsync(csvdata);
                     reject(err);
                 });
         } catch (err) {
             console.error(err);
-            await unlinkAsync(csvdata);
+            unlinkAsync(csvdata);
             reject(err);
         }
     });

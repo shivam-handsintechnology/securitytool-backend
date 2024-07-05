@@ -29,7 +29,7 @@ const SSLverifier = async (hostname) => {
                     return;
                 }
 
-                const { subject, issuer, valid_from: validFrom, valid_to: validTo, fingerprint, serialNumber, subjectaltname: subjectAltName } = certificate;
+                const { subject, issuer, valid_to: validTo } = certificate;
                 const valid = moment(validTo, 'MMM DD HH:mm:ss YYYY GMT');
                 const currentDate = moment();
 
@@ -42,7 +42,7 @@ const SSLverifier = async (hostname) => {
                         result.self = 'Certificate is not self-signed';
                     }
                 } catch (error) {
-                    resolve({ message: "Invalid JSON" });
+                    resolve({ message: "Invalid JSON", error: error });
                     socket.end();
                     return;
                 }
@@ -224,26 +224,6 @@ async function fillInputFields(page, username, password, email) {
             await page.waitForTimeout(2000);
         }
 
-        // Handle CAPTCHA (pseudo-implementation)
-        const captchaInput = await page.$('input[aria-label*="captcha"], input[name*="captcha"], input[id*="captcha"]');
-        if (captchaInput) {
-            // Placeholder for captcha solving logic
-            const captchaImage = await page.$('img[alt="captcha"], img[src*="captcha"]');
-            if (captchaImage) {
-                const captchaSrc = await captchaImage.getAttribute('src');
-                const captchaSolution = await solveCaptcha(captchaSrc); // External CAPTCHA solving service
-                await captchaInput.fill(captchaSolution);
-            }
-        }
-
-        // Handle Google reCAPTCHA (pseudo-implementation)
-        const recaptcha = await page.$('.g-recaptcha');
-        if (recaptcha) {
-            // You need to use an external service for solving reCAPTCHA
-            const recaptchaSolution = await solveRecaptcha(page.url());
-            // Implement the logic to fill the reCAPTCHA response token
-            await page.evaluate(`document.getElementById('g-recaptcha-response').value='${recaptchaSolution}'`);
-        }
 
     } catch (error) {
         console.error('Error occurred:', error);
@@ -367,35 +347,7 @@ const CronJobVIdeoDelete = async () => {
 const OtpGenerator = () => {
     return Math.floor(100000 + Math.random() * 900000);
 }
-const HostnameAppIDGetter = async (origin) => {
-    return new Promise(async (resolve, reject) => {
-        // Launch browser
-        const browser = await chromium.launch({ headless: true });
-        try {
 
-            const context = await browser.newContext();
-            const page = await context.newPage();
-            // Navigate to the page
-            await page.goto(origin);
-            // Capture values from the client-side script
-            const appid = await page.evaluate(() => window.appid);
-            const hostname = await page.evaluate(() => window.location.hostname);
-            console.log(`App ID: ${appid}, Hostname: ${hostname}`);
-            resolve({
-                appid: appid,
-                hostname: hostname
-            })
-
-
-            // Close browser
-
-        } catch (error) {
-            reject(error)
-        } finally {
-            await browser.close();
-        }
-    })
-}
 // Online Javascript Editor for free
 // Write, Edit and Run your Javascript code using JS Online Compiler
 const extractRootDomain = (url) => {
@@ -430,40 +382,45 @@ function decodeJWT(token) {
         return totalexpiretime
 
     } catch (error) {
-        return null
+        if (error) return null
+
     }
 
 }
 
 const findJwtToken = async (data) => {
     return new Promise((resolve, reject) => {
-        const findToken = (data) => {
-            if (typeof data === 'string') {
-                if (validator.isJWT(data)) {
-                    resolve(decodeJWT(data));
-                }
-            } else if (Array.isArray(data)) {
-                for (const element of data) {
-                    const result = findToken(element);
-                    if (result) {
-                        resolve(result);
+        try {
+            const findToken = (data) => {
+                if (typeof data === 'string') {
+                    if (validator.isJWT(data)) {
+                        resolve(decodeJWT(data));
                     }
-                }
-            } else if (typeof data === 'object' && data !== null) {
-                for (const key in data) {
-                    if (data.hasOwnProperty(key)) {
-                        const result = findToken(data[key]);
+                } else if (Array.isArray(data)) {
+                    for (const element of data) {
+                        const result = findToken(element);
                         if (result) {
                             resolve(result);
                         }
                     }
+                } else if (typeof data === 'object' && data !== null) {
+                    for (const key in data) {
+                        if (data.hasOwnProperty(key)) {
+                            const result = findToken(data[key]);
+                            if (result) {
+                                resolve(result);
+                            }
+                        }
+                    }
                 }
-            }
-        };
+            };
 
-        const token = findToken(data);
-        if (!token) {
-            resolve(null); // Resolve with null if no JWT token is found
+            const token = findToken(data);
+            if (!token) {
+                resolve(null); // Resolve with null if no JWT token is found
+            }
+        } catch (error) {
+            reject(error)
         }
     });
 };
@@ -472,6 +429,6 @@ const findJwtToken = async (data) => {
 
 module.exports = {
     findJwtToken, decodeJWT,
-    scrapWebsite, extractVisibleText, withRetry, CronJobVIdeoDelete, SSLverifier, OtpGenerator, HostnameAppIDGetter,
+    scrapWebsite, extractVisibleText, withRetry, CronJobVIdeoDelete, SSLverifier, OtpGenerator,
     fillInputFields, takeScreenshot, fillInputFieldsBlackPassword, shouldIgnoreURL, containsQueryParams, extractRootDomain
 }

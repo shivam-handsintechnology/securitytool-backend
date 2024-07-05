@@ -1,8 +1,8 @@
 const { chromium } = require('playwright');
 const path = require('path');
-const { scrapWebsite, fillInputFields, takeScreenshot, withRetry } = require('..');
+const { scrapWebsite, fillInputFields, withRetry } = require('..');
 const fs = require("fs");
-const { possibleauthapiTexts, apiRequestsToAbort } = require("../../data/json/ApplicationTestingData.json")
+const { possibleauthapiTexts } = require("../../data/json/ApplicationTestingData.json")
 let requestabort = async (page) => {
   await page.route('**', (route) => {
     const requestUrl = route.request().url();

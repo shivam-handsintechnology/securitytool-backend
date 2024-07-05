@@ -11,21 +11,21 @@ async function checkForModules(name) {
         if (fs.existsSync(nodeModulesPath)) {
             // Read the content of the node_modules directory
             const nodeModules = fs.readdirSync(nodeModulesPath);
-            
+
             // Check if any of the -related modules are present
-            const Modules = nodeModules.filter(module => module.startsWith(name) );
+            const Modules = nodeModules.filter(module => module.startsWith(name));
 
             if (Modules.length > 0) {
-              return true
+                return true
             } else {
-               return false
+                return false
             }
         } else {
-           return false
+            return false
         }
     } catch (err) {
-        return false
+        if (err) return false
     }
 }
-module.exports=checkForModules
+module.exports = checkForModules
 

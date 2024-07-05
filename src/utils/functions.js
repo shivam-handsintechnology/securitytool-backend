@@ -1,4 +1,4 @@
-const { isValidObjectId } = require('mongoose');
+
 const Project_Security_Logs = require('.././models/Project_Security_Logs')
 let validator = require('validator');
 const { default: axios } = require('axios');
@@ -73,7 +73,7 @@ const CreateuserDetails = async (req, res, message, type) => {
 }
 
 
-async function checkForSensitiveInfoInBody(data, keysToMatch, passwordTestHashes) {
+async function checkForSensitiveInfoInBody(data, keysToMatch) {
   try {
     let result = []
     let matchedData = null; // Initialize variable to store matched data
@@ -101,7 +101,7 @@ async function checkForSensitiveInfoInBody(data, keysToMatch, passwordTestHashes
 }
 
 
-async function CheckPasswordKeyText(data, keysToMatch, passwordhashlist) {
+async function CheckPasswordKeyText(data, keysToMatch) {
 
   try {
     let isHashedPassword = false; // Initialize variable to store matched data
@@ -227,7 +227,7 @@ const CheckAllSensitiveData = async (data) => {
       try {
         JSON.parse(str);
       } catch (e) {
-        return false;
+        if (e) return false;
       }
       return true;
     };

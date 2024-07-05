@@ -414,34 +414,7 @@ const extractRootDomain = (url) => {
     const tld = parts[length - 1];
     return `${domain}.${tld}`;
 };
-const findJwtToken = (data) => {
-    if (typeof data === 'string') {
-        // Check if the string is a JWT token
-        if (validator.isJWT(data)) {
-            return data;
-        }
-    } else if (Array.isArray(data)) {
-        // Iterate over array elements
-        for (const element of data) {
-            const result = findJwtToken(element);
-            if (result) {
-                return result;
-            }
-        }
-    } else if (typeof data === 'object' && data !== null) {
-        // Iterate over object properties
-        for (const key in data) {
-            if (data.hasOwnProperty(key)) {
-                const result = findJwtToken(data[key]);
-                if (result) {
-                    return result;
-                }
-            }
-        }
-    }
 
-    return null; // Return null if no JWT token is found
-};
 function decodeJWT(token) {
 
     try {
@@ -450,12 +423,53 @@ function decodeJWT(token) {
             throw new Error('Invalid JWT format');
         }
         const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-        return payload;
+        // const iat = payload.iat ? new Date(payload.iat * 1000) : null;
+        // const exp = payload.exp ? new Date(payload.exp * 1000) : null;
+        const totalexpiretime = payload.exp ? payload.exp - payload.iat : null;
+
+        return totalexpiretime
+
     } catch (error) {
         return null
     }
 
 }
+
+const findJwtToken = async (data) => {
+    return new Promise((resolve, reject) => {
+        const findToken = (data) => {
+            if (typeof data === 'string') {
+                if (validator.isJWT(data)) {
+                    resolve(decodeJWT(data));
+                }
+            } else if (Array.isArray(data)) {
+                for (const element of data) {
+                    const result = findToken(element);
+                    if (result) {
+                        resolve(result);
+                    }
+                }
+            } else if (typeof data === 'object' && data !== null) {
+                for (const key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        const result = findToken(data[key]);
+                        if (result) {
+                            resolve(result);
+                        }
+                    }
+                }
+            }
+        };
+
+        const token = findToken(data);
+        if (!token) {
+            resolve(null); // Resolve with null if no JWT token is found
+        }
+    });
+};
+
+
+
 module.exports = {
     findJwtToken, decodeJWT,
     scrapWebsite, extractVisibleText, withRetry, CronJobVIdeoDelete, SSLverifier, OtpGenerator, HostnameAppIDGetter,

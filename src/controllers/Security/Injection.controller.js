@@ -3,7 +3,7 @@ const { sendResponse } = require('../../utils/dataHandler')
 const { errorHandler } = require('../../utils/errorHandler')
 const getRandomColor = require('../../helpers/randomColorGenerator')
 const { default: mongoose } = require('mongoose')
-const scanSQLvulnerability = require('../../utils/TestWithPlayWright/Sqlvulnurability')
+const { scanSQLvulnerability } = require('../../utils/TestWithPlayWright')
 
 const getAllLogs = async (req, res) => {
     try {
@@ -65,7 +65,7 @@ const getLogsCount = async (req, res) => {
         console.log("object", req.user);
         let finalResult = [];
         let result = {};
-        const alltypesinjection = require("../../utils/Injectionstype.json").data;
+        const alltypesinjection = require("../../data/json/ApplicationTestingData.json").injectiontypes;
         const typeTitles = alltypesinjection.map(entry => entry.slug);
         data = await Project_Security_Logs.aggregate([
             {

@@ -1,6 +1,6 @@
-const testSqlWildcardDos = require("../../utils/TestWithPlayWright/sqlWildcardDosTest");
-const { TestLockoutFeature } = require("../../utils/TestWithPlayWright/LockoutFeatureTest");
-const { MiscellaneousAttacks } = require("../../utils/TestWithPlayWright/MiscellaneousAttacks");
+const testSqlWildcardDos = require("../../utils/TestWithPlayWright");
+const { TestLockoutFeature } = require("../../utils/TestWithPlayWright");
+const { MiscellaneousAttacks } = require("../../utils/TestWithPlayWright");
 
 
 module.exports = {

@@ -6,7 +6,7 @@ const swaggerDocument = require('../swagger.json');
 const AuditMiddleware = require('../middlewares/AuditMiddleware');
 // Import Middlewares  And Functions
 
-const { ValidationMiddleware, ValidationMiddlewareQuery, AuthDomainMiddleware } = require('../middlewares/ValidationMiddleware');
+const { ValidationMiddleware, AuthDomainMiddleware } = require('../middlewares/ValidationMiddleware');
 const verifytoken = require('../middlewares/VerifyUser')
 const verifyToken = require('../middlewares/VerifyUser');
 const GetFileCOntentMiddleware = require('../middlewares/GetFileCOntentMiddleware');
@@ -52,7 +52,7 @@ router.use("/AuthSessionGuardian", CorsMiddleware, IncomingDataHashFormat, verif
 router.use("/injections", AuthDomainMiddleware, CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, InjectionsRoute)
 // SSL Verify
 router.use("/SSLVerify", AuthDomainMiddleware, CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, verifyToken,
-  ValidationMiddlewareQuery(DomainValidationSchema), SSlRouter)
+  ValidationMiddleware(DomainValidationSchema), SSlRouter)
 // Error Message
 router.use("/ErrorMessage", AuthDomainMiddleware, CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, ErrorMessagesRoute)
 // Insecure Direct Object References

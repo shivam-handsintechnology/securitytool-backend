@@ -3,7 +3,20 @@ const cheerio = require('cheerio');
 const moment = require('moment')
 const validator = require('validator');
 const tls = require('tls');
+const dns = require("dns");
 const { ignorePatterns, queryParams } = require("../data/json/ApplicationTestingData.json");
+const BcryptRegX = /^\$2[ayb]\$.{56}$/i
+const checkDomainAvailability = async (domain) => {
+    return new Promise((resolve, reject) => {
+        dns.lookup(domain, (err, d) => {
+            if (err && err.code === "ENOTFOUND") {
+                resolve(false);
+            } else {
+                resolve(true);
+            }
+        });
+    });
+}
 const SSLverifier = async (hostname) => {
     return new Promise((resolve, reject) => {
         try {
@@ -425,10 +438,294 @@ const findJwtToken = async (data) => {
     });
 };
 
+const validatePassword = async (str = '') => {
+    const { length: l } = str;
+    const strArr = str.split('');
+    if (l < 6 || l > 20) {
+        return false;
+    };
+    const specialCharacters = '!@#$%^&*()-+';
+    const alphabets = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '0123456789';
+    const checkWith = (char, set) => set.includes(char);
+    const containsSpecialCharacter = strArr.some(char => checkWith(char, specialCharacters));
+    const containsLowercase = strArr.some(char => checkWith(char, alphabets));
+    const containsUppercase = strArr.some(char => checkWith(char, alphabets.toUpperCase()));
+    const containsNumber = strArr.some(char => checkWith(char, numbers));
 
+    return { containsSpecialCharacter, containsLowercase, containsUppercase, containsNumber }
+};
+async function sendEmail(to, subject, text) {
+    const nodemailer = require('nodemailer');
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth
+            : {
+            user: process.env.EMAIL,
+            pass: process.env.PASSWORD
+        }
+    });
+    let mailOptions = {
+        from: process.env.EMAIL,
+        to: to,
+        subject: subject,
+        text: text
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            throw new Error(error)
+        } else {
+            return "Email Sent" + info.response
+        }
+    });
+}
+
+
+function checkHashedData(value, isHashedPassword) {
+    console.log("bcrypt test", BcryptRegX.test(value))
+    console.log("bcrypt test value", value)
+    if (validator.isMD5(value)
+        || BcryptRegX.test(value)
+        || validator.isHash(value)
+        || validator.isStrongPassword(value)
+    ) {
+        isHashedPassword = true;
+    }
+
+    return isHashedPassword;
+}
+
+async function checkForSensitiveInfoInBody(data, keysToMatch) {
+    try {
+        let result = []
+        let matchedData = null; // Initialize variable to store matched data
+        const recursiveSearch = (currentData) => {
+            if (typeof currentData === "object" && currentData !== null) {
+                // If the current data is an object, recursively search its properties
+                Object.entries(currentData).forEach(([key, value]) => {
+                    if (keysToMatch.includes(key) && value) {
+                        // If the current key matches one of the keys and the value is not falsy, set it as the matched data
+                        matchedData = key;
+                        result.push(matchedData)
+                    } else {
+                        recursiveSearch(value);
+                    }
+                });
+            }
+        }
+
+        recursiveSearch(data);
+        console.log("result", result)
+        return result;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
+
+
+async function CheckPasswordKeyText(data, keysToMatch) {
+
+    try {
+        let isHashedPassword = false; // Initialize variable to store matched data
+        let ispassword = false
+        const recursiveSearch = (currentData) => {
+            if (typeof currentData === "object" && currentData !== null) {
+                // If the current data is an object, recursively search its properties
+                Object.entries(currentData).forEach(([key, value]) => {
+                    if (keysToMatch.includes(key) && value) {
+                        ispassword = true
+                        isHashedPassword = checkHashedData(value, isHashedPassword)
+                    } else {
+                        recursiveSearch(value);
+                    }
+                });
+            }
+        }
+        recursiveSearch(data);
+        return { isHashedPassword, ispassword };
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
+async function CheckAllDataIsEncrypted(data, keysToMatch) {
+    try {
+        const matchedData = []; // Initialize array to store matched data
+        const recursiveSearch = (currentData) => {
+            if (typeof currentData === "object" && currentData !== null) {
+                // If the current data is an object, recursively search its properties
+                Object.entries(currentData).forEach(([key, value]) => {
+                    if (keysToMatch.includes(key) && value) {
+                        // If the current key matches one of the keys and the value is not falsy
+                        const matchedItem = { key, value, encrypted: false };
+                        let encrypted = checkHashedData(value, data = false)
+                        matchedItem["encrypted"] = encrypted
+                        matchedData.push(matchedItem);
+
+                    }
+                    else {
+                        recursiveSearch(value);
+                    }
+                });
+            }
+        }
+        recursiveSearch(data);
+        return matchedData;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
+// Define a function to check for CSS injection
+const CheckAllSensitiveData = async (data) => {
+    try {
+        const result = [];
+
+        const checkForSensitiveData = (obj) => {
+            if (Array.isArray(obj)) {
+                obj.forEach(item => {
+                    if (typeof item === 'object' && item !== null) {
+                        if (item.hasOwnProperty('value')) {
+                            checkValue(item);
+                        } else {
+                            checkForSensitiveData(item);
+                        }
+                    }
+                });
+            } else if (typeof obj === 'object' && obj !== null) {
+                for (const key in obj) {
+                    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                        const value = obj[key];
+                        if (typeof value === 'object' && value !== null) {
+                            checkForSensitiveData(value);
+                        } else if (typeof value === 'string') {
+                            checkValue({ key, value });
+                        }
+                    }
+                }
+            }
+            return result;
+        };
+
+        const checkValue = (item) => {
+            let { key, value } = item;
+
+            const sensitiveData = {
+                Email: { id: false, data: value },
+                "JSON Web Token": { id: false, data: value },
+                ObjectId: { id: false, data: value },
+                PassportNumber: { id: false, data: value },
+                CreditCard: { id: false, data: value },
+                Password: { id: false, data: value },
+                PhoneNumber: { id: false, data: value },
+                UUID: { id: false, data: value }
+            };
+
+            value = value.replace(/^"|"$/g, '').replace(/^'|'$/g, '');
+
+            if (isJsonString(value)) {
+                const parsedValue = JSON.parse(value);
+                checkForSensitiveData(parsedValue);
+            } else {
+                if (validator.isEmail(value)) {
+                    sensitiveData.Email.id = true;
+                } else if (validator.isJWT(value)) {
+                    sensitiveData["JSON Web Token"].id = true;
+                } else if (validator.isMongoId(value)) {
+                    sensitiveData.ObjectId.id = true;
+                } else if (validator.isCreditCard(value)) {
+                    sensitiveData.CreditCard.id = true;
+                } else if (validator.isStrongPassword(value)) {
+                    sensitiveData.Password.id = true;
+                } else if (validator.isMobilePhone(value)) {
+                    sensitiveData.PhoneNumber.id = true;
+                } else if (validator.isUUID(value)) {
+                    sensitiveData.UUID.id = true;
+                }
+            }
+
+            result.push({ key, value: sensitiveData });
+        };
+
+        const isJsonString = (str) => {
+            try {
+                JSON.parse(str);
+            } catch (e) {
+                if (e) return false;
+            }
+            return true;
+        };
+
+        return checkForSensitiveData(data);
+    } catch (error) {
+        console.log("Error in CheckAllSensitiveData", error);
+        throw new Error(error.message);
+    }
+};
+const analyzeSessionCookie = (sessionCookie, localdata, sessiondata) => {
+
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let sessionCookieobj = sessionCookie && sessionCookie.sessionData ? sessionCookie.sessionData : null
+            let sessionCookiesdata = sessionCookie && sessionCookie.Cookiesdata ? sessionCookie.Cookiesdata : null
+            let cookietoken = await findJwtToken(sessionCookiesdata).then((data) => data).catch((error) => null)
+            let localstoragetoken = await findJwtToken(localdata).then((data) => data).catch((error) => null)
+            let sessionstoragetoken = await findJwtToken(sessiondata).then((data) => data).catch((error) => null)
+            console.log("token", cookietoken)
+            console.log("localstoragetoken", localstoragetoken)
+            console.log("sessionstoragetoken", sessionstoragetoken)
+            let sessionExpiretotaltime = cookietoken || localstoragetoken || sessionstoragetoken
+            console.log("sessionExpiretotaltime", sessionExpiretotaltime)
+
+            let possibilities = {};
+            let sessionNotFound = sessionCookieobj ? sessionCookieobj : null
+            // Check if session token is being passed in other areas apart from cookies
+            console.log("sessionNotFound", sessionNotFound)
+            // Check if session token is being passed in other areas apart from cookies
+            possibilities["Session Token Being Passed In Other Areas Apart From Cookies"] =
+                (localdata && localdata.containsJWT) || (sessiondata && sessiondata.containsJWT) ? "Yes" : "No"
+
+            // Check if session expires on closing the browser
+            possibilities["Session Does Not Expire On Closing The Browser"] =
+                (sessionNotFound?.originalMaxAge || sessionExpiretotaltime === null) ? "NO" : "Yes"
+
+            // Check session timeout
+            if (sessionNotFound?.originalMaxAge || sessionExpiretotaltime === null) {
+                possibilities["Session Time-Out Is High (Or) Not Implemented"] = "Not Implemented"
+            } else {
+                const maxAge = sessionNotFound?.originalMaxAge || sessionExpiretotaltime;
+                if (maxAge === null) {
+                    possibilities["Session Time-Out Is High (Or) Not Implemented"] = "High (No timeout set)"
+                } else {
+                    // Convert maxAge to hours for easier interpretation
+                    //convert maxage to days
+                    const maxAgeHours = Math.floor(maxAge / 3600000);
+                    console.log("maxAgeHours", maxAgeHours)
+                    possibilities["Session Time-Out Is High (Or) Not Implemented"] =
+                        maxAgeHours > 1 ? `High (${maxAgeHours} days)` : `Normal (${maxAgeHours} days)`
+                }
+            }
+
+            // Check for session fixation vulnerability
+            possibilities["An Adversary Can Hijack User Sessions By Session Fixation"] =
+                !sessionNotFound ? "No" : !sessionNotFound.httpOnly ? "Yes" : "No"
+
+            // Check for session hijacking vulnerability
+            possibilities["Application Is Vulnerable To Session Hijacking Attack"] =
+                !sessionNotFound ? "No" : !sessionNotFound.secure || sessionNotFound.sameSite === null ? "Yes" : "No"
+
+            // Convert possibilities object to array of objects
+            let results = Object.keys(possibilities).map(key => ({ [key]: possibilities[key] }));
+            resolve(results);
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
 
 module.exports = {
-    findJwtToken, decodeJWT,
+    checkForSensitiveInfoInBody, CheckAllSensitiveData,
+    CheckPasswordKeyText, CheckAllDataIsEncrypted, analyzeSessionCookie,
+    findJwtToken, decodeJWT, validatePassword, checkDomainAvailability, sendEmail,
     scrapWebsite, extractVisibleText, withRetry, CronJobVIdeoDelete, SSLverifier, OtpGenerator,
     fillInputFields, takeScreenshot, fillInputFieldsBlackPassword, shouldIgnoreURL, containsQueryParams, extractRootDomain
 }

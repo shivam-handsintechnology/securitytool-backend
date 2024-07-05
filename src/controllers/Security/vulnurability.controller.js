@@ -1,8 +1,8 @@
 
 const { Project_Security_Logs } = require("../../models/Project_Security_Logs");
 const { CrticalInformationInurl } = require("../../models/sensitivekeywordsModel");
-const { checkForSensitiveInfoInBody, CheckPasswordKeyText, CheckAllDataIsEncrypted, } = require("../../utils/functions");
-const { sensitivedata, passwordkeys, } = require("../../sensitive/availableapikeys");
+const { checkForSensitiveInfoInBody, CheckPasswordKeyText, CheckAllDataIsEncrypted, } = require("../../utils");
+const { sensitivedata, passwordkeys, } = require("../../data/json/ApplicationTestingData.json");
 const { sendResponse } = require("../../utils/dataHandler");
 const { errorHandler } = require("../../utils/errorHandler");
 const { PasswordValidateModel } = require('../../models/PasswordVaildateModel');

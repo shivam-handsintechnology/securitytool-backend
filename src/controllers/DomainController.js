@@ -1,7 +1,8 @@
-const { checkDomainAvailability } = require("../utilities/functions/functions");
+
 const { sendResponse } = require("../utils/dataHandler");
 const { default: mongoose } = require("mongoose");
 const { AllowedDomainsModel, AllowedWebDomainsModel } = require("../models/AllowedDomainsModel");
+const { checkDomainAvailability } = require("../utils");
 
 module.exports = {
     addDomain: async (req, res) => {

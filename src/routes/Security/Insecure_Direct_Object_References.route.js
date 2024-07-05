@@ -1,11 +1,11 @@
 const router = require('express').Router();
 const InsecureObjectRefGuard = require('../../controllers/Security/InsecureObjectRefGuard.controoler');
 const { DomainValidationSchema } = require('../../helpers/Validators');
-const { ValidationMiddlewareQuery, AuthDomainMiddleware } = require('../../middlewares/ValidationMiddleware');
+const { ValidationMiddleware, AuthDomainMiddleware } = require('../../middlewares/ValidationMiddleware');
 const verifyToken = require('../../middlewares/VerifyUser');
-router.get('/DirectoryListingEnable', verifyToken, ValidationMiddlewareQuery(DomainValidationSchema), AuthDomainMiddleware, InsecureObjectRefGuard.DirectoryListingEnable);
-// router.get('/httpparameterpollution', verifyToken, ValidationMiddlewareQuery(DomainValidationSchema), AuthDomainMiddleware, InsecureObjectRefGuard.httpparameterpollution);
-router.get('/robottxt', verifyToken, ValidationMiddlewareQuery(DomainValidationSchema), AuthDomainMiddleware, InsecureObjectRefGuard.robotsTxtPath);
+router.get('/DirectoryListingEnable', verifyToken, ValidationMiddleware(DomainValidationSchema), AuthDomainMiddleware, InsecureObjectRefGuard.DirectoryListingEnable);
+// router.get('/httpparameterpollution', verifyToken, ValidationMiddleware(DomainValidationSchema), AuthDomainMiddleware, InsecureObjectRefGuard.httpparameterpollution);
+router.get('/robottxt', verifyToken, ValidationMiddleware(DomainValidationSchema), AuthDomainMiddleware, InsecureObjectRefGuard.robotsTxtPath);
 router.post('/fetch', verifyToken, InsecureObjectRefGuard.fetch);
 router.post('/post', verifyToken, InsecureObjectRefGuard.post);
 module.exports = router;

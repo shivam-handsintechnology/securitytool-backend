@@ -1,8 +1,6 @@
 const Audit = require("../models/Audit.model");
 
 module.exports = async (req, res, next) => {
-    console.log(req.originalUrl);
-
     const sessionData = {
         url: req.originalUrl,
         method: req.method,

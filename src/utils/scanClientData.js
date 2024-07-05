@@ -1,7 +1,7 @@
 
 const {
   sensitivedata,
-} = require("../sensitive/availableapikeys");
+} = require("../data/json/ApplicationTestingData.json");
 const staticFolders = require("../data/json/staticFolders.json");
 
 // regular expression paterns

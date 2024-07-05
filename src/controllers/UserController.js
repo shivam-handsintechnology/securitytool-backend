@@ -11,9 +11,9 @@ const Razorpay = require("razorpay");
 const key_id = process.env.NODE_ENV == "production" ? process.env.RAZORPAY_KEY_ID : process.env.RAZORPAY_KEY_ID_TEST
 const key_secret = process.env.NODE_ENV == "production" ? process.env.RAZORPAY_KEY_SECRET : process.env.RAZORPAY_KEY_SECRET_TEST
 const { validatePaymentVerification } = require("razorpay/dist/utils/razorpay-utils");
-const { OtpGenerator } = require("../utils");
-const sendEmail = require("../helpers/sendEmail");
-const { checkDomainAvailability } = require("../utilities/functions/functions");
+const { OtpGenerator, checkDomainAvailability } = require("../utils");
+const sendEmail = require("../utils");
+
 const instance = new Razorpay({
   key_id: key_id,
   key_secret: key_secret,

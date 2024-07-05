@@ -2,8 +2,7 @@ const Joi = require('joi');
 const moment = require('moment');
 const { errorHandler } = require('../utils/errorHandler');
 const User = require("../models/User");
-const { checkDomainAvailability } = require('../utilities/functions/functions');
-const { extractRootDomain } = require('../utils');
+const { extractRootDomain, checkDomainAvailability } = require('../utils');
 const ValidationMiddleware = (schema) => {
     return (req, res, next) => {
         let statusCode = 500
@@ -25,32 +24,7 @@ const ValidationMiddleware = (schema) => {
         }
     }
 };
-const ValidationMiddlewareQuery = (schema) => {
-    return async (req, res, next) => {
-        let statusCode = 500
-        try {
-            const payload = {
-                ...req.query,
-                ...req.params,
-            }
 
-            const { error } = Joi.object(schema).unknown(true).validate(payload)
-
-            if (error) {
-                const { details } = error;
-                const message = details.map(i => i.message).join(',');
-                statusCode = 422
-                throw new Error(message)
-            }
-
-
-            next()
-
-        } catch (error) {
-            return errorHandler(res, statusCode, error.message)
-        }
-    };
-};
 const AuthDomainMiddleware = async (req, res, next) => {
     let statusCode = 500
     try {
@@ -147,4 +121,4 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
 }
 
 
-module.exports = { ValidationMiddleware, ValidationMiddlewareQuery, AuthDomainMiddleware, AuthDomainMiddlewarePackage };
+module.exports = { ValidationMiddleware, AuthDomainMiddleware, AuthDomainMiddlewarePackage };

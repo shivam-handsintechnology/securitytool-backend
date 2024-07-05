@@ -5,7 +5,7 @@ const { sendResponse } = require("../../utils/dataHandler")
 const { AllowedDomainsModel } = require("../../models/AllowedDomainsModel")
 const { ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanDirectoryOptionMethod } = require("../../utils/scanClientData")
 const { errorHandler } = require("../../utils/errorHandler")
-const { DefaultUserNamePasswordTest } = require("../../utils/TestWithPlayWright/DefaultusernamePasswordTest")
+const { DefaultUserNamePasswordTest } = require("../../utils/TestWithPlayWright")
 
 module.exports = {
     arbitraryMethods: async (req, res) => {

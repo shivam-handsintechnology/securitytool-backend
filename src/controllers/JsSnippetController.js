@@ -2,7 +2,7 @@ const path = require('path');
 const { sendResponse } = require('../utils/dataHandler');
 const { errorHandler } = require('../utils/errorHandler');
 const SensitiveDataStoredInLocalStorageModel = require('../models/Security/SensitiveDataStoredInLocalStorage.model');
-const { CheckAllSensitiveData } = require('../utils/functions');
+const { CheckAllSensitiveData } = require('../utils');
 const SensitiveDataStoredInSessionStorageModel = require('../models/Security/SensitiveDataStoredInSessionStorage.model');
 const getALlDataFromSnippet = async (req, res) => {
   let status = 500;

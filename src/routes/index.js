@@ -51,13 +51,13 @@ router.use("/AuthSessionGuardian", CorsMiddleware, IncomingDataHashFormat, verif
   AuthSessionGuardian
 )
 // Injections
-// router.use("/injections",CorsMiddleware,AuditMiddleware, IncomingDataHashFormat, verifyToken, AuthDomainMiddleware, InjectionsRoute)
-router.use("/injections", AuthDomainMiddleware, CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, InjectionsRoute)
+router.use("/injections", CorsMiddleware, IncomingDataHashFormat, verifyToken, AuthDomainMiddleware, InjectionsRoute)
+// router.use("/injections", AuthDomainMiddleware, CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, InjectionsRoute)
 // SSL Verify
-router.use("/SSLVerify", AuthDomainMiddleware, CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, verifyToken,
+router.use("/SSLVerify", verifyToken, CorsMiddleware, AuthDomainMiddleware, AuditMiddleware, IncomingDataHashFormat,
   ValidationMiddleware(DomainValidationSchema), SSlRouter)
 // Error Message
-router.use("/ErrorMessage", AuthDomainMiddleware, CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, ErrorMessagesRoute)
+router.use("/ErrorMessage", CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, ErrorMessagesRoute)
 // Insecure Direct Object References
 router.use("/InsecureObjectRefGuard", CorsMiddleware, AuditMiddleware, IncomingDataHashFormat, InsecureObjectRefGuard)
 // SecurityMisconfigurationuu

@@ -10,6 +10,7 @@ module.exports = {
         try {
             // Call the respective controller function
             const payload = { ...req.body, ...req.query, ...req.params, }
+            console.log(payload)
             let [sessiondata] = await SensitiveDataStoredInSessionStorageModel.aggregate([
                 {
                     $match: {
@@ -24,32 +25,19 @@ module.exports = {
                 {
                     $addFields: {
                         containsJWT: {
-                            $map: {
-                                input: '$data',
-                                as: 'dataItem',
-                                in: {
-                                    $cond: {
-                                        if: {
-                                            $in: ["JSON Web Token", "$$dataItem.value.key"]
-                                        },
-                                        then: "$$dataItem",
-                                        else: null
-                                    }
+                            $anyElementTrue: {
+                                $map: {
+                                    input: '$data',
+                                    as: 'dataItem',
+                                    in: { $eq: ["$$dataItem.value.key", "JSON Web Token"] }
                                 }
                             }
                         }
                     }
                 },
                 {
-                    $addFields: {
-                        containsJWT: {
-                            $anyElementTrue: '$containsJWT'
-                        }
-                    }
-                },
-                {
                     $project: {
-                        data: '$data',
+                        data: 1,
                         containsJWT: 1,
                         _id: 0
                     }
@@ -59,7 +47,8 @@ module.exports = {
                 {
                     $match: {
                         appid: req.user.appid,
-                        subdomain: payload.domain, data: { $exists: true, $ne: [] }
+                        subdomain: payload.domain,
+                        data: { $exists: true, $ne: [] }
                     }
                 },
                 {
@@ -68,32 +57,19 @@ module.exports = {
                 {
                     $addFields: {
                         containsJWT: {
-                            $map: {
-                                input: '$data',
-                                as: 'dataItem',
-                                in: {
-                                    $cond: {
-                                        if: {
-                                            $in: ["JSON Web Token", "$$dataItem.value.key"]
-                                        },
-                                        then: "$$dataItem",
-                                        else: null
-                                    }
+                            $anyElementTrue: {
+                                $map: {
+                                    input: '$data',
+                                    as: 'dataItem',
+                                    in: { $eq: ["$$dataItem.value.key", "JSON Web Token"] }
                                 }
                             }
                         }
                     }
                 },
                 {
-                    $addFields: {
-                        containsJWT: {
-                            $anyElementTrue: '$containsJWT'
-                        }
-                    }
-                },
-                {
                     $project: {
-                        data: '$data',
+                        data: 1,
                         containsJWT: 1,
                         _id: 0
                     }
@@ -108,10 +84,16 @@ module.exports = {
                     }
                 },
                 {
+                    $project: {
+                        Cookiesdata: 1,
+                        _id: 0
+                    }
+                },
+                {
                     $limit: 1
                 },
             ]);
-
+            console.log({ sessionCookies, localdata, sessiondata })
             const results = await analyzeSessionCookie(sessionCookies, localdata, sessiondata).then(data => data)
 
             return sendResponse(res, 200, "fetch", results)

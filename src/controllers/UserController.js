@@ -450,9 +450,32 @@ const Profile = async (req, res) => {
 // get all users
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.aggregate([{
+    let { page, limit, search } = req.query;
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const startIndex = (page - 1) * limit;
+
+    let searchObj = search ? {
+      $or: [
+        {
+          "name": { $regex: search, $options: 'i' }
+        },
+        { "email": { $regex: search, $options: 'i' } },
+        { "subdomain": { $regex: search, $options: 'i' } },
+
+      ]
+    } : {}
+    console.log("searchObj", searchObj)
+    let totalCount = await User.countDocuments({
+      userType: "User",
+      expiresAt: null, ...searchObj
+
+    });
+    const data = await User.aggregate([{
       $match: {
-        userType: "User"
+        userType: "User",
+        expiresAt: null,
+        ...searchObj
       }
     },
     {
@@ -468,19 +491,64 @@ const getAllUsers = async (req, res) => {
     },
     {
       $project: {
-        password: 0,
-        userType: 0,
+        email: 1,
+        appid: 1, subsription: 1, subdomain: 1, name: 1, domain: 1
       }
-    }
+    }, { $skip: startIndex },
+    { $limit: limit },
+    { $sort: { createdAt: -1 } }
     ])
-    if (users) {
-      return sendResponse(res, 200, "Fetch users", users);
-    } else {
-      return sendResponse(res, 404, "Users not found");
+    if (data.length === 0) {
+
+      return sendResponse(res, 404, "Records are not found", { users: data, totalPages: 0 });
     }
+    return sendResponse(res, 200, "Fetch all domains", { users: data, totalPages: Math.ceil(totalCount / limit) });
+
   }
   catch (error) {
     console.log(error)
+    return errorHandler(res)
+  }
+}
+const getUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select(["-userType", "-password"]).populate("subsription")
+    if (user) {
+      return sendResponse(res, 200, "Fetch user", user);
+    } else {
+
+      return sendResponse(res, 404, "User not found");
+    }
+  }
+  catch (error) {
+
+    return errorHandler(res)
+  }
+}
+const updateUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req
+      .params.id, req.body, { new: true }).select(["-userType", "-password"])
+    if (user) {
+      return sendResponse(res, 200, "User updated successfully", user);
+    }
+    return sendResponse(res, 404, "User not found");
+  }
+  catch (error) {
+
+    return errorHandler(res)
+  }
+}
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id)
+    if (user) {
+      return sendResponse(res, 200, "User deleted successfully", user);
+    }
+    return sendResponse(res, 404, "User not found");
+  }
+  catch (error) {
+
     return errorHandler(res)
   }
 }
@@ -492,7 +560,7 @@ const UserController = {
   FBCustomerLogin,
   Profile,
   Checkout,
-  CheckoutSuccess, getAllUsers
+  CheckoutSuccess, getAllUsers, getUser, updateUser, deleteUser
 }
 
 module.exports = {

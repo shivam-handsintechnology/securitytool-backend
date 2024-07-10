@@ -13,9 +13,9 @@ module.exports = {
       res.header('Cross-Origin-Resource-Policy', "cross-origin");
       res.header("Access-Control-Allow-Headers", "Content-Type,Authorization,Origin, X-Requested-With,Accept");
 
-      if (!req.headers.origin || !req.headers["x-origin"]) {
-        return errorHandler(res, 403, "Forbidden");
-      }
+      // if (!req.headers.origin || !req.headers["x-origin"]) {
+      //   return errorHandler(res, 403, "Forbidden");
+      // }
 
       // Handle preflight requests
       if (req.method === 'OPTIONS') {

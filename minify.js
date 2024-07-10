@@ -61,11 +61,8 @@ async function processFiles(srcDir, destDir) {
 
     // Minify and obfuscate JavaScript files in the destination directory
     for (const file of files) {
-        if (path.extname(file) === '.js' && !file.includes('build')) {
+        if (path.extname(file) === '.js' && !file.includes('build') && !!file.includes('protect.js')) {
             await minifyJs(file);
-            if (!file.includes('protect.js')) {
-                obfuscateJs(file);
-            }
         }
     }
 }

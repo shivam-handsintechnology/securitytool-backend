@@ -15,10 +15,12 @@ const getALlDataFromSnippet = async (req, res) => {
       console.log("All Data", alldata);
 
       let sensitive = await CheckAllSensitiveData(alldata);
+      console.log("Sensitive Data", sensitive);
       sensitive = filterSensitiveData(sensitive);
+      const dataToStore = prepareSensitiveDataForStorage(sensitive, appid, domain, subdomain);
 
       if (sensitive.length > 0) {
-        await saveData(SensitiveDataStoredInLocalStorageModel, { appid, domain, subdomain, data: sensitive });
+        await saveData(SensitiveDataStoredInLocalStorageModel, dataToStore);
       }
     }
 
@@ -28,9 +30,11 @@ const getALlDataFromSnippet = async (req, res) => {
 
       let sensitive = await CheckAllSensitiveData(alldata);
       sensitive = filterSensitiveData(sensitive);
+      const dataToStore = prepareSensitiveDataForStorage(sensitive, appid, domain, subdomain);
+
 
       if (sensitive.length > 0) {
-        await saveData(SensitiveDataStoredInSessionStorageModel, { appid, domain, subdomain, data: sensitive });
+        await saveData(SensitiveDataStoredInSessionStorageModel, dataToStore);
       }
     }
 
@@ -58,6 +62,25 @@ const filterSensitiveData = (sensitive) => {
     });
     return { key: item.key, value: arr };
   }).filter(item => item.value.length > 0);
+};
+const prepareSensitiveDataForStorage = (filteredData, appid, domain, subdomain) => {
+  const preparedData = filteredData.flatMap(item =>
+    item.value.map(valueItem => ({
+      key: item.key,
+      value: {
+        key: valueItem.key,
+        id: valueItem.id,
+        value: valueItem.value
+      }
+    }))
+  );
+
+  return {
+    appid,
+    data: preparedData,
+    domain,
+    subdomain
+  };
 };
 
 const saveData = async (Model, dataToSave) => {

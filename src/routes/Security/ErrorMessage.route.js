@@ -4,9 +4,9 @@ const { ValidationMiddleware, AuthDomainMiddleware } = require("../../middleware
 const { DomainValidationSchema } = require("../../helpers/Validators");
 const ErrorMessageController = require("../../controllers/Security/ErrorMessage.controller");
 const GetFileCOntentMiddleware = require("../../middlewares/GetFileCOntentMiddleware")
-router.get("/", verifyToken, ValidationMiddleware(DomainValidationSchema), GetFileCOntentMiddleware,
+router.get("/", ValidationMiddleware(DomainValidationSchema), GetFileCOntentMiddleware,
     ErrorMessageController.getAllErrorMessages)
-router.get("/403error-message", verifyToken, ValidationMiddleware(DomainValidationSchema), AuthDomainMiddleware, GetFileCOntentMiddleware, ErrorMessageController.get403ErrorMessage)
-router.get("/http-error-messages", verifyToken, ValidationMiddleware(DomainValidationSchema), AuthDomainMiddleware, GetFileCOntentMiddleware, ErrorMessageController.getHttpErrorMessages)
-router.get("/login-error-messages", verifyToken, ValidationMiddleware(DomainValidationSchema), AuthDomainMiddleware, GetFileCOntentMiddleware, ErrorMessageController.getLoginErrorMessages)
+router.get("/403error-message", ValidationMiddleware(DomainValidationSchema), AuthDomainMiddleware, GetFileCOntentMiddleware, ErrorMessageController.get403ErrorMessage)
+router.get("/http-error-messages", ValidationMiddleware(DomainValidationSchema), AuthDomainMiddleware, GetFileCOntentMiddleware, ErrorMessageController.getHttpErrorMessages)
+router.get("/login-error-messages", ValidationMiddleware(DomainValidationSchema), AuthDomainMiddleware, GetFileCOntentMiddleware, ErrorMessageController.getLoginErrorMessages)
 module.exports = router

@@ -1,4 +1,5 @@
 const { AllowedWebDomainsModel } = require("../../models/AllowedDomainsModel");
+const User = require("../../models/User");
 const { sendResponse } = require("../../utils/dataHandler");
 const { errorHandler } = require("../../utils/errorHandler");
 
@@ -7,36 +8,23 @@ module.exports = {
     // Is "Origin" header in client request validated at the server?
     isOriginHeaderValidated: async function (req, res) {
         try {
-            let domainData = await AllowedWebDomainsModel.aggregate([
-                {
-                    $match: {
-                        appid: req.user.appid,
-                    },
-                },
-                {
-                    $group: {
-                        _id: null,
-                        domains: { $addToSet: "$domain" },
-                    },
-                },
-            ]);
+            const { domain } = req.query
+            let domainData = await User.findOne({ domain: domain, appid: req.user.appid });
 
-            let domainsArray = domainData.length > 0 ? domainData[0].domains : [];
-            if (domainsArray.length === 0) {
-                return errorHandler(res, 404, "Application not found");
-            }
-            if (domainsArray.length > 0) {
-                let response = await fetch(`http://${req.query.domain}`)
+
+            if (domainData && domainData.domain) {
+                let response = await fetch(`http://${domain}`)
                 let OriginAtClient = response.headers.get('Access-Control-Allow-Origin')
                 console.log("OriginAtClient", OriginAtClient)
-                if(!OriginAtClient){
+                if (!OriginAtClient) {
                     return sendResponse(res, 200, "Origin header in client request is not validated at the server", "No")
                 }
-                let existSome = domainsArray.some((domain) => OriginAtClient.includes(domain))
-                if (existSome) {
+                const parsedUrl = new URL(OriginAtClient);
+                const subdomain = parsedUrl.hostname;
+                if (subdomain == domainData.domain) {
                     return sendResponse(res, 200, "Origin header in client request is validated at the server", "Yes")
                 }
-                if (!existSome) {
+                else if (subdomain !== domainData.domain) {
                     return sendResponse(res, 200, "Origin header in client request is not validated at the server", "No"
                     )
                 }
@@ -53,7 +41,7 @@ module.exports = {
         try {
             let response = await fetch(`http://${req.query.domain}`)
             let OriginAtClient = response.headers.get('Access-Control-Allow-Origin')
-            if(!OriginAtClient){
+            if (!OriginAtClient) {
                 return sendResponse(res, 200, "Origin header in client request is not validated at the server", "No")
             }
             if (OriginAtClient.includes("*")) {

@@ -37,7 +37,7 @@ const AuthDomainMiddleware = async (req, res, next) => {
         let url = `http://${domain}`
         const parsedUrl = new URL(`http://${domain}`);
         const subdomain = parsedUrl.hostname;
-        domain = extractRootDomain(url)
+        // domain = extractRootDomain(url)
         console.log(domain)
         if (!appid) {
             throw new Error("Appid is required")

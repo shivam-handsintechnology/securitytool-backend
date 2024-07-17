@@ -11,8 +11,8 @@ const Razorpay = require("razorpay");
 const key_id = process.env.NODE_ENV == "production" ? process.env.RAZORPAY_KEY_ID : process.env.RAZORPAY_KEY_ID_TEST
 const key_secret = process.env.NODE_ENV == "production" ? process.env.RAZORPAY_KEY_SECRET : process.env.RAZORPAY_KEY_SECRET_TEST
 const { validatePaymentVerification } = require("razorpay/dist/utils/razorpay-utils");
-const { OtpGenerator, checkDomainAvailability } = require("../utils");
-const sendEmail = require("../utils");
+const { OtpGenerator, checkDomainAvailability, sendEmail } = require("../utils");
+
 
 const instance = new Razorpay({
   key_id: key_id,
@@ -214,6 +214,7 @@ const Login = async (req, res, next) => {
     return sendResponse(res, 201, "login successfully", { token, appid: user.appid });
 
   } catch (error) {
+    console.log(error)
     return errorHandler(res, status || 500, error.message)
   }
 
@@ -434,16 +435,18 @@ const FBCustomerLogin = async function (req, res) {
 //   
 const Profile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select(["-userType", "-password"]).populate("subsription")
+    let user = await User.findById(req.user.id).select(["-userType", "-password"]).populate("subsription")
+    user = user.toObject()
+    // user.domain = user.subdomain
     if (user) {
       return sendResponse(res, 200, "Fetch user", user);
     } else {
 
-      return sendResponse(res, 404, "User not found");
+      return errorHandler(res, 404, "User not found");
     }
   }
   catch (error) {
-
+    console.log(error)
     return errorHandler(res)
   }
 }

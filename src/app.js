@@ -1,5 +1,4 @@
 // Import external modules
-const fs = require('fs');
 const cors = require('cors');
 const path = require('path');
 const fileUpload = require('express-fileupload')
@@ -12,7 +11,6 @@ const http = require('http');
 const mongoSanitize = require('express-mongo-sanitize');
 const process = require("process");
 // import internal modules
-// app.js or server.js
 
 // Rest of your application code.
 const logger = require('./logger/logger');
@@ -83,6 +81,7 @@ setInterval(() => {
   CronJobVIdeoDelete()
 }, 600000); // Cron job for video deletion
 // CLeanDatabase() // Clean the database
+
 
 module.exports = app;
 

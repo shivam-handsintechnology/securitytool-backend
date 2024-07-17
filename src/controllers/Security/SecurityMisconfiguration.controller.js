@@ -2,16 +2,16 @@
 const { default: axios } = require("axios")
 const validator = require("validator")
 const { sendResponse } = require("../../utils/dataHandler")
-const { AllowedDomainsModel } = require("../../models/AllowedDomainsModel")
 const { ScanDangerousMethods, getLatestNodeVersion, ScanArbitaryMethods, scanDirectoryOptionMethod } = require("../../utils/scanClientData")
 const { errorHandler } = require("../../utils/errorHandler")
 const { DefaultUserNamePasswordTest } = require("../../utils/TestWithPlayWright")
+const User = require("../../models/User")
 
 module.exports = {
     arbitraryMethods: async (req, res) => {
         try {
             let domain = req.query.domain
-            let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
+            let isExistDomain = await User.findOne({ domain: domain, _id: req.user.id });
             if (isExistDomain) {
                 // let response = await axios.get(url)
                 let response = req.body.fileContent
@@ -33,7 +33,7 @@ module.exports = {
     DangerousHttpMethodsEnabled: async (req, res) => {
         try {
             let domain = req.query.domain
-            let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
+            let isExistDomain = await User.findOne({ domain: domain, _id: req.user.id });
             if (isExistDomain) {
                 let response = req.body.fileContent
 
@@ -55,7 +55,7 @@ module.exports = {
         try {
             let response = req.body.fileContent
             let domain = req.query.domain
-            let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
+            let isExistDomain = await User.findOne({ domain: domain, _id: req.user.id });
             if (isExistDomain) {
                 let data = await scanDirectoryOptionMethod(response).then((data) => {
                     return data
@@ -76,7 +76,7 @@ module.exports = {
 
             let domain = req.query.domain
             let url = `http://${domain}/passwords-insecure`;
-            let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
+            let isExistDomain = await User.findOne({ domain: domain, _id: req.user.id });
             if (isExistDomain) {
                 let response = await axios.get(url, {
                     headers: {
@@ -121,7 +121,7 @@ module.exports = {
         try {
             let domain = req.query.domain
             let url = `http://${domain}/passwords-insecure`;
-            let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
+            let isExistDomain = await User.findOne({ domain: domain, _id: req.user.id });
             if (isExistDomain) {
                 let response = await axios.get(url, {
                     headers: {
@@ -154,7 +154,7 @@ module.exports = {
         try {
             let domain = req.query.domain
             let url = `http://${domain}/support-oldnodejs=version`;
-            let isExistDomain = await AllowedDomainsModel.findOne({ domain: domain, user: req.user.id });
+            let isExistDomain = await User.findOne({ domain: domain, _id: req.user.id });
             if (isExistDomain) {
                 let response = await axios.get(url, {
                     headers: {

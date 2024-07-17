@@ -19,8 +19,7 @@ module.exports = async function () {
     await Project_Security_Logs.deleteMany({})
     console.log("Project Security Logs Deleted")
     await CrticalInformationInurl.deleteMany({})
-    console.log("Crtical Information Inurl Deleted")
-    console.log("Database Cleaned Successfully")
+
 
 
 }

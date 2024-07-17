@@ -70,7 +70,7 @@ const AuthDomainMiddlewarePackage = async (req, res, next) => {
 
     const parsedUrl = new URL(req.headers.origin);
     const subdomain = parsedUrl.hostname;
-    let hostname = extractRootDomain(req.headers.origin)
+    let hostname = subdomain
     req.body.domain = hostname
     req.body.hostname = hostname
     let user = req.user ? req.user : {}

@@ -7,7 +7,7 @@ module.exports = {
       const Origin = process.env.NODE_ENV === "production" ? process.env.PROD_ORIGIN : process.env.DEV_ORIGIN
       // Set specific CORS headers
       console.log({ Origin })
-      res.header("Access-Control-Allow-Origin", Origin);
+      res.header("Access-Control-Allow-Origin", "*");
       res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE")
       res.header('Access-Control-Allow-Credentials', true);
       res.header('Cross-Origin-Resource-Policy', "cross-origin");

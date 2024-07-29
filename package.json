@@ -27,6 +27,7 @@
         "express-async-handler": "^1.2.0",
         "express-fileupload": "^1.5.0",
         "express-mongo-sanitize": "^2.2.0",
+        "google-auth-library": "^9.12.0",
         "helmet": "^7.0.0",
         "https": "^1.0.0",
         "javascript-obfuscator": "^4.1.1",

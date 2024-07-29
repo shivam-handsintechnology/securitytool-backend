@@ -1,4 +1,5 @@
 require("dotenv").config();
+const { OAuth2Client } = require('google-auth-library');
 const User = require("../models/User")
 const Subscription = require("../models/SubscriptionModel")
 const jwt = require("jsonwebtoken");
@@ -8,6 +9,8 @@ const CryptoJS = require("crypto-js");
 const { v4: uuidv4 } = require('uuid');
 const { ValidateUserSignUp, ValidateUserLogin } = require("../helpers/Validators");
 const Razorpay = require("razorpay");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 const key_id = process.env.NODE_ENV == "production" ? process.env.RAZORPAY_KEY_ID : process.env.RAZORPAY_KEY_ID_TEST
 const key_secret = process.env.NODE_ENV == "production" ? process.env.RAZORPAY_KEY_SECRET : process.env.RAZORPAY_KEY_SECRET_TEST
 const { validatePaymentVerification } = require("razorpay/dist/utils/razorpay-utils");

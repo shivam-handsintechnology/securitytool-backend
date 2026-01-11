@@ -35,7 +35,7 @@
         "jsonwebtoken": "^9.0.2",
         "moment": "^2.29.4",
         "mongoose": "^6.11.1",
-        "playwright": "^1.43.1",
+        "playwright": "^1.56.0",
         "razorpay": "^2.9.4",
         "swagger-ui-express": "^5.0.1",
         "terser": "^5.31.1",
